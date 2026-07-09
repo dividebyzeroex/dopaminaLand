@@ -26,11 +26,21 @@ export async function initSession() {
   // Only track session once per browser session
   if (initialized) return;
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const utm_source = urlParams.get('utm_source') || '';
+  const utm_medium = urlParams.get('utm_medium') || '';
+  const utm_campaign = urlParams.get('utm_campaign') || '';
+  const referrer = document.referrer || '';
+
   const deviceInfo = {
     userAgent: navigator.userAgent,
     language: navigator.language,
     screen: `${window.screen.width}x${window.screen.height}`,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    referrer
   };
 
   // Simulação de Gênero para composição de Dashboard de Vendas por Impulso

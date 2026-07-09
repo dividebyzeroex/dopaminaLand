@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
-import { initSession } from '@/lib/tracking';
+import { trackEvent } from '@/lib/tracking';
 import { supabase } from '@/lib/supabase';
 
 const trustBadges = [
@@ -32,7 +32,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    initSession();
+    trackEvent('view_item', undefined, undefined, { page: 'home' });
   }, []);
 
   const fetchProducts = async (category: string, pageIndex: number, append: boolean) => {

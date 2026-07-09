@@ -125,7 +125,7 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
                   originalPrice: product.price,
                   salePrice: product.salePrice,
                 });
-                trackEvent('add_to_cart', product.id, product.salePrice, { source: 'product_page', slug: product.slug });
+                trackEvent('add_to_cart', product.id, product.salePrice, { source: 'product_page', slug: product.slug, category: product.category });
               }}
               className="w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
             >

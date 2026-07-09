@@ -41,7 +41,7 @@ export default function ProductCard({
       image: image || '', localImage, gradient: gradient || '', 
       originalPrice: price, salePrice 
     });
-    trackEvent('add_to_cart', String(id), salePrice, { source: 'product_card', slug });
+    trackEvent('add_to_cart', String(id), salePrice, { source: 'product_card', slug, category });
   };
 
   return (

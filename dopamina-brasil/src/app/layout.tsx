@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import AchievementToast from "@/components/AchievementToast";
+import TrackingProvider from "@/components/TrackingProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -57,11 +58,13 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <GameProvider>
           <CartProvider>
-            <Header />
-            <main className="flex-1 overflow-x-clip">{children}</main>
-            <Footer />
-            <CartDrawer />
-            <AchievementToast />
+            <TrackingProvider>
+              <Header />
+              <main className="flex-1 overflow-x-clip">{children}</main>
+              <Footer />
+              <CartDrawer />
+              <AchievementToast />
+            </TrackingProvider>
           </CartProvider>
         </GameProvider>
       </body>

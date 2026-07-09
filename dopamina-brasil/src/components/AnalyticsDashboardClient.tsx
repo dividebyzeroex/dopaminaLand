@@ -16,16 +16,19 @@ import {
   Area,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  ScatterChart,
+  Scatter
 } from 'recharts';
 
-const COLORS = ['#ff00ff', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b'];
+const COLORS = ['#ff00ff', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#10b981'];
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'ux' | 'marketing'>('visao_geral');
 
   // Dashboard Data State
   const [kpis, setKpis] = useState({
@@ -33,16 +36,30 @@ export default function AnalyticsDashboardClient() {
     totalCheckouts: 0,
     conversionRate: 0,
     fakeRevenue: 0,
+    aov: 0,
+    cartAbandonment: 0
   });
   const [funnelData, setFunnelData] = useState<any[]>([]);
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [timelineData, setTimelineData] = useState<any[]>([]);
 
-  // Demographics State
+  // Demographics / Marketing State
   const [demographics, setDemographics] = useState({
     gender: [] as any[],
     os: [] as any[],
     state: [] as any[]
+  });
+  const [marketing, setMarketing] = useState({
+    utmSource: [] as any[],
+    utmMedium: [] as any[],
+    referrer: [] as any[]
+  });
+
+  // UX State
+  const [uxMetrics, setUxMetrics] = useState({
+    avgDwellTime: 0,
+    rageClicksCount: 0,
+    scrollDepthMap: [] as any[]
   });
 
   const handleLogin = (e: React.FormEvent) => {
@@ -58,15 +75,17 @@ export default function AnalyticsDashboardClient() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Fetch Sessions Content for Demographics
+      // 1. Fetch Sessions (Demographics & Marketing)
       const { data: sessionData, count: sessionCount } = await supabase
         .from('intent_sessions')
         .select('*', { count: 'exact' });
 
-      // Demographics aggregators
       const genderMap: Record<string, number> = {};
       const osMap: Record<string, number> = {};
       const stateMap: Record<string, number> = {};
+      const sourceMap: Record<string, number> = {};
+      const mediumMap: Record<string, number> = {};
+      const referrerMap: Record<string, number> = {};
 
       sessionData?.forEach((sess) => {
         const info = sess.device_info;
@@ -74,10 +93,16 @@ export default function AnalyticsDashboardClient() {
           const g = info.mock_gender || 'Desconhecido';
           const o = info.os_name || 'Desconhecido';
           const s = info.state || 'Desconhecido';
+          const src = info.utm_source || 'Direto/Orgânico';
+          const med = info.utm_medium || 'N/A';
+          const ref = info.referrer ? new URL(info.referrer).hostname : 'Direto';
 
           genderMap[g] = (genderMap[g] || 0) + 1;
           osMap[o] = (osMap[o] || 0) + 1;
           stateMap[s] = (stateMap[s] || 0) + 1;
+          sourceMap[src] = (sourceMap[src] || 0) + 1;
+          mediumMap[med] = (mediumMap[med] || 0) + 1;
+          referrerMap[ref] = (referrerMap[ref] || 0) + 1;
         }
       });
 
@@ -89,10 +114,16 @@ export default function AnalyticsDashboardClient() {
         state: formatMap(stateMap).slice(0, 7)
       });
 
-      // Fetch all events for the funnel and KPIs
+      setMarketing({
+        utmSource: formatMap(sourceMap).slice(0, 5),
+        utmMedium: formatMap(mediumMap).slice(0, 5),
+        referrer: formatMap(referrerMap).slice(0, 5)
+      });
+
+      // 2. Fetch Events (Funnel, Products, UX)
       const { data: events, error: eventsError } = await supabase
         .from('intent_events')
-        .select('event_type, price_displayed, created_at, product_id');
+        .select('event_type, price_displayed, created_at, product_id, metadata');
 
       if (eventsError) throw eventsError;
 
@@ -100,15 +131,21 @@ export default function AnalyticsDashboardClient() {
       let cartCount = 0;
       let checkoutCount = 0;
       let fakeRev = 0;
+      
+      let totalDwellTime = 0;
+      let dwellEvents = 0;
+      let rageClicks = 0;
+      const scrollMap: Record<string, number> = { '25%': 0, '50%': 0, '75%': 0, '100%': 0 };
 
-      // Group by day for timeline
       const timelineMap: Record<string, number> = {};
-
-      // Map for Top Products
       const productInteractions: Record<string, { views: number, carts: number, rev: number }> = {};
 
       events?.forEach((ev) => {
-        // Funnel & KPI
+        // Timeline (Group by Date)
+        const dateStr = new Date(ev.created_at).toLocaleDateString('pt-BR');
+        timelineMap[dateStr] = (timelineMap[dateStr] || 0) + 1;
+
+        // Funnel & E-commerce
         if (ev.event_type === 'view_item') viewCount++;
         if (ev.event_type === 'add_to_cart') cartCount++;
         if (ev.event_type === 'fake_checkout') {
@@ -116,12 +153,21 @@ export default function AnalyticsDashboardClient() {
           fakeRev += ev.price_displayed || 0;
         }
 
-        // Timeline (Group by Date)
-        const dateStr = new Date(ev.created_at).toLocaleDateString('pt-BR');
-        timelineMap[dateStr] = (timelineMap[dateStr] || 0) + 1;
+        // UX Telemetry
+        if (ev.event_type === 'page_leave' && ev.metadata?.dwell_time_seconds) {
+          totalDwellTime += ev.metadata.dwell_time_seconds;
+          dwellEvents++;
+        }
+        if (ev.event_type === 'rage_click') {
+          rageClicks++;
+        }
+        if (ev.event_type === 'scroll_depth' && ev.metadata?.depth_percentage) {
+          const depth = `${ev.metadata.depth_percentage}%`;
+          if (scrollMap[depth] !== undefined) scrollMap[depth]++;
+        }
 
         // Product Heatmap
-        if (ev.product_id) {
+        if (ev.product_id && ['view_item', 'add_to_cart', 'fake_checkout'].includes(ev.event_type)) {
           if (!productInteractions[ev.product_id]) {
             productInteractions[ev.product_id] = { views: 0, carts: 0, rev: 0 };
           }
@@ -132,31 +178,39 @@ export default function AnalyticsDashboardClient() {
       });
 
       // Format KPIs
-      const totalSess = sessionCount || 1; // avoid division by zero
+      const totalSess = sessionCount || 1;
+      const safeCartCount = cartCount || 1;
       setKpis({
         totalSessions: sessionCount || 0,
         totalCheckouts: checkoutCount,
         conversionRate: ((checkoutCount / totalSess) * 100) || 0,
         fakeRevenue: fakeRev,
+        aov: checkoutCount > 0 ? fakeRev / checkoutCount : 0,
+        cartAbandonment: ((cartCount - checkoutCount) / safeCartCount) * 100
       });
 
       // Format Funnel
       setFunnelData([
         { name: 'Sessões Iniciais', value: sessionCount || 0 },
-        { name: 'Visualizações de Produto', value: viewCount },
+        { name: 'Visualizações', value: viewCount },
         { name: 'Adições ao Carrinho', value: cartCount },
         { name: 'Checkouts Falsos', value: checkoutCount },
       ]);
 
       // Format Timeline
       const formattedTimeline = Object.keys(timelineMap).map((date) => ({
-        date,
-        interacoes: timelineMap[date],
+        date, interacoes: timelineMap[date],
       }));
       setTimelineData(formattedTimeline);
 
-      // Fetch Top Products info using JOIN logic manually or via second query
-      // Because productInteractions only has UUIDs
+      // Format UX Metrics
+      setUxMetrics({
+        avgDwellTime: dwellEvents > 0 ? Math.round(totalDwellTime / dwellEvents) : 0,
+        rageClicksCount: rageClicks,
+        scrollDepthMap: Object.keys(scrollMap).map(k => ({ name: k, value: scrollMap[k] }))
+      });
+
+      // Format Products
       const topIds = Object.keys(productInteractions)
         .sort((a, b) => productInteractions[b].carts - productInteractions[a].carts)
         .slice(0, 5);
@@ -172,7 +226,6 @@ export default function AnalyticsDashboardClient() {
           metrics: productInteractions[p.id],
         })) || [];
 
-        // Sort again since 'in' doesn't preserve order
         formattedTopProducts.sort((a, b) => b.metrics.carts - a.metrics.carts);
         setTopProducts(formattedTopProducts);
       }
@@ -193,7 +246,7 @@ export default function AnalyticsDashboardClient() {
             <h1 className="mt-4 font-[var(--font-display)] text-2xl font-black text-foreground">
               Acesso Restrito
             </h1>
-            <p className="text-sm text-muted">Dashboard de Insights e Analytics</p>
+            <p className="text-sm text-muted">Dashboard de Insights Avançados v3</p>
           </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <input
@@ -217,70 +270,189 @@ export default function AnalyticsDashboardClient() {
     );
   }
 
+  const renderTabs = () => (
+    <div className="mb-8 flex gap-2 border-b border-border pb-px overflow-x-auto no-scrollbar">
+      {[
+        { id: 'visao_geral', label: 'Visão Geral & Vendas' },
+        { id: 'ux', label: 'Comportamento (UX)' },
+        { id: 'marketing', label: 'Aquisição & Marketing' }
+      ].map(tab => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id as any)}
+          className={`px-6 py-3 font-bold whitespace-nowrap transition border-b-2 ${
+            activeTab === tab.id 
+              ? 'border-magenta text-magenta' 
+              : 'border-transparent text-muted hover:text-foreground hover:border-border'
+          }`}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-[var(--font-display)] text-4xl font-black text-foreground md:text-5xl">
-            Painel de Insights 📈
+            Telemetria Avançada 📡
           </h1>
           <p className="mt-2 text-lg font-medium text-muted">
-            Inteligência de Dados sobre as "Intenções de Compra"
+            Insights de Comportamento, Marketing e Intenção de Compra.
           </p>
         </div>
         <button 
           onClick={fetchDashboardData}
           className="rounded-xl bg-surface-light px-6 py-3 font-bold text-foreground transition hover:bg-border"
         >
-          {loading ? 'Atualizando...' : '🔄 Atualizar'}
+          {loading ? 'Atualizando...' : '🔄 Atualizar Dados'}
         </button>
       </div>
 
-      {loading && topProducts.length === 0 ? (
+      {renderTabs()}
+
+      {loading && timelineData.length === 0 ? (
         <div className="flex py-20 justify-center">
           <span className="h-10 w-10 animate-spin rounded-full border-4 border-magenta border-t-transparent"></span>
         </div>
       ) : (
         <>
-          {/* KPIs */}
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="text-2xl">👥</div>
-              <div className="mt-2 text-4xl font-black text-foreground">{kpis.totalSessions}</div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões Capturadas</div>
-            </div>
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="text-2xl">🛒</div>
-              <div className="mt-2 text-4xl font-black text-foreground">{kpis.totalCheckouts}</div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Checkouts (Intenções)</div>
-            </div>
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="text-2xl">💸</div>
-              <div className="mt-2 text-4xl font-black text-emerald-500">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(kpis.fakeRevenue)}
+          {/* TAB: VISÃO GERAL */}
+          {activeTab === 'visao_geral' && (
+            <div className="animate-fade-in">
+              <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <div className="text-2xl">👥</div>
+                  <div className="mt-2 text-4xl font-black text-foreground">{kpis.totalSessions}</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões Totais</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <div className="text-2xl">💸</div>
+                  <div className="mt-2 text-4xl font-black text-emerald-500">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: "compact" }).format(kpis.fakeRevenue)}
+                  </div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Faturamento "Perdido"</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <div className="text-2xl">🛍️</div>
+                  <div className="mt-2 text-4xl font-black text-magenta">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(kpis.aov)}
+                  </div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Ticket Médio (AOV)</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <div className="text-2xl">🏃</div>
+                  <div className="mt-2 text-4xl font-black text-rose-500">{kpis.cartAbandonment.toFixed(1)}%</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Abandono de Carrinho</div>
+                </div>
               </div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Faturamento "Perdido"</div>
-            </div>
-            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-              <div className="text-2xl">🔥</div>
-              <div className="mt-2 text-4xl font-black text-magenta">{kpis.conversionRate.toFixed(1)}%</div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Taxa de Conversão</div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {/* Demographics Area */}
-            <div className="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Gender Pie Chart */}
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div className="col-span-1 lg:col-span-2 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+                  <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">📉 Funil de Intenção</h2>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={funnelData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                        <Tooltip cursor={{ fill: 'rgba(255, 0, 255, 0.05)' }} contentStyle={{ borderRadius: '16px', border: 'none' }} />
+                        <Bar dataKey="value" fill="#ff00ff" radius={[8, 8, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="col-span-1 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+                  <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">🔥 Top Produtos</h2>
+                  <div className="flex flex-col gap-4">
+                    {topProducts.map((prod, idx) => (
+                      <div key={prod.id} className="flex items-center gap-4 rounded-2xl border border-border bg-surface-light p-3">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-white">{idx + 1}</div>
+                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white">
+                          <img src={prod.image_url} alt={prod.short_name} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="truncate text-sm font-bold text-foreground">{prod.short_name}</div>
+                          <div className="text-xs text-muted">{prod.metrics.carts} adições ao carrinho</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: UX & BEHAVIOR */}
+          {activeTab === 'ux' && (
+            <div className="animate-fade-in space-y-8">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Dwell Time Médio</h3>
+                    <p className="mt-1 text-3xl font-black text-foreground">{uxMetrics.avgDwellTime}s</p>
+                    <p className="text-xs text-muted mt-1">Tempo na página antes de sair</p>
+                  </div>
+                  <div className="text-4xl">⏱️</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Rage Clicks Detectados</h3>
+                    <p className="mt-1 text-3xl font-black text-rose-500">{uxMetrics.rageClicksCount}</p>
+                    <p className="text-xs text-muted mt-1">Cliques múltiplos em frustração</p>
+                  </div>
+                  <div className="text-4xl">💢</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+                  <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">📜 Profundidade de Scroll</h2>
+                  <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={uxMetrics.scrollDepthMap} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                        <Tooltip cursor={{ fill: 'rgba(20, 184, 166, 0.05)' }} contentStyle={{ borderRadius: '16px', border: 'none' }} />
+                        <Bar dataKey="value" fill="#14b8a6" radius={[8, 8, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+                  <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">💻 Demografia Tecnológica</h2>
+                  <div className="flex flex-col gap-3">
+                    {demographics.os.map((st, idx) => (
+                      <div key={st.name} className="flex items-center justify-between border-b border-border pb-2 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-foreground">{st.name}</span>
+                        </div>
+                        <div className="text-xs font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full">{st.value} sessões</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MARKETING */}
+          {activeTab === 'marketing' && (
+            <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
                 <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
-                  Gênero (Simulado)
+                  Tráfego por Origem (Referrer)
                 </h2>
                 <div className="h-[200px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={demographics.gender} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" stroke="none">
-                        {demographics.gender.map((entry, index) => (
+                      <Pie data={marketing.referrer} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" stroke="none">
+                        {marketing.referrer.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -290,118 +462,42 @@ export default function AnalyticsDashboardClient() {
                 </div>
               </div>
 
-              {/* OS Bar Chart */}
               <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
                 <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
-                  Sistemas Operacionais
+                  Campanhas (UTM Source)
                 </h2>
                 <div className="h-[200px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={demographics.os} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
+                    <BarChart data={marketing.utmSource} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
                       <XAxis type="number" hide />
                       <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} />
-                      <Tooltip cursor={{ fill: 'rgba(255, 0, 255, 0.05)' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                      <Bar dataKey="value" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                      <Tooltip cursor={{ fill: 'rgba(255, 0, 255, 0.05)' }} contentStyle={{ borderRadius: '16px', border: 'none' }} />
+                      <Bar dataKey="value" fill="#ec4899" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              {/* State Leaderboard */}
               <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
                 <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
-                  Top Localizações (Estados)
+                  Gênero Profiling (Mock)
                 </h2>
-                <div className="flex flex-col gap-3">
-                  {demographics.state.map((st, idx) => (
-                    <div key={st.name} className="flex items-center justify-between border-b border-border pb-2 last:border-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-muted text-xs">{idx + 1}</span>
-                        <span className="text-sm font-bold text-foreground">{st.name}</span>
-                      </div>
-                      <div className="text-xs font-bold text-magenta bg-magenta/10 px-2 py-0.5 rounded-full">{st.value} sessões</div>
-                    </div>
-                  ))}
-                  {demographics.state.length === 0 && <div className="text-xs text-muted">Sem dados geográficos</div>}
+                <div className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={demographics.gender} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value" stroke="none">
+                        {demographics.gender.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={['#f59e0b', '#10b981'][index % 2]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ borderRadius: '16px', border: 'none' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
-
-            {/* Funnel Chart */}
-            <div className="col-span-1 lg:col-span-2 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
-                📉 Funil de Intenção
-              </h2>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={funnelData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                    <Tooltip 
-                      cursor={{ fill: 'rgba(255, 0, 255, 0.05)' }}
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Bar dataKey="value" fill="#ff00ff" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Top Products Heatmap */}
-            <div className="col-span-1 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
-                🔥 Produtos Mais Desejados
-              </h2>
-              <div className="flex flex-col gap-4">
-                {topProducts.map((prod, idx) => (
-                  <div key={prod.id} className="flex items-center gap-4 rounded-2xl border border-border bg-surface-light p-3">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-white">
-                      {idx + 1}
-                    </div>
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white">
-                      <img src={prod.image_url} alt={prod.short_name} className="h-full w-full object-cover" />
-                    </div>
-                    <div className="flex-1 overflow-hidden">
-                      <div className="truncate text-sm font-bold text-foreground">{prod.short_name}</div>
-                      <div className="text-xs text-muted">{prod.metrics.carts} adições ao carrinho</div>
-                    </div>
-                  </div>
-                ))}
-                {topProducts.length === 0 && (
-                  <div className="text-center text-sm text-muted">Ainda não há dados suficientes.</div>
-                )}
-              </div>
-            </div>
-
-            {/* Timeline Area Chart */}
-            <div className="col-span-1 lg:col-span-3 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
-                🌊 Tráfego de Intenções por Dia
-              </h2>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={timelineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorInteractions" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Area type="monotone" dataKey="interacoes" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorInteractions)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-          </div>
+          )}
         </>
       )}
     </div>
