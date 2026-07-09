@@ -197,12 +197,12 @@ export default function CheckoutPage() {
                         : 'border-border bg-surface-light hover:border-magenta/30'
                     }`}
                   >
-                    <div className={`h-4 w-4 rounded-full border-2 ${
+                    <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${
                       paymentMethod === method.id ? 'border-magenta bg-magenta' : 'border-muted'
                     }`} />
-                    <div>
-                      <p className="text-sm font-bold text-foreground">{method.label}</p>
-                      <p className="text-xs text-muted">{method.desc}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">{method.label}</p>
+                      <p className="text-xs text-muted truncate">{method.desc}</p>
                     </div>
                   </button>
                 ))}
@@ -223,14 +223,14 @@ export default function CheckoutPage() {
                       type="text"
                       placeholder="MM/AA"
                       defaultValue="12/99"
-                      className="flex-1 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                      className="flex-1 min-w-0 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
                       readOnly
                     />
                     <input
                       type="text"
                       placeholder="CVV"
                       defaultValue="420"
-                      className="w-20 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                      className="w-20 shrink-0 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
                       readOnly
                     />
                   </div>
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
 
               {paymentMethod === 'boleto' && (
                 <div className="mt-4 rounded-xl border border-border bg-surface p-4 text-center">
-                  <p className="font-mono text-xs text-muted tracking-wider">
+                  <p className="font-mono text-xs text-muted tracking-wider break-all">
                     00000.00000 00000.000000 00000.000000 0 00000000000000
                   </p>
                   <p className="mt-2 text-sm font-bold text-foreground">Vencimento: 31/12/9999</p>
