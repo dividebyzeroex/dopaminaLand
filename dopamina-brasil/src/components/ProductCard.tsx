@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
+import { trackEvent } from '@/lib/tracking';
 
 interface ProductCardProps {
   id: string | number;
@@ -40,6 +41,7 @@ export default function ProductCard({
       image: image || '', localImage, gradient: gradient || '', 
       originalPrice: price, salePrice 
     });
+    trackEvent('add_to_cart', String(id), salePrice, { source: 'product_card', slug });
   };
 
   return (

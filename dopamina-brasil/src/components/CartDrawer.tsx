@@ -2,6 +2,7 @@
 
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
+import { trackEvent } from '@/lib/tracking';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalFakePrice, totalItems } = useCart();
@@ -127,7 +128,12 @@ export default function CartDrawer() {
 
             <Link
               href="/checkout"
-              onClick={closeCart}
+              onClick={() => {
+                closeCart();
+                items.forEach(item => {
+                  trackEvent('fake_checkout', item.id, item.salePrice, { quantity: item.quantity, source: 'cart_drawer' });
+                });
+              }}
               className="block w-full rounded-xl bg-magenta py-3.5 text-center text-base font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-95 animate-pulse-glow"
             >
               FINALIZAR COMPRA 🚀

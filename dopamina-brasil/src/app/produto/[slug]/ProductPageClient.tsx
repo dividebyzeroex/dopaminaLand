@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
+import { trackEvent } from '@/lib/tracking';
+import { useEffect } from 'react';
 
 const fakeReviews = [
   { name: 'Maria S.', rating: 5, text: 'Melhor compra que já fiz! Não paguei nada e recebi nada. 10/10 recomendo! 💊', date: '3 dias atrás' },
@@ -13,6 +15,18 @@ const fakeReviews = [
 
 export default function ProductPageClient({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   const { addItem } = useCart();
+
+  useEffect(() => {
+    // Track view item
+    trackEvent('view_item', product.id, product.salePrice, { slug: product.slug });
+
+    // Track dwell time (15 seconds)
+    const timer = setTimeout(() => {
+      trackEvent('dwell_time_exceeded', product.id, product.salePrice, { slug: product.slug, time_spent: 15 });
+    }, 15000);
+
+    return () => clearTimeout(timer);
+  }, [product]);
 
   const installments = 4;
   const installmentValue = (product.salePrice / installments).toFixed(2);
@@ -99,17 +113,20 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
           {/* CTA Buttons */}
           <div className="mt-6 space-y-3">
             <button
-              onClick={() => addItem({
-                id: product.id,
-                slug: product.slug,
-                name: product.name,
-                shortName: product.shortName,
-                image: product.image || '',
-                localImage: product.localImage,
-                gradient: product.gradient || '',
-                originalPrice: product.price,
-                salePrice: product.salePrice,
-              })}
+              onClick={() => {
+                addItem({
+                  id: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  shortName: product.shortName,
+                  image: product.image || '',
+                  localImage: product.localImage,
+                  gradient: product.gradient || '',
+                  originalPrice: product.price,
+                  salePrice: product.salePrice,
+                });
+                trackEvent('add_to_cart', product.id, product.salePrice, { source: 'product_page', slug: product.slug });
+              }}
               className="w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
             >
               ADICIONAR AO CARRINHO 🛒

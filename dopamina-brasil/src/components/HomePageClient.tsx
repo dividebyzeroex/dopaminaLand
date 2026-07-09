@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
+import { initSession } from '@/lib/tracking';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -23,6 +24,10 @@ export default function HomePageClient({ products }: { products: any[] }) {
   const [activeCategory, setActiveCategory] = useState('todos');
   const [heroSlide, setHeroSlide] = useState(0);
   const { addItem } = useCart();
+
+  useEffect(() => {
+    initSession();
+  }, []);
 
   const filteredProducts = activeCategory === 'todos'
     ? products
