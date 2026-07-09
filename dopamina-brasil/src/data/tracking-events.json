@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "status": "confirmed",
+    "icon": "✅",
+    "title": "Pedido confirmado pelo algoritmo da felicidade",
+    "description": "Nosso sistema de IA (Inteligência Absurda) confirmou seu pedido com sucesso."
+  },
+  {
+    "id": 2,
+    "status": "preparing",
+    "icon": "📦",
+    "title": "Embalando com carinho (e fita adesiva demais)",
+    "description": "Nosso time de empacotadores imaginários está usando 3x mais plástico-bolha do que o necessário."
+  },
+  {
+    "id": 3,
+    "status": "collected",
+    "icon": "🛵",
+    "title": "Motoboy coletou o pacote",
+    "description": "O motoboy Cleiton pegou seu pacote e já está cortando geral no trânsito."
+  },
+  {
+    "id": 4,
+    "status": "pastel",
+    "icon": "🥟",
+    "title": "Motoboy parou para comer um pastel",
+    "description": "O Cleiton tá na feira comendo um pastel de carne com caldo de cana. Volta logo (talvez)."
+  },
+  {
+    "id": 5,
+    "status": "transit",
+    "icon": "🚛",
+    "title": "Em trânsito — preso no congestionamento da Marginal",
+    "description": "Seu pacote está parado na Marginal Tietê. Previsão de chegada: quando Deus quiser."
+  },
+  {
+    "id": 6,
+    "status": "curitiba",
+    "icon": "🏛️",
+    "title": "Preso na alfândega de Curitiba (vai demorar)",
+    "description": "Seu pacote foi retido pela alfândega de Curitiba. Motivo: 'procedimento padrão' (ninguém sabe o que isso significa)."
+  },
+  {
+    "id": 7,
+    "status": "capivara",
+    "icon": "🦫",
+    "title": "Pacote engolido por uma capivara no Tietê",
+    "description": "Uma capivara de 80kg confundiu seu pacote com comida. Estamos negociando a devolução com snacks."
+  },
+  {
+    "id": 8,
+    "status": "aliens",
+    "icon": "👽",
+    "title": "Roubado por alienígenas na BR-101",
+    "description": "Seres extraterrestres interceptaram o caminhão na BR-101. Eles parecem interessados no produto."
+  },
+  {
+    "id": 9,
+    "status": "bermuda",
+    "icon": "🌊",
+    "title": "Pacote atravessando o Triângulo das Bermudas",
+    "description": "Perdemos o sinal do rastreador. Última localização: algum lugar entre a Flórida e o além."
+  },
+  {
+    "id": 10,
+    "status": "whale",
+    "icon": "🐋",
+    "title": "Pacote engolido por uma baleia",
+    "description": "Uma jubarte confundiu seu pacote com krill. Jonas que o diga — a gente recupera."
+  },
+  {
+    "id": 11,
+    "status": "soccer",
+    "icon": "⚽",
+    "title": "Motoboy assistindo jogo do Corinthians",
+    "description": "O Cleiton estacionou pra assistir o jogo. Dependendo do resultado, pode demorar mais (ou menos se perder de goleada)."
+  },
+  {
+    "id": 12,
+    "status": "rain",
+    "icon": "🌧️",
+    "title": "Chuva em São Paulo — cidade parou",
+    "description": "São Paulo alagou (de novo). Seu pacote está flutuando por algum lugar da Zona Leste."
+  },
+  {
+    "id": 13,
+    "status": "returned",
+    "icon": "🔄",
+    "title": "Tentativa de entrega: ninguém em casa",
+    "description": "Nosso entregador imaginário tentou entregar, mas você também é imaginário, então faz sentido."
+  },
+  {
+    "id": 14,
+    "status": "dog",
+    "icon": "🐕",
+    "title": "Cachorro do vizinho roubou o pacote",
+    "description": "O Rex da dona Maria pegou seu pacote e enterrou no quintal. Estamos escavando."
+  },
+  {
+    "id": 15,
+    "status": "drone",
+    "icon": "🚁",
+    "title": "Transferido para entrega por drone",
+    "description": "Upgrade gratuito! Seu pacote agora será entregue por drone. (O drone é uma pomba treinada)"
+  },
+  {
+    "id": 16,
+    "status": "catapult",
+    "icon": "🏰",
+    "title": "Pacote lançado por catapulta medieval",
+    "description": "Por questões logísticas, optamos pelo método de entrega mais rápido do século XII."
+  },
+  {
+    "id": 17,
+    "status": "selfie",
+    "icon": "🤳",
+    "title": "Motoboy tirando selfie com o pacote",
+    "description": "O Cleiton achou o pacote tão bonito que tirou foto pra postar no Instagram. #PackageGoals"
+  },
+  {
+    "id": 18,
+    "status": "out_for_delivery",
+    "icon": "📍",
+    "title": "Saiu para entrega!",
+    "description": "Seu pacote está a caminho! (Dessa vez é sério... talvez... provavelmente... quem sabe)"
+  },
+  {
+    "id": 19,
+    "status": "almost",
+    "icon": "🏃",
+    "title": "A 2 quarteirões de você!",
+    "description": "Tão perto e tão longe. O motoboy tá vindo, mas parou pra responder uma mensagem."
+  },
+  {
+    "id": 20,
+    "status": "delivered",
+    "icon": "🎉",
+    "title": "ENTREGUE! (na sua imaginação)",
+    "description": "Parabéns! Seu pacote foi entregue com sucesso no endereço fictício. Aproveite seu produto inexistente! 💊"
+  }
+]

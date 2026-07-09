@@ -1,0 +1,86 @@
+{
+  "levels": [
+    { "level": 1, "xpRequired": 0, "title": "Curioso", "emoji": "👀" },
+    { "level": 2, "xpRequired": 100, "title": "Comprador Casual", "emoji": "🛍️" },
+    { "level": 3, "xpRequired": 500, "title": "Viciado em Desconto", "emoji": "🏷️" },
+    { "level": 4, "xpRequired": 1500, "title": "Comprador Compulsivo", "emoji": "🤑" },
+    { "level": 5, "xpRequired": 5000, "title": "Mestre do Cartão Clonado", "emoji": "💳" },
+    { "level": 6, "xpRequired": 15000, "title": "CEO da Shopee Imaginária", "emoji": "👑" },
+    { "level": 7, "xpRequired": 50000, "title": "Lenda do E-commerce Falso", "emoji": "🏆" }
+  ],
+  "achievements": [
+    {
+      "id": "first_purchase",
+      "title": "Primeira Dose 💊",
+      "description": "Fez a primeira compra fictícia",
+      "xpReward": 50,
+      "icon": "🎯"
+    },
+    {
+      "id": "five_purchases",
+      "title": "Maratonista 🔥",
+      "description": "Fez 5 compras em uma sessão",
+      "xpReward": 150,
+      "icon": "🔥"
+    },
+    {
+      "id": "big_spender",
+      "title": "Esbanjador Virtual 💰",
+      "description": "Gastou R$ 100.000 fictícios",
+      "xpReward": 500,
+      "icon": "💰"
+    },
+    {
+      "id": "capybara_hunter",
+      "title": "Caçador de Capivara 🦫",
+      "description": "Pacote foi engolido por uma capivara",
+      "xpReward": 200,
+      "icon": "🦫"
+    },
+    {
+      "id": "speed_runner",
+      "title": "Speed Runner ⚡",
+      "description": "Completou o checkout em menos de 10 segundos",
+      "xpReward": 100,
+      "icon": "⚡"
+    },
+    {
+      "id": "cart_hoarder",
+      "title": "Acumulador de Carrinho 🛒",
+      "description": "Adicionou 10+ itens ao carrinho de uma vez",
+      "xpReward": 100,
+      "icon": "🛒"
+    },
+    {
+      "id": "coupon_master",
+      "title": "Mestre do Cupom 🎟️",
+      "description": "Usou um cupom de desconto (em algo que já é grátis)",
+      "xpReward": 75,
+      "icon": "🎟️"
+    },
+    {
+      "id": "window_shopper",
+      "title": "Vitrinista Profissional 👁️",
+      "description": "Visitou 10 páginas de produto sem comprar nada",
+      "xpReward": 50,
+      "icon": "👁️"
+    },
+    {
+      "id": "all_categories",
+      "title": "Eclético 🌈",
+      "description": "Comprou de todas as 5 categorias",
+      "xpReward": 300,
+      "icon": "🌈"
+    },
+    {
+      "id": "night_owl",
+      "title": "Comprador Noturno 🦉",
+      "description": "Fez uma compra entre meia-noite e 5h da manhã",
+      "xpReward": 100,
+      "icon": "🦉"
+    }
+  ],
+  "xpPerPurchase": 25,
+  "xpPerItemInCart": 10,
+  "xpPerCheckout": 50
+}
