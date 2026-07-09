@@ -111,9 +111,10 @@ export default function ProductCard({
           {/* CTA */}
           <button
             onClick={handleAddToCart}
-            className="mt-3 w-full rounded-xl bg-magenta py-2.5 text-sm font-extrabold text-white transition hover:bg-magenta-light active:scale-95"
+            className="mt-3 w-full rounded-xl bg-magenta py-2.5 text-xs sm:text-sm font-extrabold text-white transition hover:bg-magenta-light active:scale-95"
           >
-            adicionar ao carrinho
+            <span className="hidden sm:inline">adicionar ao carrinho</span>
+            <span className="sm:hidden">adicionar 🛒</span>
           </button>
         </div>
       </div>

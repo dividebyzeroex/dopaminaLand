@@ -111,7 +111,24 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
           </p>
 
           {/* CTA Buttons */}
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 space-y-3 flex flex-col">
+            <Link
+              href="/checkout"
+              onClick={() => addItem({
+                id: product.id,
+                slug: product.slug,
+                name: product.name,
+                shortName: product.shortName,
+                image: product.image || '',
+                localImage: product.localImage,
+                gradient: product.gradient || '',
+                originalPrice: product.price,
+                salePrice: product.salePrice,
+              })}
+              className="order-1 block w-full rounded-2xl bg-magenta py-4 text-center text-base sm:text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
+            >
+              COMPRAR AGORA ⚡
+            </Link>
             <button
               onClick={() => {
                 addItem({
@@ -127,27 +144,10 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
                 });
                 trackEvent('add_to_cart', product.id, product.salePrice, { source: 'product_page', slug: product.slug, category: product.category });
               }}
-              className="w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
+              className="order-2 w-full rounded-2xl border-2 border-magenta py-4 text-base sm:text-lg font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-[0.98]"
             >
               ADICIONAR AO CARRINHO 🛒
             </button>
-            <Link
-              href="/checkout"
-              onClick={() => addItem({
-                id: product.id,
-                slug: product.slug,
-                name: product.name,
-                shortName: product.shortName,
-                image: product.image || '',
-                localImage: product.localImage,
-                gradient: product.gradient || '',
-                originalPrice: product.price,
-                salePrice: product.salePrice,
-              })}
-              className="block w-full rounded-2xl border-2 border-magenta py-4 text-center text-lg font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-[0.98]"
-            >
-              COMPRAR AGORA ⚡
-            </Link>
           </div>
 
           {/* Shipping */}
