@@ -126,7 +126,7 @@ export default function HomePageClient({ products }: { products: any[] }) {
                         quero minha dopamina 🚀
                       </a>
                       <a
-                        href="#ofertas"
+                        href="/ofertas"
                         className="rounded-full border-2 border-border px-7 py-3 text-base font-bold text-foreground transition hover:border-magenta hover:text-magenta"
                       >
                         ver ofertas 🔥
@@ -245,7 +245,7 @@ export default function HomePageClient({ products }: { products: any[] }) {
                       Descontos absurdos em produtos que você nunca vai receber. Pegue enquanto a dopamina tá em promoção. 🐋
                     </p>
                     <a
-                      href="#ofertas"
+                      href="/ofertas"
                       className="mt-6 inline-block rounded-full bg-white px-8 py-3.5 text-base font-extrabold text-magenta shadow-lg transition hover:scale-105 active:scale-95"
                     >
                       ver ofertas →
@@ -351,12 +351,12 @@ export default function HomePageClient({ products }: { products: any[] }) {
           <h2 className="font-[var(--font-display)] text-2xl font-extrabold text-foreground">
             🔥 ofertas relâmpago
           </h2>
-          <button
-            onClick={() => setActiveCategory('todos')}
+          <a
+            href="/ofertas"
             className="text-sm font-bold text-magenta hover:underline"
           >
-            ver todos →
-          </button>
+            ver todas as ofertas →
+          </a>
         </div>
         <div className="no-scrollbar -mx-4 mt-4 flex gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           {flashDeals.map((product) => (
