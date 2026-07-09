@@ -11,7 +11,7 @@ export default async function OfertasPage() {
   const { data: flashDealsRaw } = await supabase
     .from('products')
     .select('*')
-    .gte('discount', 50)
+    .gte('discount', 30)
     .order('discount', { ascending: false })
     .limit(3);
 
@@ -19,7 +19,7 @@ export default async function OfertasPage() {
   const { data: picksRaw } = await supabase
     .from('products')
     .select('*')
-    .gte('discount', 40)
+    .gte('discount', 20)
     .order('created_at', { ascending: false })
     .limit(30);
 
