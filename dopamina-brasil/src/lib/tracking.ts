@@ -68,7 +68,7 @@ export async function initSession() {
 }
 
 export async function trackEvent(
-  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click',
+  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product',
   productId?: string,
   priceDisplayed?: number,
   metadata?: any
