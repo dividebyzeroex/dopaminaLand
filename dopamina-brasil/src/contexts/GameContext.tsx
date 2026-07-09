@@ -21,6 +21,7 @@ interface GameState {
   achievements: string[];
   orders: OrderHistory[];
   nickname: string;
+  email: string;
   toasts: { id: string; title: string; description: string; icon: string }[];
 }
 
@@ -29,6 +30,7 @@ type GameAction =
   | { type: 'COMPLETE_PURCHASE'; payload: { items: { name: string; price: number; quantity: number }[]; totalFake: number } }
   | { type: 'UNLOCK_ACHIEVEMENT'; payload: string }
   | { type: 'SET_NICKNAME'; payload: string }
+  | { type: 'SET_EMAIL'; payload: string }
   | { type: 'DISMISS_TOAST'; payload: string }
   | { type: 'LOAD_STATE'; payload: Partial<GameState> };
 
@@ -180,6 +182,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'SET_NICKNAME':
       return { ...state, nickname: action.payload };
 
+    case 'SET_EMAIL':
+      return { ...state, email: action.payload };
+
     case 'DISMISS_TOAST':
       return { ...state, toasts: state.toasts.filter(t => t.id !== action.payload) };
 
@@ -201,6 +206,7 @@ const initialState: GameState = {
   achievements: [],
   orders: [],
   nickname: defaultNicknames[Math.floor(Math.random() * defaultNicknames.length)] + ' #' + Math.floor(Math.random() * 9999),
+  email: '',
   toasts: [],
 };
 
@@ -208,6 +214,7 @@ interface GameContextType extends GameState {
   completePurchase: (items: { name: string; price: number; quantity: number }[], totalFake: number) => string;
   unlockAchievement: (id: string) => void;
   setNickname: (name: string) => void;
+  setEmail: (email: string) => void;
   dismissToast: (id: string) => void;
   nextLevel: { level: number; xpRequired: number; title: string; emoji: string } | null;
   xpProgress: number;
@@ -256,6 +263,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     completePurchase,
     unlockAchievement: (id) => dispatch({ type: 'UNLOCK_ACHIEVEMENT', payload: id }),
     setNickname: (name) => dispatch({ type: 'SET_NICKNAME', payload: name }),
+    setEmail: (email) => dispatch({ type: 'SET_EMAIL', payload: email }),
     dismissToast: (id) => dispatch({ type: 'DISMISS_TOAST', payload: id }),
     nextLevel,
     xpProgress,

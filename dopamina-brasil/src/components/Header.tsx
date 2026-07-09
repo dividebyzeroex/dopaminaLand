@@ -154,6 +154,12 @@ export default function Header() {
             >
               Ranking 🏆
             </Link>
+            <Link
+              href="/minha-conta"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface-light hover:text-foreground lg:block"
+            >
+              Minha conta 👤
+            </Link>
 
             {/* XP Badge */}
             <div className="hidden items-center gap-1.5 rounded-full bg-surface-light px-3 py-2 text-xs font-bold text-muted lg:flex">
