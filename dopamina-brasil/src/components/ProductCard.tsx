@@ -4,35 +4,42 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 
 interface ProductCardProps {
-  id: number;
+  id: string | number;
   slug: string;
   name: string;
   shortName: string;
-  image: string;
-  gradient: string;
-  originalPrice: number;
+  category?: string;
+  image?: string;
+  localImage?: string;
+  gradient?: string;
+  price: number;
   salePrice: number;
   discount: number;
-  rating: number;
+  rating: string | number;
   reviews: number;
-  installments: number;
+  installments?: number;
   badge?: string | null;
 }
 
 export default function ProductCard({
-  id, slug, name, shortName, image, gradient,
-  originalPrice, salePrice, discount, rating, reviews,
-  installments, badge,
+  id, slug, name, shortName, image, localImage, gradient,
+  price, salePrice, discount, rating, reviews,
+  installments = 4, badge,
 }: ProductCardProps) {
   const { addItem } = useCart();
 
-  const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '★' : '');
+  const numRating = Number(rating) || 5;
+  const stars = '★'.repeat(Math.floor(numRating)) + (numRating % 1 >= 0.5 ? '★' : '');
   const installmentValue = (salePrice / installments).toFixed(2);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem({ id, slug, name, shortName, image, gradient, originalPrice, salePrice });
+    addItem({ 
+      id: String(id), slug, name, shortName, 
+      image: image || '', localImage, gradient: gradient || '', 
+      originalPrice: price, salePrice 
+    });
   };
 
   return (
@@ -58,11 +65,19 @@ export default function ProductCard({
           </span>
         )}
 
-        {/* Product Emoji */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-7xl drop-shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2">
-            {image}
-          </span>
+        {/* Product Image or Emoji */}
+        <div className="absolute inset-0 flex items-center justify-center p-6">
+          {localImage ? (
+            <img 
+              src={localImage} 
+              alt={shortName}
+              className="max-h-[85%] max-w-[85%] object-contain drop-shadow-[0_10px_18px_rgba(27,16,32,0.18)] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2"
+            />
+          ) : (
+            <span className="text-7xl drop-shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2">
+              {image}
+            </span>
+          )}
         </div>
       </div>
 
@@ -82,7 +97,7 @@ export default function ProductCard({
         {/* Price */}
         <div className="mt-auto pt-3">
           <p className="text-xs text-muted line-through">
-            R$ {originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           <p className="font-[var(--font-display)] text-lg font-extrabold leading-tight tracking-tight tabular-nums text-magenta sm:text-xl">
             R$ {salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}

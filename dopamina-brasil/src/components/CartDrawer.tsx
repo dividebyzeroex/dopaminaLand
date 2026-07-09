@@ -54,9 +54,13 @@ export default function CartDrawer() {
                   key={item.id}
                   className="flex gap-4 rounded-xl border border-border bg-card p-3"
                 >
-                  {/* Product emoji */}
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-surface-light text-3xl">
-                    {item.image}
+                  {/* Product image or emoji */}
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface-light text-3xl">
+                    {item.localImage ? (
+                      <img src={item.localImage} alt={item.shortName} className="h-full w-full object-contain p-1" />
+                    ) : (
+                      item.image
+                    )}
                   </div>
 
                   {/* Info */}

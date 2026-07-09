@@ -3,11 +3,12 @@
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
 
 export interface CartItem {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   shortName: string;
   image: string;
+  localImage?: string;
   gradient: string;
   originalPrice: number;
   salePrice: number;
@@ -21,8 +22,8 @@ interface CartState {
 
 type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: number }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
+  | { type: 'REMOVE_ITEM'; payload: string }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'OPEN_CART' }
@@ -91,8 +92,8 @@ interface CartContextType {
   totalItems: number;
   totalFakePrice: number;
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;

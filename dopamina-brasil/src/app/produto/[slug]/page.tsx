@@ -16,13 +16,15 @@ const fakeReviews = [
 
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const product = products.find(p => p.slug === slug);
+  const product: any = products.find(p => p.slug === slug);
   const { addItem } = useCart();
 
   if (!product) return notFound();
 
-  const installmentValue = (product.salePrice / product.installments).toFixed(2);
-  const stars = '★'.repeat(Math.floor(product.rating)) + (product.rating % 1 >= 0.5 ? '★' : '');
+  const installments = 4;
+  const installmentValue = (product.salePrice / installments).toFixed(2);
+  const numRating = Number(product.rating) || 5;
+  const stars = '★'.repeat(Math.floor(numRating)) + (numRating % 1 >= 0.5 ? '★' : '');
 
   const relatedProducts = products
     .filter(p => p.category === product.category && p.id !== product.id)
@@ -55,10 +57,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </span>
           )}
 
-          <div className="flex h-full items-center justify-center">
-            <span className="text-[160px] animate-float drop-shadow-2xl sm:text-[200px]">
-              {product.image}
-            </span>
+          <div className="flex h-full items-center justify-center p-6">
+            {product.localImage ? (
+              <img src={product.localImage} alt={product.shortName} className="max-h-[85%] max-w-[85%] object-contain animate-float drop-shadow-2xl" />
+            ) : (
+              <span className="text-[160px] animate-float drop-shadow-2xl sm:text-[200px]">
+                {product.image}
+              </span>
+            )}
           </div>
         </div>
 
@@ -79,13 +85,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           {/* Price */}
           <div className="mt-6 rounded-2xl border border-border bg-surface-light p-6">
             <p className="text-sm text-muted">
-              De <span className="line-through">R$ {product.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              De <span className="line-through">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
             </p>
             <p className="mt-1 font-[var(--font-display)] text-4xl font-extrabold text-magenta">
               R$ {product.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
             <p className="mt-1 text-sm text-muted">
-              em até <span className="font-bold text-foreground">{product.installments}x de R$ {Number(installmentValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span> sem juros no cartão imaginário 💳
+              em até <span className="font-bold text-foreground">{installments}x de R$ {Number(installmentValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span> sem juros no cartão imaginário 💳
             </p>
 
             <div className="mt-4 flex items-center gap-2 rounded-xl bg-neon-green/10 border border-neon-green/20 px-4 py-2">
@@ -109,9 +115,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 slug: product.slug,
                 name: product.name,
                 shortName: product.shortName,
-                image: product.image,
-                gradient: product.gradient,
-                originalPrice: product.originalPrice,
+                image: product.image || '',
+                localImage: product.localImage,
+                gradient: product.gradient || '',
+                originalPrice: product.price,
                 salePrice: product.salePrice,
               })}
               className="w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
@@ -125,9 +132,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 slug: product.slug,
                 name: product.name,
                 shortName: product.shortName,
-                image: product.image,
-                gradient: product.gradient,
-                originalPrice: product.originalPrice,
+                image: product.image || '',
+                localImage: product.localImage,
+                gradient: product.gradient || '',
+                originalPrice: product.price,
                 salePrice: product.salePrice,
               })}
               className="block w-full rounded-2xl border-2 border-magenta py-4 text-center text-lg font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-[0.98]"
