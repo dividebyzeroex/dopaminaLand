@@ -33,11 +33,23 @@ export async function initSession() {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   };
 
+  // Simulação de Gênero para composição de Dashboard de Vendas por Impulso
+  // Como não há coleta real, atribuímos uma persona simulada (probabilística)
+  let mockGender = localStorage.getItem('dopamina_mock_gender');
+  if (!mockGender) {
+    mockGender = Math.random() > 0.45 ? 'Feminino' : 'Masculino';
+    localStorage.setItem('dopamina_mock_gender', mockGender);
+  }
+
   try {
     await fetch('/api/track-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId, device_info: deviceInfo })
+      body: JSON.stringify({ 
+        session_id: sessionId, 
+        device_info: deviceInfo,
+        mock_gender: mockGender 
+      })
     });
     sessionStorage.setItem('dopamina_session_initialized', 'true');
   } catch (error) {

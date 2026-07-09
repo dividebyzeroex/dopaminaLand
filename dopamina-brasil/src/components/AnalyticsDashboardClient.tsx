@@ -13,8 +13,13 @@ import {
   LineChart,
   Line,
   AreaChart,
-  Area
+  Area,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
+
+const COLORS = ['#ff00ff', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b'];
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,6 +38,13 @@ export default function AnalyticsDashboardClient() {
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [timelineData, setTimelineData] = useState<any[]>([]);
 
+  // Demographics State
+  const [demographics, setDemographics] = useState({
+    gender: [] as any[],
+    os: [] as any[],
+    state: [] as any[]
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'dopamina') {
@@ -46,10 +58,36 @@ export default function AnalyticsDashboardClient() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Fetch Sessions Count
-      const { count: sessionCount } = await supabase
+      // Fetch Sessions Content for Demographics
+      const { data: sessionData, count: sessionCount } = await supabase
         .from('intent_sessions')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact' });
+
+      // Demographics aggregators
+      const genderMap: Record<string, number> = {};
+      const osMap: Record<string, number> = {};
+      const stateMap: Record<string, number> = {};
+
+      sessionData?.forEach((sess) => {
+        const info = sess.device_info;
+        if (info) {
+          const g = info.mock_gender || 'Desconhecido';
+          const o = info.os_name || 'Desconhecido';
+          const s = info.state || 'Desconhecido';
+
+          genderMap[g] = (genderMap[g] || 0) + 1;
+          osMap[o] = (osMap[o] || 0) + 1;
+          stateMap[s] = (stateMap[s] || 0) + 1;
+        }
+      });
+
+      const formatMap = (map: Record<string, number>) => Object.keys(map).map(name => ({ name, value: map[name] })).sort((a,b) => b.value - a.value);
+
+      setDemographics({
+        gender: formatMap(genderMap),
+        os: formatMap(osMap).slice(0, 5),
+        state: formatMap(stateMap).slice(0, 7)
+      });
 
       // Fetch all events for the funnel and KPIs
       const { data: events, error: eventsError } = await supabase
@@ -231,6 +269,65 @@ export default function AnalyticsDashboardClient() {
           </div>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* Demographics Area */}
+            <div className="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Gender Pie Chart */}
+              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
+                <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
+                  Gênero (Simulado)
+                </h2>
+                <div className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={demographics.gender} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" stroke="none">
+                        {demographics.gender.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* OS Bar Chart */}
+              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
+                <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
+                  Sistemas Operacionais
+                </h2>
+                <div className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={demographics.os} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} />
+                      <Tooltip cursor={{ fill: 'rgba(255, 0, 255, 0.05)' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                      <Bar dataKey="value" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* State Leaderboard */}
+              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
+                <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
+                  Top Localizações (Estados)
+                </h2>
+                <div className="flex flex-col gap-3">
+                  {demographics.state.map((st, idx) => (
+                    <div key={st.name} className="flex items-center justify-between border-b border-border pb-2 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-muted text-xs">{idx + 1}</span>
+                        <span className="text-sm font-bold text-foreground">{st.name}</span>
+                      </div>
+                      <div className="text-xs font-bold text-magenta bg-magenta/10 px-2 py-0.5 rounded-full">{st.value} sessões</div>
+                    </div>
+                  ))}
+                  {demographics.state.length === 0 && <div className="text-xs text-muted">Sem dados geográficos</div>}
+                </div>
+              </div>
+            </div>
+
             {/* Funnel Chart */}
             <div className="col-span-1 lg:col-span-2 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
               <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
