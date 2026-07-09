@@ -25,7 +25,7 @@ interface ProductCardProps {
 export default function ProductCard({
   id, slug, name, shortName, image, localImage, gradient,
   price, salePrice, discount, rating, reviews,
-  installments = 4, badge,
+  installments = 4, badge, category
 }: ProductCardProps) {
   const { addItem } = useCart();
 
