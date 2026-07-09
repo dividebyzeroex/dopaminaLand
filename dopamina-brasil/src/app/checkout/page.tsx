@@ -105,13 +105,13 @@ export default function CheckoutPage() {
           <div className="mt-8 space-y-3">
             <Link
               href={`/rastreamento/${orderId}`}
-              className="block w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light"
+              className="block w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
               RASTREAR PEDIDO 📍
             </Link>
             <Link
               href="/"
-              className="block w-full rounded-2xl border-2 border-border py-4 text-lg font-extrabold text-foreground transition hover:border-magenta hover:text-magenta"
+              className="block w-full rounded-2xl border-2 border-border py-4 text-lg font-extrabold text-foreground transition hover:border-magenta hover:text-magenta whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
               COMPRAR MAIS 🛒
             </Link>
@@ -314,7 +314,7 @@ export default function CheckoutPage() {
                 />
                 <button
                   onClick={applyCoupon}
-                  className="rounded-lg bg-surface-lighter px-4 py-2 text-sm font-bold text-foreground hover:bg-magenta hover:text-white transition"
+                  className="rounded-lg bg-surface-lighter px-4 py-2 text-sm font-bold text-foreground hover:bg-magenta hover:text-white transition whitespace-nowrap shrink-0"
                 >
                   Aplicar
                 </button>
@@ -326,7 +326,7 @@ export default function CheckoutPage() {
               <button
                 onClick={handleCheckout}
                 disabled={isProcessing || items.length === 0}
-                className={`w-full rounded-2xl py-4 text-lg font-extrabold text-white shadow-lg transition active:scale-[0.98] ${
+                className={`w-full rounded-2xl py-4 text-lg font-extrabold text-white shadow-lg transition active:scale-[0.98] whitespace-nowrap overflow-hidden text-ellipsis px-2 ${
                   isProcessing
                     ? 'bg-surface-lighter cursor-wait'
                     : 'bg-magenta hover:bg-magenta-light animate-pulse-glow'

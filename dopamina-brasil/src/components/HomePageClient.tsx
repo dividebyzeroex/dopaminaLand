@@ -121,13 +121,13 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                     <div className="mt-7 flex flex-wrap items-center gap-3">
                       <a
                         href="#catalogo"
-                        className="rounded-full bg-magenta px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-magenta-light active:scale-95"
+                        className="rounded-full bg-magenta px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-magenta-light active:scale-95 whitespace-nowrap"
                       >
                         quero minha dopamina 🚀
                       </a>
                       <a
                         href="/ofertas"
-                        className="rounded-full border-2 border-border px-7 py-3 text-base font-bold text-foreground transition hover:border-magenta hover:text-magenta"
+                        className="rounded-full border-2 border-border px-7 py-3 text-base font-bold text-foreground transition hover:border-magenta hover:text-magenta whitespace-nowrap"
                       >
                         ver ofertas 🔥
                       </a>
@@ -204,7 +204,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       </button>
                       <a
                         href="#catalogo"
-                        className="rounded-full bg-foreground px-7 py-3 text-base font-extrabold text-background transition hover:scale-105 active:scale-95"
+                        className="rounded-full bg-foreground px-7 py-3 text-base font-extrabold text-background transition hover:scale-105 active:scale-95 whitespace-nowrap"
                       >
                         começar a comprar 🚀
                       </a>
@@ -246,7 +246,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                     </p>
                     <a
                       href="/ofertas"
-                      className="mt-6 inline-block rounded-full bg-white px-8 py-3.5 text-base font-extrabold text-magenta shadow-lg transition hover:scale-105 active:scale-95"
+                      className="mt-6 inline-block rounded-full bg-white px-8 py-3.5 text-base font-extrabold text-magenta shadow-lg transition hover:scale-105 active:scale-95 whitespace-nowrap"
                     >
                       ver ofertas →
                     </a>

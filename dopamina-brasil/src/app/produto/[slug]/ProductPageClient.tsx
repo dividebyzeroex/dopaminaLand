@@ -125,7 +125,7 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
                 originalPrice: product.price,
                 salePrice: product.salePrice,
               })}
-              className="order-1 block w-full rounded-2xl bg-magenta py-4 text-center text-base sm:text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
+              className="order-1 block w-full rounded-2xl bg-magenta py-4 text-center text-base sm:text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
               COMPRAR AGORA ⚡
             </Link>
@@ -144,7 +144,7 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
                 });
                 trackEvent('add_to_cart', product.id, product.salePrice, { source: 'product_page', slug: product.slug, category: product.category });
               }}
-              className="order-2 w-full rounded-2xl border-2 border-magenta py-4 text-base sm:text-lg font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-[0.98]"
+              className="order-2 w-full rounded-2xl border-2 border-magenta py-4 text-base sm:text-lg font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-[0.98] whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
               ADICIONAR AO CARRINHO 🛒
             </button>
