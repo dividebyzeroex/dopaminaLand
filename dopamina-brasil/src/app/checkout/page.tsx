@@ -147,11 +147,11 @@ export default function CheckoutPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px] min-w-0 w-full">
           {/* Left - Form */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0 w-full">
             {/* Order Summary */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl border border-border bg-card p-6 overflow-hidden">
               <h2 className="text-lg font-extrabold text-foreground">Resumo do Pedido</h2>
               <div className="mt-4 space-y-3">
                 {items.map(item => (
@@ -170,7 +170,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Address (visual only) */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl border border-border bg-card p-6 overflow-hidden">
               <h2 className="text-lg font-extrabold text-foreground">Endereço de Entrega 📍</h2>
               <p className="mt-1 text-xs text-muted">Apenas para o mapa de rastreamento — não armazenamos dados reais.</p>
               <input
@@ -178,12 +178,12 @@ export default function CheckoutPage() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Rua da Capivara, 42 - São Paulo"
-                className="mt-4 w-full rounded-xl border border-border bg-surface-light px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta transition"
+                className="mt-4 w-full min-w-0 rounded-xl border border-border bg-surface-light px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta transition"
               />
             </div>
 
             {/* Payment Method */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl border border-border bg-card p-6 overflow-hidden">
               <h2 className="text-lg font-extrabold text-foreground">Meio de Pagamento 💰</h2>
               <p className="mt-1 text-xs text-muted">Todos igualmente fictícios. Escolha seu favorito.</p>
               <div className="mt-4 space-y-3">
@@ -267,8 +267,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right - Summary */}
-          <div className="lg:sticky lg:top-32 h-fit">
-            <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <div className="lg:sticky lg:top-32 h-fit min-w-0 w-full">
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-4 overflow-hidden">
               <h2 className="text-lg font-extrabold text-foreground">Resumo</h2>
 
               <div className="space-y-2 text-sm">
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                   value={coupon}
                   onChange={(e) => setCoupon(e.target.value.toUpperCase())}
                   placeholder="Cupom de desconto"
-                  className="flex-1 rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                  className="flex-1 min-w-0 rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
                 />
                 <button
                   onClick={applyCoupon}
