@@ -46,8 +46,8 @@ export default function HomePage() {
           >
             {/* Slide 1 — Main Hero */}
             <div className="w-full shrink-0">
-              <div className="grain relative flex min-h-[460px] items-center overflow-hidden bg-gradient-to-br from-surface via-surface-light to-[#1a0a2e] px-6 py-10 sm:px-12">
-                <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-magenta/20 blur-3xl" />
+              <div className="grain relative flex min-h-[460px] items-center overflow-hidden bg-gradient-to-br from-surface via-surface-light to-[#ffedd5] px-6 py-10 sm:px-12">
+                <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-magenta/30 blur-3xl" />
                 <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-violet/20 blur-3xl" />
 
                 <div className="relative grid w-full items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">

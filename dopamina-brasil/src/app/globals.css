@@ -3,8 +3,8 @@
 @theme inline {
   --color-background: #ffffff;
   --color-foreground: #09090b;
-  --color-magenta: #ff1e7a;
-  --color-magenta-light: #ff4d9a;
+  --color-magenta: #ff6b00;
+  --color-magenta-light: #ff8533;
   --color-violet: #8b5cf6;
   --color-violet-light: #a78bfa;
   --color-cyan: #06b6d4;
@@ -76,10 +76,10 @@ body {
 /* ---- Pulse Glow ---- */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 30, 122, 0.3), 0 0 60px rgba(255, 30, 122, 0.1);
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.3), 0 0 60px rgba(255, 107, 0, 0.1);
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 30, 122, 0.5), 0 0 80px rgba(255, 30, 122, 0.2);
+    box-shadow: 0 0 30px rgba(255, 107, 0, 0.5), 0 0 80px rgba(255, 107, 0, 0.2);
   }
 }
 
@@ -140,8 +140,8 @@ body {
 
 /* ---- Neon Glow Border ---- */
 .neon-border {
-  border: 1px solid rgba(255, 30, 122, 0.3);
-  box-shadow: 0 0 15px rgba(255, 30, 122, 0.05), inset 0 0 15px rgba(255, 30, 122, 0.02);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 107, 0, 0.05), inset 0 0 15px rgba(255, 107, 0, 0.02);
 }
 
 /* ---- Scrollbar ---- */
