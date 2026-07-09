@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #0a0a0f;
-  --color-foreground: #f0eaf6;
-  --color-magenta: #ff1e7a;
-  --color-magenta-light: #ff4d9a;
-  --color-violet: #7c3aed;
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+  --color-magenta: #2563eb; /* Using blue for primary buttons */
+  --color-magenta-light: #3b82f6;
+  --color-violet: #8b5cf6;
   --color-violet-light: #a78bfa;
-  --color-cyan: #06d6ff;
-  --color-neon-green: #39ff14;
-  --color-pop: #ffd24a;
-  --color-surface: #141420;
-  --color-surface-light: #1e1e30;
-  --color-surface-lighter: #2a2a40;
-  --color-card: #18182a;
-  --color-card-hover: #22223a;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-muted: rgba(240, 234, 246, 0.45);
+  --color-cyan: #06b6d4;
+  --color-neon-green: #10b981;
+  --color-pop: #f59e0b;
+  --color-surface: #f4f4f5;
+  --color-surface-light: #e4e4e7;
+  --color-surface-lighter: #d4d4d8;
+  --color-card: #ffffff;
+  --color-card-hover: #fafafa;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-muted: rgba(0, 0, 0, 0.5);
   --font-sans: var(--font-inter);
   --font-display: var(--font-outfit);
 }
@@ -76,10 +76,10 @@ body {
 /* ---- Pulse Glow ---- */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 30, 122, 0.3), 0 0 60px rgba(255, 30, 122, 0.1);
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3), 0 0 60px rgba(37, 99, 235, 0.1);
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 30, 122, 0.5), 0 0 80px rgba(255, 30, 122, 0.2);
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.5), 0 0 80px rgba(37, 99, 235, 0.2);
   }
 }
 
@@ -140,8 +140,8 @@ body {
 
 /* ---- Neon Glow Border ---- */
 .neon-border {
-  border: 1px solid rgba(255, 30, 122, 0.3);
-  box-shadow: 0 0 15px rgba(255, 30, 122, 0.1), inset 0 0 15px rgba(255, 30, 122, 0.05);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.05), inset 0 0 15px rgba(37, 99, 235, 0.02);
 }
 
 /* ---- Scrollbar ---- */
