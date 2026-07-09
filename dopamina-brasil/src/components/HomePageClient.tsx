@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
 import { initSession } from '@/lib/tracking';
+import { supabase } from '@/lib/supabase';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -14,24 +15,73 @@ const trustBadges = [
 
 export default function HomePageClient({ products }: { products: any[] }) {
   const categories = [
-    { id: 'todos', label: 'Todos', emoji: '🔥', count: products.length },
-    { id: 'games', label: 'Games', emoji: '🎮', count: products.filter(p => p.category === 'games').length },
-    { id: 'tecnologia', label: 'Tecnologia', emoji: '📱', count: products.filter(p => p.category === 'tecnologia').length },
-    { id: 'beleza', label: 'Beleza', emoji: '💄', count: products.filter(p => p.category === 'beleza').length },
-    { id: 'moda', label: 'Moda', emoji: '👟', count: products.filter(p => p.category === 'moda').length },
-    { id: 'casa', label: 'Casa', emoji: '🛋️', count: products.filter(p => p.category === 'casa').length },
+    { id: 'todos', label: 'Todos', emoji: '🔥' },
+    { id: 'games', label: 'Games', emoji: '🎮' },
+    { id: 'tecnologia', label: 'Tecnologia', emoji: '📱' },
+    { id: 'beleza', label: 'Beleza', emoji: '💄' },
+    { id: 'moda', label: 'Moda', emoji: '👟' },
+    { id: 'casa', label: 'Casa', emoji: '🛋️' },
   ];
   const [activeCategory, setActiveCategory] = useState('todos');
   const [heroSlide, setHeroSlide] = useState(0);
   const { addItem } = useCart();
 
+  const [displayedProducts, setDisplayedProducts] = useState(products);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(products.length === 25);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     initSession();
   }, []);
 
-  const filteredProducts = activeCategory === 'todos'
-    ? products
-    : products.filter(p => p.category === activeCategory);
+  const fetchProducts = async (category: string, pageIndex: number, append: boolean) => {
+    setIsLoading(true);
+    let query = supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(pageIndex * 25, (pageIndex + 1) * 25 - 1);
+
+    if (category !== 'todos') {
+      query = query.eq('category', category);
+    }
+
+    const { data } = await query;
+    const mapped = (data || []).map((p: any) => ({
+      ...p,
+      localImage: p.image_url,
+      shortName: p.short_name,
+      salePrice: p.sale_price,
+    }));
+
+    if (append) {
+      setDisplayedProducts((prev: any) => {
+        // Prevent duplicates just in case
+        const existingIds = new Set(prev.map((p: any) => p.id));
+        const newItems = mapped.filter((p: any) => !existingIds.has(p.id));
+        return [...prev, ...newItems];
+      });
+    } else {
+      setDisplayedProducts(mapped);
+    }
+    setHasMore(mapped.length === 25);
+    setIsLoading(false);
+  };
+
+  const handleCategoryChange = (catId: string) => {
+    setActiveCategory(catId);
+    setPage(0);
+    // Fetch first page of new category
+    fetchProducts(catId, 0, false);
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchProducts(activeCategory, nextPage, true);
+  };
 
   const flashDeals = products.filter(p => p.discount >= 28).slice(0, 8);
 
@@ -277,10 +327,7 @@ export default function HomePageClient({ products }: { products: any[] }) {
           {categories.filter(c => c.id !== 'todos').map((cat) => (
             <button
               key={cat.id}
-              onClick={() => {
-                setActiveCategory(cat.id);
-                document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={() => handleCategoryChange(cat.id)}
               className={`group flex items-center gap-3 rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${
                 activeCategory === cat.id
                   ? 'border-magenta/50 bg-magenta/10'
@@ -292,7 +339,6 @@ export default function HomePageClient({ products }: { products: any[] }) {
               </span>
               <div>
                 <p className="font-extrabold text-foreground">{cat.label}</p>
-                <p className="text-xs text-muted">{cat.count} produtos</p>
               </div>
             </button>
           ))}
@@ -329,7 +375,7 @@ export default function HomePageClient({ products }: { products: any[] }) {
               catálogo completo 💊
             </h2>
             <p className="mt-1 text-sm text-muted">
-              {filteredProducts.length} produtos fictícios esperando por você
+              muitos produtos fictícios esperando por você
             </p>
           </div>
 
@@ -338,7 +384,7 @@ export default function HomePageClient({ products }: { products: any[] }) {
             {categories.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                onClick={() => handleCategoryChange(cat.id)}
                 className={`rounded-full px-4 py-2 text-xs font-bold transition ${
                   activeCategory === cat.id
                     ? 'bg-magenta text-white'
@@ -352,10 +398,23 @@ export default function HomePageClient({ products }: { products: any[] }) {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {filteredProducts.map((product) => (
+          {displayedProducts.map((product: any) => (
             <ProductCard key={product.id} {...product} />
           ))}
         </div>
+
+        {/* Load More Button */}
+        {hasMore && (
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={handleLoadMore}
+              disabled={isLoading}
+              className="rounded-full border-2 border-magenta px-8 py-3.5 text-base font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-95 disabled:opacity-50"
+            >
+              {isLoading ? 'carregando mais dopamina...' : 'carregar mais produtos ✨'}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* ============ FAQ SECTION ============ */}

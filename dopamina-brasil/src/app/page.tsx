@@ -6,11 +6,12 @@ import localProducts from '@/data/products.json';
 export const revalidate = 60;
 
 export default async function HomePage() {
-  // Fetch from Supabase
+  // Fetch initial 25 products from Supabase
   let { data: products, error } = await supabase
     .from('products')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(25);
 
   if (error || !products || products.length === 0) {
     console.error('Error fetching products from Supabase, falling back to local JSON', error);
