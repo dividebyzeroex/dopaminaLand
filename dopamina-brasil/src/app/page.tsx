@@ -30,5 +30,19 @@ export default async function HomePage() {
     }));
   }
 
-  return <HomePageClient products={products} />;
+  let { data: flashDealsRaw, error: flashError } = await supabase
+    .from('products')
+    .select('*')
+    .gte('discount', 12)
+    .order('discount', { ascending: false })
+    .limit(8);
+
+  let flashDeals = (flashDealsRaw || []).map(p => ({
+      ...p,
+      localImage: p.image_url,
+      shortName: p.short_name,
+      salePrice: p.sale_price,
+  }));
+
+  return <HomePageClient products={products} flashDeals={flashDeals} />;
 }

@@ -13,7 +13,7 @@ const trustBadges = [
   { emoji: '📍', title: 'rastreamento ao vivo', desc: 'a viagem real até sua porta' },
 ];
 
-export default function HomePageClient({ products }: { products: any[] }) {
+export default function HomePageClient({ products, flashDeals = [] }: { products: any[], flashDeals?: any[] }) {
   const categories = [
     { id: 'todos', label: 'Todos', emoji: '🔥' },
     { id: 'games', label: 'Games', emoji: '🎮' },
@@ -83,7 +83,7 @@ export default function HomePageClient({ products }: { products: any[] }) {
     fetchProducts(activeCategory, nextPage, true);
   };
 
-  const flashDeals = products.filter(p => p.discount >= 28).slice(0, 8);
+
 
   const heroProduct = products[0]; // RTX 4090
 
