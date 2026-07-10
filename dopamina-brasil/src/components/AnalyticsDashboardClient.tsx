@@ -93,7 +93,9 @@ export default function AnalyticsDashboardClient() {
       const mediumMap: Record<string, number> = {};
       const referrerMap: Record<string, number> = {};
 
-      sessionData?.forEach((sess) => {
+      const safeSessionData = sessionData || [];
+
+      safeSessionData.forEach((sess) => {
         const info = sess.device_info;
         if (info) {
           const g = info.mock_gender || 'Desconhecido';
@@ -214,7 +216,18 @@ export default function AnalyticsDashboardClient() {
       let consideration = 0;
       let decision = 0;
       
-      const leads = sessionData?.map(sess => {
+      // Fallback for missing intent_sessions
+      let finalSessionData = sessionData || [];
+      if (finalSessionData.length === 0 && events && events.length > 0) {
+        const uniqueSids = Array.from(new Set(events.map(e => e.session_id).filter(Boolean)));
+        finalSessionData = uniqueSids.map(sid => ({
+           session_id: sid,
+           created_at: new Date().toISOString(),
+           device_info: { city: 'Fantasma', os_name: 'Desconhecido', browser_name: 'N/A' }
+        }));
+      }
+      
+      const leads = finalSessionData.map(sess => {
         const sid = sess.session_id;
         const stats = sessionScores[sid] || { score: 0, events: 0, fakeRev: 0, lastActive: sess.created_at };
         const score = stats.score;
@@ -241,7 +254,7 @@ export default function AnalyticsDashboardClient() {
            fakeRev: stats.fakeRev,
            lastActive: new Date(stats.lastActive).toLocaleString('pt-BR')
         };
-      }).sort((a, b) => b.score - a.score).slice(0, 50) || [];
+      }).filter(lead => lead.events > 0).sort((a, b) => b.score - a.score).slice(0, 50);
 
       setIntentData({
          funnelStages: { awareness, consideration, decision },
@@ -249,7 +262,7 @@ export default function AnalyticsDashboardClient() {
       });
 
       // Format KPIs
-      const totalSess = sessionCount || 1;
+      const totalSess = finalSessionData.length > 0 ? finalSessionData.length : 1;
       const safeCartCount = cartCount || 1;
       setKpis({
         totalSessions: sessionCount || 0,
