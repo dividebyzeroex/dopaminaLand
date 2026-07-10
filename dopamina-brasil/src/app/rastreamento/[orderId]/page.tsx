@@ -59,12 +59,6 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
       setProgress(currentProgress);
       setTimeLeft(Math.max(0, TOTAL_DURATION - elapsed));
 
-      // Interpolate Map Position (Manaus -> SP)
-      setMapPosition({
-        lat: -3.1190 + (destination.lat - (-3.1190)) * currentProgress,
-        lng: -60.0217 + (destination.lng - (-60.0217)) * currentProgress,
-      });
-
     }, 1000);
 
     return () => clearInterval(timer);
@@ -75,6 +69,13 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
     Math.floor(progress * events.length),
     events.length - 1
   );
+
+  // Map Position based only on the event index to avoid 1-second flicker
+  const eventProgress = events.length > 0 ? currentEventIndex / (events.length - 1) : 0;
+  const currentMapPosition = {
+    lat: -3.1190 + (destination.lat - (-3.1190)) * eventProgress,
+    lng: -60.0217 + (destination.lng - (-60.0217)) * eventProgress,
+  };
 
   const visibleEvents = events.slice(0, currentEventIndex + 1);
   const currentEvent = events[currentEventIndex];
@@ -166,7 +167,7 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
       )}
 
       {/* Real Map (OpenStreetMap iframe) */}
-      <div className="mt-8 rounded-2xl border border-border bg-card overflow-hidden shadow-lg">
+      <div className="mt-8 rounded-2xl border border-border bg-card overflow-hidden shadow-lg relative">
         <div className="relative h-72 sm:h-96 w-full pointer-events-none">
           <iframe 
             width="100%" 
@@ -175,15 +176,23 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
             scrolling="no" 
             marginHeight={0} 
             marginWidth={0} 
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapPosition.lng - 0.2}%2C${mapPosition.lat - 0.2}%2C${mapPosition.lng + 0.2}%2C${mapPosition.lat + 0.2}&layer=mapnik&marker=${mapPosition.lat}%2C${mapPosition.lng}`}
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${currentMapPosition.lng - 0.2}%2C${currentMapPosition.lat - 0.2}%2C${currentMapPosition.lng + 0.2}%2C${currentMapPosition.lat + 0.2}&layer=mapnik`}
             className="filter grayscale-[50%] invert-[90%] hue-rotate-[200deg]" // Dark mode futuristic map look
           ></iframe>
+          
+          {/* Centered Cleiton Marker */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
+            <div className="relative h-16 w-16 mb-1 animate-bounce drop-shadow-[0_0_15px_rgba(204,255,0,0.8)]">
+              <img src="/cleiton_nobg.png" alt="Cleiton no Mapa" className="w-full h-full object-contain" />
+            </div>
+            <div className="h-2 w-8 rounded-[100%] bg-black/50 blur-sm"></div>
+          </div>
 
           {/* Map labels overlay */}
           <div className="absolute bottom-4 left-4 rounded-lg bg-surface/90 border border-border backdrop-blur px-3 py-2 pointer-events-auto">
             <p className="text-[10px] font-bold text-neon uppercase">Sinal GPS do Cleiton</p>
             <p className="text-xs font-bold text-foreground">
-              {mapPosition.lat.toFixed(4)}°, {mapPosition.lng.toFixed(4)}°
+              {currentMapPosition.lat.toFixed(4)}°, {currentMapPosition.lng.toFixed(4)}°
             </p>
           </div>
 
