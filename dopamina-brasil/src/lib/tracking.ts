@@ -32,11 +32,20 @@ export async function initSession() {
   const utm_campaign = urlParams.get('utm_campaign') || '';
   const referrer = document.referrer || '';
 
+  // Extrair metadados nativos de Hardware e Conexão (se suportados pelo browser)
+  const nav = navigator as any;
+  const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+  
   const deviceInfo = {
     userAgent: navigator.userAgent,
     language: navigator.language,
     screen: `${window.screen.width}x${window.screen.height}`,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    deviceMemory: nav.deviceMemory || null, // RAM estimate in GB
+    hardwareConcurrency: nav.hardwareConcurrency || null, // CPU cores
+    connectionType: connection ? connection.effectiveType : null, // 4g, 3g, etc
+    dataSaver: connection ? connection.saveData : false, // true if user is on restricted data
+    prefersDarkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
     utm_source,
     utm_medium,
     utm_campaign,
