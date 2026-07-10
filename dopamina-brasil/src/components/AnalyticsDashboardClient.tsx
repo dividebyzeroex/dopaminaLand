@@ -183,7 +183,16 @@ export default function AnalyticsDashboardClient() {
 
       const timelineMap: Record<string, number> = {};
       const productInteractions: Record<string, { views: number, carts: number, rev: number }> = {};
-      const sessionScores: Record<string, { score: number, events: number, fakeRev: number, lastActive: string }> = {};
+      
+      // Intent Data per Session
+      const sessionScores: Record<string, { 
+        score: number, 
+        events: number, 
+        fakeRev: number, 
+        lastActive: string,
+        productsViewed: Set<string>,
+        productsCarted: Set<string>
+      }> = {};
 
       const searchMap: Record<string, number> = {};
       const abandonedList: any[] = [];
@@ -241,7 +250,14 @@ export default function AnalyticsDashboardClient() {
         const sid = ev.session_id;
         if (sid) {
           if (!sessionScores[sid]) {
-            sessionScores[sid] = { score: 0, events: 0, fakeRev: 0, lastActive: ev.created_at };
+            sessionScores[sid] = { 
+              score: 0, 
+              events: 0, 
+              fakeRev: 0, 
+              lastActive: ev.created_at,
+              productsViewed: new Set(),
+              productsCarted: new Set()
+            };
           }
           sessionScores[sid].score += SCORE_MAP[ev.event_type as keyof typeof SCORE_MAP] || 0;
           sessionScores[sid].events += 1;
@@ -250,6 +266,18 @@ export default function AnalyticsDashboardClient() {
           }
           if (ev.event_type === 'fake_checkout') {
              sessionScores[sid].fakeRev += ev.price_displayed || 0;
+          }
+          
+          // Map real product names
+          if (ev.product_id) {
+            const product = productsData.find((p: any) => p.id === ev.product_id);
+            const pName = product ? product.short_name : ev.product_id;
+            if (ev.event_type === 'view_item') {
+              sessionScores[sid].productsViewed.add(pName);
+            }
+            if (ev.event_type === 'add_to_cart') {
+              sessionScores[sid].productsCarted.add(pName);
+            }
           }
         }
 
@@ -310,7 +338,7 @@ export default function AnalyticsDashboardClient() {
       
       const leads = finalSessionData.map(sess => {
         const sid = sess.session_id;
-        const stats = sessionScores[sid] || { score: 0, events: 0, fakeRev: 0, lastActive: sess.created_at };
+        const stats = sessionScores[sid] || { score: 0, events: 0, fakeRev: 0, lastActive: sess.created_at, productsViewed: new Set(), productsCarted: new Set() };
         const score = stats.score;
         
         let stage = 'Awareness';
@@ -321,19 +349,20 @@ export default function AnalyticsDashboardClient() {
         const city = sess.device_info?.city || 'Desconhecido';
         const os = sess.device_info?.os_name || 'Desconhecido';
         const browser = sess.device_info?.browser_name || '';
-        const mockCompany = `${os} ${browser} Corp - ${city}`;
-        const mockRole = score > 50 ? 'Diretor de Compras (Hot)' : score > 20 ? 'Gerente (Warm)' : 'Estagiário Curioso (Cold)';
+        const source = sess.device_info?.utm_source || sess.device_info?.referrer || 'Tráfego Direto/Orgânico';
+        const isMobile = sess.device_info?.is_mobile ? '📱' : '💻';
         
         return {
            id: sid,
-           company: mockCompany,
-           role: mockRole,
-           city: city,
+           deviceLocal: `${isMobile} ${os} - ${city}`,
+           source: source,
            score: score,
            stage: stage,
            events: stats.events,
            fakeRev: stats.fakeRev,
-           lastActive: new Date(stats.lastActive).toLocaleString('pt-BR')
+           lastActive: new Date(stats.lastActive).toLocaleString('pt-BR'),
+           views: Array.from(stats.productsViewed),
+           carts: Array.from(stats.productsCarted)
         };
       }).filter(lead => lead.events > 0).sort((a, b) => b.score - a.score).slice(0, 50);
 
@@ -901,32 +930,32 @@ export default function AnalyticsDashboardClient() {
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-border text-muted">
-                        <th className="pb-3 font-bold uppercase tracking-wider">Empresa (Mock)</th>
-                        <th className="pb-3 font-bold uppercase tracking-wider">Cargo Estimado</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Visitante (Device & Local)</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Origem</th>
                         <th className="pb-3 font-bold uppercase tracking-wider">Estágio</th>
-                        <th className="pb-3 font-bold uppercase tracking-wider">Intent Score</th>
-                        <th className="pb-3 font-bold uppercase tracking-wider">Última Atividade</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Interesse (Produtos)</th>
                         <th className="pb-3 font-bold uppercase tracking-wider text-right">Potencial (R$)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                       {intentData.topLeads.map((lead) => (
                         <tr key={lead.id} className="transition hover:bg-surface-light">
-                          <td className="py-4 font-bold text-foreground">{lead.company}</td>
-                          <td className="py-4 text-muted">{lead.role}</td>
+                          <td className="py-4 font-bold text-foreground">
+                            {lead.deviceLocal}
+                            <div className="text-xs font-normal text-muted mt-1">ID: <code className="bg-surface px-1 py-0.5 rounded">{lead.id.split('-')[0]}</code></div>
+                          </td>
+                          <td className="py-4 text-muted truncate max-w-[150px]" title={lead.source}>{lead.source}</td>
                           <td className="py-4">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold mb-1 ${
                               lead.stage === 'Decision' ? 'bg-rose-100 text-rose-700' :
                               lead.stage === 'Consideration' ? 'bg-amber-100 text-amber-700' :
                               'bg-cyan-100 text-cyan-700'
                             }`}>
                               {lead.stage}
                             </span>
-                          </td>
-                          <td className="py-4">
                             <div className="flex items-center gap-2">
-                              <span className="font-black text-foreground">{lead.score}</span>
-                              <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-lighter">
+                              <span className="font-black text-foreground text-xs">{lead.score}</span>
+                              <div className="h-1.5 w-12 overflow-hidden rounded-full bg-surface-lighter">
                                 <div 
                                   className={`h-full rounded-full ${lead.score > 50 ? 'bg-rose-500' : lead.score > 20 ? 'bg-amber-500' : 'bg-cyan-500'}`} 
                                   style={{ width: `${Math.min(100, (lead.score / 100) * 100)}%` }} 
@@ -934,7 +963,25 @@ export default function AnalyticsDashboardClient() {
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 text-xs text-muted">{lead.lastActive}</td>
+                          <td className="py-4">
+                            <div className="flex flex-col gap-1 max-w-[300px]">
+                              {lead.carts.length > 0 && (
+                                <div className="text-xs">
+                                  <span className="font-bold text-neon">🛒 Adicionou: </span>
+                                  <span className="text-foreground truncate">{lead.carts.join(', ')}</span>
+                                </div>
+                              )}
+                              {lead.views.length > 0 && (
+                                <div className="text-xs">
+                                  <span className="font-bold text-muted">👀 Viu: </span>
+                                  <span className="text-muted truncate">{lead.views.join(', ')}</span>
+                                </div>
+                              )}
+                              {lead.carts.length === 0 && lead.views.length === 0 && (
+                                <span className="text-xs text-muted">Apenas navegou (Nenhum produto)</span>
+                              )}
+                            </div>
+                          </td>
                           <td className="py-4 text-right font-black text-neon">
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.fakeRev)}
                           </td>
