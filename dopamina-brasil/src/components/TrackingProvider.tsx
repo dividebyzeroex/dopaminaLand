@@ -92,9 +92,9 @@ function TrackingLogic() {
     
     // beforeunload catches closing tabs or navigating away externally
     const handleAbandon = () => {
-      const { items, totalValue } = cartRef.current;
+      const { items, totalFakePrice } = cartRef.current;
       if (items.length > 0 && !pathname.includes('sucesso') && !pathname.includes('checkout')) {
-        trackEvent('cart_abandoned', undefined, totalValue, {
+        trackEvent('cart_abandoned', undefined, totalFakePrice, {
           path: pathname,
           items: items.map(i => ({ id: i.id, name: i.short_name, qty: i.quantity, price: i.salePrice }))
         });
