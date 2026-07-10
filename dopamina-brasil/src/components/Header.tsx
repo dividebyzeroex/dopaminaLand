@@ -65,7 +65,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="group flex shrink-0 items-center gap-2">
             <span className="text-3xl transition-transform group-hover:rotate-12 group-hover:scale-110">⚡</span>
-            <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground">dopaminando</span>
+            <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground">dopaminado</span>
           </Link>
 
           {/* Search */}

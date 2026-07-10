@@ -26,7 +26,7 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "dopaminando ⚡ — Compre o que quiser. Gaste zero.",
+  title: "dopaminado ⚡ — Compre o que quiser. Gaste zero.",
   description:
     "O e-commerce cyberpunk onde você compra a dopamina sem usar o limite. Checkout blindado, produtos ultra-desejáveis e fatura em R$ 0,00.",
   keywords: [
@@ -37,11 +37,14 @@ export const metadata: Metadata = {
     "checkout falso",
     "rastreamento falso",
     "simulador de compras",
-    "dopaminando",
+    "dopaminado",
+    "compras virtuais",
+    "frete grátis infinito",
+    "gamificação"
   ],
   robots: "index, follow",
   openGraph: {
-    title: "dopaminando ⚡ — Compre o que quiser. Gaste zero.",
+    title: "dopaminado ⚡ — Compre o que quiser. Gaste zero.",
     description:
       "O e-commerce cyberpunk que vende a emoção de comprar sem o peso da fatura.",
     locale: "pt_BR",

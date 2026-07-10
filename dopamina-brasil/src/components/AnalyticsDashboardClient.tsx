@@ -28,7 +28,7 @@ export default function AnalyticsDashboardClient() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'ux' | 'marketing' | 'intent_b2b'>('visao_geral');
+  const [activeTab, setActiveTab] = useState<'overview' | 'ux' | 'ecommerce' | 'intent'>('overview');
 
   // Intent Data State
   const [intentData, setIntentData] = useState({

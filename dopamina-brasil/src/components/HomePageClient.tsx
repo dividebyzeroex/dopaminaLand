@@ -153,11 +153,11 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                   </h2>
                   <p className="mt-2 text-sm text-white/70">Aplique no checkout e tenha a ilusão de economizar uma grana violenta.</p>
                   <button
-                    onClick={() => navigator.clipboard?.writeText('DOPAMINANDO')}
+                    onClick={() => navigator.clipboard?.writeText('DOPAMINADO')}
                     className="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-pop/50 bg-white/5 px-4 py-2.5 transition hover:border-pop w-full sm:w-auto"
                   >
                     <span className="font-[var(--font-display)] text-base font-extrabold tracking-wide text-pop">
-                      DOPAMINANDO
+                      DOPAMINADO
                     </span>
                     <span className="shrink-0 rounded-lg bg-pop px-3 py-1 text-[10px] font-black text-background">
                       copiar
