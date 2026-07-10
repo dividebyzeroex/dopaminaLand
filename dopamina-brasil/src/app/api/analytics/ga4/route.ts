@@ -38,12 +38,25 @@ export async function GET() {
       ],
     });
 
-    if (!response.rows || response.rows.length === 0) {
+    const [realtimeResponse] = await analyticsDataClient.runRealtimeReport({
+      property: `properties/${propertyId}`,
+      metrics: [
+        { name: 'activeUsers' },
+      ],
+    });
+
+    const isStandardEmpty = !response.rows || response.rows.length === 0;
+    const isRealtimeEmpty = !realtimeResponse.rows || realtimeResponse.rows.length === 0;
+
+    if (isStandardEmpty && isRealtimeEmpty) {
       return NextResponse.json({ data: null });
     }
 
-    const row = response.rows[0];
-    const metricValues = row.metricValues || [];
+    const row = isStandardEmpty ? null : response.rows![0];
+    const metricValues = row ? (row.metricValues || []) : [];
+    
+    const rtRow = isRealtimeEmpty ? null : realtimeResponse.rows![0];
+    const rtMetricValues = rtRow ? (rtRow.metricValues || []) : [];
 
     return NextResponse.json({
       data: {
@@ -52,6 +65,7 @@ export async function GET() {
         pageViews: metricValues[2]?.value || '0',
         bounceRate: (parseFloat(metricValues[3]?.value || '0') * 100).toFixed(1), // Convert to percentage
         avgSessionDuration: parseFloat(metricValues[4]?.value || '0').toFixed(0), // In seconds
+        realtimeUsers: rtMetricValues[0]?.value || '0',
       }
     });
 

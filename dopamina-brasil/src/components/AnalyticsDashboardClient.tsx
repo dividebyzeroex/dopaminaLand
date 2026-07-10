@@ -695,7 +695,18 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'ga4' && (
             <div className="animate-fade-in space-y-6">
               {ga4Data && ga4Data !== 'empty' ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="rounded-2xl border-2 border-neon bg-neon/5 p-6 shadow-[0_0_15px_rgba(204,255,0,0.2)]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-neon"></span>
+                      </span>
+                      <div className="text-xs font-bold uppercase tracking-wider text-neon">Agora</div>
+                    </div>
+                    <div className="text-4xl font-black text-foreground">{ga4Data.realtimeUsers || '0'}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Usuários Ativos (30m)</div>
+                  </div>
                   <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                     <div className="text-2xl">👥</div>
                     <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.activeUsers}</div>
