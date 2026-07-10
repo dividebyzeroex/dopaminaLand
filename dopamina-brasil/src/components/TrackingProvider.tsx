@@ -96,7 +96,7 @@ function TrackingLogic() {
       if (items.length > 0 && !pathname.includes('sucesso') && !pathname.includes('checkout')) {
         trackEvent('cart_abandoned', undefined, totalFakePrice, {
           path: pathname,
-          items: items.map(i => ({ id: i.id, name: i.short_name, qty: i.quantity, price: i.salePrice }))
+          items: items.map(i => ({ id: i.id, name: i.shortName, qty: i.quantity, price: i.salePrice }))
         });
       }
     };
