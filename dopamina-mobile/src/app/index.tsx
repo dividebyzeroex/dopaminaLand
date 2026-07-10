@@ -23,7 +23,11 @@ export default function HomeScreen() {
   const totalItems = items.reduce((acc, i) => acc + (i.quantity || 1), 0);
 
   const renderItem = ({ item }: { item: any }) => (
-    <View className="flex-1 m-2 rounded-3xl border border-border bg-card overflow-hidden">
+    <TouchableOpacity 
+      className="flex-1 m-2 rounded-3xl border border-border bg-card overflow-hidden"
+      onPress={() => router.push(`/produto/${item.id}`)}
+      activeOpacity={0.9}
+    >
       <View className="w-full aspect-square relative bg-surface p-4 items-center justify-center">
         {item.local_image ? (
           <Image source={{ uri: `https://raw.githubusercontent.com/dividebyzeroex/dopaminaLand/main/dopamina-brasil/public${item.local_image}` }} className="w-full h-full" resizeMode="contain" />
@@ -56,7 +60,7 @@ export default function HomeScreen() {
           <Text className="font-black text-background">COMPRAR ⚡</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
