@@ -119,6 +119,83 @@
     "description": "O Cleiton achou o pacote tão bonito que tirou foto pra postar no Instagram. #PackageGoals"
   },
   {
+    "id": 21,
+    "status": "batalha_rap",
+    "icon": "🎤",
+    "title": "Cleiton foi desafiado para uma batalha de rap",
+    "description": "O motoboy cruzou com um MC no farol. Ele está usando seu pacote como microfone. Se ele ganhar, a entrega é mais rápida."
+  },
+  {
+    "id": 22,
+    "status": "pneu_furado",
+    "icon": "🛞",
+    "title": "Pneu furou. Cleiton está trocando com fita isolante",
+    "description": "A CG Titan 160 do Cleiton sofreu um revés, mas ele é o MacGyver das entregas. Retomando a rota em breve."
+  },
+  {
+    "id": 23,
+    "status": "abducao_parcial",
+    "icon": "🛸",
+    "title": "Tentativa de abdução alienígena frustrada",
+    "description": "Um disco voador tentou levar a moto do Cleiton. Ele deu 'grau' e escapou. O pacote está seguro, mas levemente radioativo."
+  },
+  {
+    "id": 24,
+    "status": "buraco_negro",
+    "icon": "🕳️",
+    "title": "Pacote caiu em um buraco negro em Osasco",
+    "description": "Uma anomalia temporal na grande São Paulo sugou o pacote. Ele deve reaparecer na sua porta na próxima terça-feira ou em 1985."
+  },
+  {
+    "id": 25,
+    "status": "multiverso",
+    "icon": "🌌",
+    "title": "Entrega desviada para o multiverso",
+    "description": "O Cleiton entrou na rua errada e foi parar na Terra-838. Seu pacote está sendo inspecionado pelo Doutor Estranho."
+  },
+  {
+    "id": 26,
+    "status": "vovo",
+    "icon": "👵",
+    "title": "Cleiton parou para ajudar uma senhora a atravessar a rua",
+    "description": "Seu pacote teve que esperar, porque a dona Neide precisava de ajuda com as sacolas do mercado. Cleiton é um herói."
+  },
+  {
+    "id": 27,
+    "status": "fuga_policia",
+    "icon": "🚔",
+    "title": "Fuga tática em alta velocidade",
+    "description": "O Cleiton esqueceu de pagar o IPVA e teve que meter o loko na fuga. Seu pacote está chegando mais rápido do que o esperado!"
+  },
+  {
+    "id": 28,
+    "status": "blitz",
+    "icon": "🛑",
+    "title": "Parado na blitz (sem documento)",
+    "description": "Deu ruim. A PM parou o Cleiton e ele tava de chinelo. Negociação em andamento."
+  },
+  {
+    "id": 29,
+    "status": "batalha_chefe",
+    "icon": "🐉",
+    "title": "Cleiton enfrentando o Boss Final",
+    "description": "Para chegar na sua rua, o motoboy teve que sacar uma espada e lutar contra um dragão corporativo. A barra de vida dele tá cheia."
+  },
+  {
+    "id": 30,
+    "status": "matrix",
+    "icon": "💻",
+    "title": "Falha na Matrix",
+    "description": "O pacote se multiplicou por 3 e depois sumiu. Os desenvolvedores do universo estão aplicando um patch de correção."
+  },
+  {
+    "id": 31,
+    "status": "caminhoneiros",
+    "icon": "🚧",
+    "title": "Preso em protesto na estrada",
+    "description": "A rodovia foi bloqueada e o Cleiton tá lá fazendo churrasco com a galera do pneu queimado. Pacote cheirando a picanha."
+  },
+  {
     "id": 18,
     "status": "out_for_delivery",
     "icon": "📍",
@@ -137,6 +214,6 @@
     "status": "delivered",
     "icon": "🎉",
     "title": "ENTREGUE! (na sua imaginação)",
-    "description": "Parabéns! Seu pacote foi entregue com sucesso no endereço fictício. Aproveite seu produto inexistente! 💊"
+    "description": "Parabéns! Seu pacote foi entregue com sucesso no endereço fictício. Aproveite seu produto inexistente! ⚡"
   }
 ]
