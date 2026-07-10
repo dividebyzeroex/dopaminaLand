@@ -171,7 +171,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
             {/* Slide 2 — Coupon */}
             <div className="w-full shrink-0">
-              <div className="relative flex min-h-[460px] items-center overflow-hidden bg-[#160c20] px-6 py-10 text-foreground sm:px-12">
+              <div className="relative flex min-h-[460px] items-center overflow-hidden bg-[#160c20] px-6 py-10 text-white sm:px-12">
                 <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-pop/20 blur-3xl" />
                 <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-neon/20 blur-3xl" />
 
@@ -185,7 +185,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       <br />
                       no seu primeiro pedido
                     </h2>
-                    <p className="mt-4 max-w-md text-base font-medium text-muted">
+                    <p className="mt-4 max-w-md text-base font-medium text-white/70">
                       Use o cupom no checkout e veja o dinheiro falso derreter diante dos seus olhos. ✨
                     </p>
                     <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -204,7 +204,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       </button>
                       <a
                         href="#catalogo"
-                        className="rounded-full bg-foreground px-7 py-3 text-base font-extrabold text-background transition hover:scale-105 active:scale-95 whitespace-nowrap"
+                        className="rounded-full bg-white px-7 py-3 text-base font-extrabold text-black transition hover:scale-105 active:scale-95 whitespace-nowrap"
                       >
                         começar a comprar 🚀
                       </a>
