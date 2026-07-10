@@ -55,12 +55,12 @@ export default function Footer() {
               Dopamina é gratuito e sem anúncios. Se curtiu, considere apoiar:
             </p>
             <a
-              href="https://buymeacoffee.com"
+              href="https://buy.stripe.com/00wfZhgEFcAb4Lra3odAk00"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-2 rounded-full bg-pop/20 px-4 py-2 text-sm font-bold text-pop transition hover:bg-pop/30"
             >
-              ☕ Buy me a Coffee
+              ☕ Me pague um café
             </a>
             <p className="mt-2 text-xs text-muted/50">
               Doadores podem incluir um produto customizado no catálogo!
