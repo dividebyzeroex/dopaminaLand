@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import productsData from '@/data/products.json';
 import {
   BarChart,
   Bar,
@@ -171,6 +170,13 @@ export default function AnalyticsDashboardClient() {
 
       if (eventsError) throw eventsError;
 
+      // 3. Fetch Product Dictionary (to map UUIDs to Names)
+      const { data: allProducts } = await supabase.from('products').select('id, name, short_name');
+      const productDict = (allProducts || []).reduce((acc: any, p: any) => {
+        acc[p.id] = p;
+        return acc;
+      }, {});
+
       let viewCount = 0;
       let cartCount = 0;
       let checkoutCount = 0;
@@ -270,8 +276,8 @@ export default function AnalyticsDashboardClient() {
           
           // Map real product names
           if (ev.product_id) {
-            const product = productsData.find((p: any) => p.id === ev.product_id);
-            const pName = product ? product.shortName : ev.product_id;
+            const product = productDict[ev.product_id];
+            const pName = product ? product.short_name : ev.product_id;
             if (ev.event_type === 'view_item') {
               sessionScores[sid].productsViewed.add(pName);
             }
@@ -410,7 +416,7 @@ export default function AnalyticsDashboardClient() {
         abandonedCarts: abandonedList.sort((a, b) => b.value - a.value).slice(0, 10),
         boughtTogether: formatMap(pairMap).slice(0, 10),
         topProducts: Object.keys(productInteractions).map(id => {
-          const product = productsData.find((p: any) => p.id === id);
+          const product = productDict[id];
           return {
             id,
             name: product ? product.name : `Produto ${id.split('-')[0]}`,
