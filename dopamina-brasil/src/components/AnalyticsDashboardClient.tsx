@@ -56,6 +56,12 @@ export default function AnalyticsDashboardClient() {
     os: [] as any[],
     state: [] as any[]
   });
+  const [hardware, setHardware] = useState({
+    connection: [] as any[],
+    ram: [] as any[],
+    cores: [] as any[],
+    theme: [] as any[]
+  });
   const [marketing, setMarketing] = useState({
     utmSource: [] as any[],
     utmMedium: [] as any[],
@@ -101,6 +107,10 @@ export default function AnalyticsDashboardClient() {
       const sourceMap: Record<string, number> = {};
       const mediumMap: Record<string, number> = {};
       const referrerMap: Record<string, number> = {};
+      const connMap: Record<string, number> = {};
+      const ramMap: Record<string, number> = {};
+      const coresMap: Record<string, number> = {};
+      const themeMap: Record<string, number> = {};
 
       const safeSessionData = sessionData || [];
 
@@ -120,6 +130,13 @@ export default function AnalyticsDashboardClient() {
           sourceMap[src] = (sourceMap[src] || 0) + 1;
           mediumMap[med] = (mediumMap[med] || 0) + 1;
           referrerMap[ref] = (referrerMap[ref] || 0) + 1;
+
+          if (info.connectionType) connMap[info.connectionType.toUpperCase()] = (connMap[info.connectionType.toUpperCase()] || 0) + 1;
+          if (info.deviceMemory) ramMap[`${info.deviceMemory}GB`] = (ramMap[`${info.deviceMemory}GB`] || 0) + 1;
+          if (info.hardwareConcurrency) coresMap[`${info.hardwareConcurrency} Núcleos`] = (coresMap[`${info.hardwareConcurrency} Núcleos`] || 0) + 1;
+          
+          const theme = info.prefersDarkMode === true ? 'Modo Escuro' : info.prefersDarkMode === false ? 'Modo Claro' : 'Desconhecido';
+          themeMap[theme] = (themeMap[theme] || 0) + 1;
         }
       });
 
@@ -135,6 +152,13 @@ export default function AnalyticsDashboardClient() {
         utmSource: formatMap(sourceMap).slice(0, 5),
         utmMedium: formatMap(mediumMap).slice(0, 5),
         referrer: formatMap(referrerMap).slice(0, 5)
+      });
+
+      setHardware({
+        connection: formatMap(connMap).slice(0, 5),
+        ram: formatMap(ramMap).slice(0, 5),
+        cores: formatMap(coresMap).slice(0, 5),
+        theme: formatMap(themeMap).slice(0, 3)
       });
 
       // 2. Fetch Events (Funnel, Products, UX)
@@ -593,6 +617,56 @@ export default function AnalyticsDashboardClient() {
                         <div className="text-xs font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full">{st.value} sessões</div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Hardware Fingerprint */}
+              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+                <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">🔋 Hardware & Conexão (Fingerprint Avançado)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Conexão */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Rede</h3>
+                    {hardware.connection.length > 0 ? hardware.connection.map(c => (
+                      <div key={c.name} className="flex justify-between items-center text-sm font-medium">
+                        <span>{c.name}</span>
+                        <span className="text-neon font-bold">{c.value}</span>
+                      </div>
+                    )) : <div className="text-sm text-muted">Sem dados</div>}
+                  </div>
+                  
+                  {/* Memória RAM */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Memória RAM</h3>
+                    {hardware.ram.length > 0 ? hardware.ram.map(c => (
+                      <div key={c.name} className="flex justify-between items-center text-sm font-medium">
+                        <span>{c.name}</span>
+                        <span className="text-neon font-bold">{c.value}</span>
+                      </div>
+                    )) : <div className="text-sm text-muted">Sem dados</div>}
+                  </div>
+
+                  {/* CPU */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Processador (Cores)</h3>
+                    {hardware.cores.length > 0 ? hardware.cores.map(c => (
+                      <div key={c.name} className="flex justify-between items-center text-sm font-medium">
+                        <span>{c.name}</span>
+                        <span className="text-neon font-bold">{c.value}</span>
+                      </div>
+                    )) : <div className="text-sm text-muted">Sem dados</div>}
+                  </div>
+
+                  {/* Tema */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Preferência de Tema</h3>
+                    {hardware.theme.length > 0 ? hardware.theme.map(c => (
+                      <div key={c.name} className="flex justify-between items-center text-sm font-medium">
+                        <span>{c.name}</span>
+                        <span className="text-neon font-bold">{c.value}</span>
+                      </div>
+                    )) : <div className="text-sm text-muted">Sem dados</div>}
                   </div>
                 </div>
               </div>
