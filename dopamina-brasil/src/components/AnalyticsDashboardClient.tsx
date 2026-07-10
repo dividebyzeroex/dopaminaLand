@@ -271,7 +271,7 @@ export default function AnalyticsDashboardClient() {
           // Map real product names
           if (ev.product_id) {
             const product = productsData.find((p: any) => p.id === ev.product_id);
-            const pName = product ? product.short_name : ev.product_id;
+            const pName = product ? product.shortName : ev.product_id;
             if (ev.event_type === 'view_item') {
               sessionScores[sid].productsViewed.add(pName);
             }
