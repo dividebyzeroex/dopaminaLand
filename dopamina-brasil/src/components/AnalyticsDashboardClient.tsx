@@ -28,7 +28,13 @@ export default function AnalyticsDashboardClient() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'ux' | 'marketing'>('visao_geral');
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'ux' | 'marketing' | 'intent_b2b'>('visao_geral');
+
+  // Intent Data State
+  const [intentData, setIntentData] = useState({
+    funnelStages: { awareness: 0, consideration: 0, decision: 0 },
+    topLeads: [] as any[],
+  });
 
   // Dashboard Data State
   const [kpis, setKpis] = useState({
@@ -123,7 +129,7 @@ export default function AnalyticsDashboardClient() {
       // 2. Fetch Events (Funnel, Products, UX)
       const { data: events, error: eventsError } = await supabase
         .from('intent_events')
-        .select('event_type, price_displayed, created_at, product_id, metadata');
+        .select('session_id, event_type, price_displayed, created_at, product_id, metadata');
 
       if (eventsError) throw eventsError;
 
@@ -139,6 +145,16 @@ export default function AnalyticsDashboardClient() {
 
       const timelineMap: Record<string, number> = {};
       const productInteractions: Record<string, { views: number, carts: number, rev: number }> = {};
+      const sessionScores: Record<string, { score: number, events: number, fakeRev: number, lastActive: string }> = {};
+
+      const SCORE_MAP = {
+        'fake_checkout': 50,
+        'share_product': 30,
+        'add_to_cart': 20,
+        'dwell_time_exceeded': 10,
+        'view_item': 5,
+        'rage_click': 15
+      };
 
       events?.forEach((ev) => {
         // Timeline (Group by Date)
@@ -175,6 +191,61 @@ export default function AnalyticsDashboardClient() {
           if (ev.event_type === 'add_to_cart') productInteractions[ev.product_id].carts++;
           if (ev.event_type === 'fake_checkout') productInteractions[ev.product_id].rev += ev.price_displayed || 0;
         }
+
+        // Intent Scoring
+        const sid = ev.session_id;
+        if (sid) {
+          if (!sessionScores[sid]) {
+            sessionScores[sid] = { score: 0, events: 0, fakeRev: 0, lastActive: ev.created_at };
+          }
+          sessionScores[sid].score += SCORE_MAP[ev.event_type as keyof typeof SCORE_MAP] || 0;
+          sessionScores[sid].events += 1;
+          if (ev.created_at > sessionScores[sid].lastActive) {
+            sessionScores[sid].lastActive = ev.created_at;
+          }
+          if (ev.event_type === 'fake_checkout') {
+             sessionScores[sid].fakeRev += ev.price_displayed || 0;
+          }
+        }
+      });
+
+      // Calculate B2B Intent Leads & Funnel
+      let awareness = 0;
+      let consideration = 0;
+      let decision = 0;
+      
+      const leads = sessionData?.map(sess => {
+        const sid = sess.session_id;
+        const stats = sessionScores[sid] || { score: 0, events: 0, fakeRev: 0, lastActive: sess.created_at };
+        const score = stats.score;
+        
+        let stage = 'Awareness';
+        if (score > 50) { stage = 'Decision'; decision++; }
+        else if (score > 20) { stage = 'Consideration'; consideration++; }
+        else { stage = 'Awareness'; awareness++; }
+        
+        const city = sess.device_info?.city || 'Desconhecido';
+        const os = sess.device_info?.os_name || 'Desconhecido';
+        const browser = sess.device_info?.browser_name || '';
+        const mockCompany = `${os} ${browser} Corp - ${city}`;
+        const mockRole = score > 50 ? 'Diretor de Compras (Hot)' : score > 20 ? 'Gerente (Warm)' : 'Estagiário Curioso (Cold)';
+        
+        return {
+           id: sid,
+           company: mockCompany,
+           role: mockRole,
+           city: city,
+           score: score,
+           stage: stage,
+           events: stats.events,
+           fakeRev: stats.fakeRev,
+           lastActive: new Date(stats.lastActive).toLocaleString('pt-BR')
+        };
+      }).sort((a, b) => b.score - a.score).slice(0, 50) || [];
+
+      setIntentData({
+         funnelStages: { awareness, consideration, decision },
+         topLeads: leads
       });
 
       // Format KPIs
@@ -275,7 +346,8 @@ export default function AnalyticsDashboardClient() {
       {[
         { id: 'visao_geral', label: 'Visão Geral & Vendas' },
         { id: 'ux', label: 'Comportamento (UX)' },
-        { id: 'marketing', label: 'Aquisição & Marketing' }
+        { id: 'marketing', label: 'Aquisição & Marketing' },
+        { id: 'intent_b2b', label: 'Intent Data B2B 🔥' }
       ].map(tab => (
         <button
           key={tab.id}
@@ -494,6 +566,94 @@ export default function AnalyticsDashboardClient() {
                       <Tooltip contentStyle={{ borderRadius: '16px', border: 'none' }} />
                     </PieChart>
                   </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: INTENT DATA B2B */}
+          {activeTab === 'intent_b2b' && (
+            <div className="animate-fade-in space-y-8">
+              {/* Funnel */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm border-t-4 border-t-cyan-400">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted">1. Awareness (Frio)</h3>
+                  <p className="mt-2 text-4xl font-black text-cyan-500">{intentData.funnelStages.awareness}</p>
+                  <p className="text-xs text-muted mt-1">Apenas navegando (Score &lt; 20)</p>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm border-t-4 border-t-amber-400">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted">2. Consideration (Morno)</h3>
+                  <p className="mt-2 text-4xl font-black text-amber-500">{intentData.funnelStages.consideration}</p>
+                  <p className="text-xs text-muted mt-1">Engajados (Score 20-50)</p>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm border-t-4 border-t-rose-500">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted">3. Decision (Quente)</h3>
+                  <p className="mt-2 text-4xl font-black text-rose-500">{intentData.funnelStages.decision}</p>
+                  <p className="text-xs text-muted mt-1">Alta intenção (Score &gt; 50)</p>
+                </div>
+              </div>
+
+              {/* CRM / Live Intent Feed */}
+              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
+                    🎯 Radar de Intenção (Top Leads)
+                  </h2>
+                  <span className="flex items-center gap-2 text-sm font-bold text-rose-500 bg-rose-500/10 px-3 py-1 rounded-full animate-pulse">
+                    <span className="h-2 w-2 rounded-full bg-rose-500"></span> Live
+                  </span>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-muted">
+                        <th className="pb-3 font-bold uppercase tracking-wider">Empresa (Mock)</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Cargo Estimado</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Estágio</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Intent Score</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider">Última Atividade</th>
+                        <th className="pb-3 font-bold uppercase tracking-wider text-right">Potencial (R$)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {intentData.topLeads.map((lead) => (
+                        <tr key={lead.id} className="transition hover:bg-surface-light">
+                          <td className="py-4 font-bold text-foreground">{lead.company}</td>
+                          <td className="py-4 text-muted">{lead.role}</td>
+                          <td className="py-4">
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                              lead.stage === 'Decision' ? 'bg-rose-100 text-rose-700' :
+                              lead.stage === 'Consideration' ? 'bg-amber-100 text-amber-700' :
+                              'bg-cyan-100 text-cyan-700'
+                            }`}>
+                              {lead.stage}
+                            </span>
+                          </td>
+                          <td className="py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-foreground">{lead.score}</span>
+                              <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-lighter">
+                                <div 
+                                  className={`h-full rounded-full ${lead.score > 50 ? 'bg-rose-500' : lead.score > 20 ? 'bg-amber-500' : 'bg-cyan-500'}`} 
+                                  style={{ width: `${Math.min(100, (lead.score / 100) * 100)}%` }} 
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 text-xs text-muted">{lead.lastActive}</td>
+                          <td className="py-4 text-right font-black text-magenta">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.fakeRev)}
+                          </td>
+                        </tr>
+                      ))}
+                      {intentData.topLeads.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-muted">Nenhum lead com intenção detectado ainda.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
