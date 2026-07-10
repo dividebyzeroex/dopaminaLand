@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useGame } from '@/contexts/GameContext';
 import { supabase } from '@/lib/supabase';
+import { trackEvent } from '@/lib/tracking';
 
 
 export default function Header() {
@@ -47,6 +48,9 @@ export default function Header() {
       if (!error && data) {
         setResults(data);
         setShowDropdown(true);
+        if (query.trim().length > 2) {
+          trackEvent('search', undefined, undefined, { query: query.trim() });
+        }
       }
       setIsSearching(false);
     }, 300);

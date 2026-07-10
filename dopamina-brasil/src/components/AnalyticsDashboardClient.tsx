@@ -68,6 +68,14 @@ export default function AnalyticsDashboardClient() {
     scrollDepthMap: [] as any[]
   });
 
+  // E-commerce Insights
+  const [ecommerceInsights, setEcommerceInsights] = useState({
+    searchTerms: [] as any[],
+    abandonedCarts: [] as any[],
+    boughtTogether: [] as any[],
+    topProducts: [] as any[]
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'dopamina') {
@@ -149,13 +157,20 @@ export default function AnalyticsDashboardClient() {
       const productInteractions: Record<string, { views: number, carts: number, rev: number }> = {};
       const sessionScores: Record<string, { score: number, events: number, fakeRev: number, lastActive: string }> = {};
 
+      const searchMap: Record<string, number> = {};
+      const abandonedList: any[] = [];
+      const pairMap: Record<string, number> = {};
+
       const SCORE_MAP = {
         'fake_checkout': 50,
         'share_product': 30,
         'add_to_cart': 20,
         'dwell_time_exceeded': 10,
         'view_item': 5,
-        'rage_click': 15
+        'rage_click': 15,
+        'search': 10,
+        'cart_abandoned': -5,
+        'checkout_basket': 0 // just for stats
       };
 
       events?.forEach((ev) => {
@@ -207,6 +222,44 @@ export default function AnalyticsDashboardClient() {
           }
           if (ev.event_type === 'fake_checkout') {
              sessionScores[sid].fakeRev += ev.price_displayed || 0;
+          }
+        }
+
+        // New Ecommerce Insights
+        if (ev.event_type === 'search' && ev.metadata?.query) {
+          const q = ev.metadata.query.toLowerCase().trim();
+          if (q.length > 2) searchMap[q] = (searchMap[q] || 0) + 1;
+        }
+
+        if (ev.event_type === 'cart_abandoned' && ev.metadata?.items) {
+          // Avoid duplicates per session (only keep the latest abandoned cart)
+          const existingIdx = abandonedList.findIndex(a => a.sid === sid);
+          const val = ev.price_displayed || 0;
+          const cartItem = {
+            id: ev.id,
+            sid: sid,
+            date: new Date(ev.created_at).toLocaleString('pt-BR'),
+            value: val,
+            items: ev.metadata.items
+          };
+          if (existingIdx >= 0) {
+            abandonedList[existingIdx] = cartItem;
+          } else {
+            abandonedList.push(cartItem);
+          }
+        }
+
+        if (ev.event_type === 'checkout_basket' && ev.metadata?.items) {
+          const items = ev.metadata.items as any[];
+          if (items.length > 1) {
+            for (let i = 0; i < items.length; i++) {
+              for (let j = i + 1; j < items.length; j++) {
+                const name1 = items[i].name || items[i].id;
+                const name2 = items[j].name || items[j].id;
+                const pair = [name1, name2].sort().join(' + ');
+                pairMap[pair] = (pairMap[pair] || 0) + 1;
+              }
+            }
           }
         }
       });
@@ -287,11 +340,24 @@ export default function AnalyticsDashboardClient() {
       }));
       setTimelineData(formattedTimeline);
 
-      // Format UX Metrics
+      // Calculate UX Metrics
       setUxMetrics({
-        avgDwellTime: dwellEvents > 0 ? Math.round(totalDwellTime / dwellEvents) : 0,
+        avgDwellTime: dwellEvents > 0 ? Math.floor(totalDwellTime / dwellEvents) : 0,
         rageClicksCount: rageClicks,
         scrollDepthMap: Object.keys(scrollMap).map(k => ({ name: k, value: scrollMap[k] }))
+      });
+
+      // Calculate Ecommerce Insights
+      setEcommerceInsights({
+        searchTerms: formatMap(searchMap).slice(0, 10),
+        abandonedCarts: abandonedList.sort((a, b) => b.value - a.value).slice(0, 10),
+        boughtTogether: formatMap(pairMap).slice(0, 10),
+        topProducts: Object.keys(productInteractions).map(id => ({
+          id,
+          views: productInteractions[id].views,
+          carts: productInteractions[id].carts,
+          rev: productInteractions[id].rev
+        })).sort((a, b) => b.rev - a.rev).slice(0, 10)
       });
 
       // Format Products
@@ -354,14 +420,16 @@ export default function AnalyticsDashboardClient() {
     );
   }
 
+  const TABS = [
+    { id: 'overview', label: 'Visão Geral', icon: '📊' },
+    { id: 'intent', label: 'Intent Data B2B 🔥', icon: '🎯' },
+    { id: 'ecommerce', label: 'Insights de E-commerce 🛒', icon: '🛍️' },
+    { id: 'ux', label: 'Telemetria UX', icon: '🖱️' },
+  ];
+
   const renderTabs = () => (
     <div className="mb-8 flex gap-2 border-b border-border pb-px overflow-x-auto no-scrollbar">
-      {[
-        { id: 'visao_geral', label: 'Visão Geral & Vendas' },
-        { id: 'ux', label: 'Comportamento (UX)' },
-        { id: 'marketing', label: 'Aquisição & Marketing' },
-        { id: 'intent_b2b', label: 'Intent Data B2B 🔥' }
-      ].map(tab => (
+      {TABS.map(tab => (
         <button
           key={tab.id}
           onClick={() => setActiveTab(tab.id as any)}
@@ -405,7 +473,7 @@ export default function AnalyticsDashboardClient() {
       ) : (
         <>
           {/* TAB: VISÃO GERAL */}
-          {activeTab === 'visao_geral' && (
+          {activeTab === 'overview' && (
             <div className="animate-fade-in">
               <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
@@ -526,66 +594,122 @@ export default function AnalyticsDashboardClient() {
             </div>
           )}
 
-          {/* TAB: MARKETING */}
-          {activeTab === 'marketing' && (
-            <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
-                <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
-                  Tráfego por Origem (Referrer)
-                </h2>
-                <div className="h-[200px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={marketing.referrer} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" stroke="none">
-                        {marketing.referrer.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+          {/* TAB: E-COMMERCE INSIGHTS */}
+          {activeTab === 'ecommerce' && (
+            <div className="animate-fade-in space-y-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Buscas Realizadas */}
+                <div className="rounded-2xl border border-border bg-surface-light p-6">
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
+                    <span>🔍</span> Termos Mais Buscados
+                  </h3>
+                  {ecommerceInsights.searchTerms.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {ecommerceInsights.searchTerms.map((term, i) => (
+                        <span key={i} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm">
+                          <span className="font-medium text-foreground">{term.name}</span>
+                          <span className="text-muted">{term.value}x</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted">Nenhuma busca registrada ainda.</p>
+                  )}
+                </div>
+
+                {/* Comprados Juntos */}
+                <div className="rounded-2xl border border-border bg-surface-light p-6">
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
+                    <span>🤝</span> Comprados Juntos (Cesta)
+                  </h3>
+                  {ecommerceInsights.boughtTogether.length > 0 ? (
+                    <div className="space-y-3">
+                      {ecommerceInsights.boughtTogether.map((pair, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-xl border border-border bg-surface p-3">
+                          <span className="text-sm font-medium text-foreground">{pair.name}</span>
+                          <span className="shrink-0 rounded-full bg-neon/10 px-2 py-1 text-xs font-bold text-neon">{pair.value} pedidos</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted">Nenhum padrão de cesta identificado.</p>
+                  )}
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
-                <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
-                  Campanhas (UTM Source)
-                </h2>
-                <div className="h-[200px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={marketing.utmSource} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} />
-                      <Tooltip cursor={{ fill: 'rgba(255, 0, 255, 0.05)' }} contentStyle={{ borderRadius: '16px', border: 'none' }} />
-                      <Bar dataKey="value" fill="#ec4899" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+              {/* Carrinhos Abandonados */}
+              <div className="rounded-2xl border border-border bg-surface-light p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
+                  <span>🛒</span> Carrinhos Abandonados (Lost Revenue)
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-muted">
+                        <th className="pb-3 font-medium">Data</th>
+                        <th className="pb-3 font-medium">Sessão ID</th>
+                        <th className="pb-3 font-medium">Valor Perdido</th>
+                        <th className="pb-3 font-medium">Itens no Carrinho</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {ecommerceInsights.abandonedCarts.map((cart, i) => (
+                        <tr key={i} className="transition hover:bg-surface">
+                          <td className="py-4 text-foreground">{cart.date}</td>
+                          <td className="py-4 text-muted"><code className="rounded bg-surface px-1">{cart.sid.split('-')[0]}</code></td>
+                          <td className="py-4 font-bold text-pop">R$ {cart.value.toFixed(2)}</td>
+                          <td className="py-4">
+                            <div className="flex flex-col gap-1">
+                              {cart.items.map((item: any, j: number) => (
+                                <span key={j} className="text-xs text-muted">• {item.qty}x {item.name}</span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {ecommerceInsights.abandonedCarts.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-muted">Nenhum carrinho abandonado. A conversão está voando!</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
-                <h2 className="mb-4 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
-                  Gênero Profiling (Mock)
-                </h2>
-                <div className="h-[200px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={demographics.gender} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value" stroke="none">
-                        {demographics.gender.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={['#f59e0b', '#10b981'][index % 2]} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ borderRadius: '16px', border: 'none' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+              {/* Produtos Mais Clicados vs Comprados */}
+              <div className="rounded-2xl border border-border bg-surface-light p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
+                  <span>📦</span> Funil de Produtos
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-muted">
+                        <th className="pb-3 font-medium">Produto ID</th>
+                        <th className="pb-3 font-medium text-center">Visualizações</th>
+                        <th className="pb-3 font-medium text-center">Adições ao Carrinho</th>
+                        <th className="pb-3 font-medium text-right">Faturamento (Fake)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {ecommerceInsights.topProducts.map((p, i) => (
+                        <tr key={i} className="transition hover:bg-surface">
+                          <td className="py-4 text-foreground"><code className="rounded bg-surface px-1">{p.id.split('-')[0]}...</code></td>
+                          <td className="py-4 text-center text-muted">{p.views}</td>
+                          <td className="py-4 text-center text-muted">{p.carts}</td>
+                          <td className="py-4 text-right font-bold text-neon">R$ {p.rev.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           )}
 
           {/* TAB: INTENT DATA B2B */}
-          {activeTab === 'intent_b2b' && (
+          {activeTab === 'intent' && (
             <div className="animate-fade-in space-y-8">
               {/* Funnel */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

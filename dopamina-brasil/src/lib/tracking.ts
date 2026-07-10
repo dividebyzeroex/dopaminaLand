@@ -59,7 +59,8 @@ export async function initSession() {
         session_id: sessionId, 
         device_info: deviceInfo,
         mock_gender: mockGender 
-      })
+      }),
+      keepalive: true
     });
     sessionStorage.setItem('dopamina_session_initialized', 'true');
   } catch (error) {
@@ -68,7 +69,7 @@ export async function initSession() {
 }
 
 export async function trackEvent(
-  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product',
+  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket',
   productId?: string,
   priceDisplayed?: number,
   metadata?: any
@@ -87,7 +88,8 @@ export async function trackEvent(
         product_id: productId,
         price_displayed: priceDisplayed,
         metadata: metadata
-      })
+      }),
+      keepalive: true
     });
   } catch (error) {
     console.error(`Failed to track event ${eventType}`, error);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useGame } from '@/contexts/GameContext';
+import { trackEvent } from '@/lib/tracking';
 
 const paymentMethods = [
   { id: 'cartao', label: '💳 Cartão de Crédito Imaginário', desc: 'Limite infinito, fatura inexistente' },
@@ -40,6 +41,13 @@ export default function CheckoutPage() {
         items.map(item => ({ name: item.shortName, price: item.salePrice, quantity: item.quantity })),
         totalFakePrice
       );
+      
+      trackEvent('checkout_basket', undefined, totalFakePrice, {
+        items: items.map(item => ({ id: item.id, qty: item.quantity, name: item.shortName })),
+        payment_method: paymentMethod,
+        coupon_applied: couponApplied ? coupon : null
+      });
+
       setOrderId(id);
       clearCart();
       setIsProcessing(false);

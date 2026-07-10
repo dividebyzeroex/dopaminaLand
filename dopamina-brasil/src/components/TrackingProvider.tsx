@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { initSession, trackEvent } from '@/lib/tracking';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { useCart } from '@/contexts/CartContext';
 
 function TrackingLogic() {
   const pathname = usePathname();
@@ -12,6 +13,12 @@ function TrackingLogic() {
   const entryTimeRef = useRef<number>(Date.now());
   const maxScrollRef = useRef<number>(0);
   const clickHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);
+  
+  const { items, totalValue } = useCart();
+  const cartRef = useRef({ items, totalValue });
+  useEffect(() => {
+    cartRef.current = { items, totalValue };
+  }, [items, totalValue]);
 
   useEffect(() => {
     // UTMs and Referrer tracking handled in initSession
@@ -83,13 +90,25 @@ function TrackingLogic() {
     };
     
     // beforeunload catches closing tabs or navigating away externally
+    const handleAbandon = () => {
+      const { items, totalValue } = cartRef.current;
+      if (items.length > 0 && !pathname.includes('sucesso') && !pathname.includes('checkout')) {
+        trackEvent('cart_abandoned', undefined, totalValue, {
+          path: pathname,
+          items: items.map(i => ({ id: i.id, name: i.short_name, qty: i.quantity, price: i.salePrice }))
+        });
+      }
+    };
+
     window.addEventListener('beforeunload', handleLeave);
+    window.addEventListener('beforeunload', handleAbandon);
 
     return () => {
       handleLeave(); // Log when component unmounts (route change)
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('click', handleClick);
       window.removeEventListener('beforeunload', handleLeave);
+      window.removeEventListener('beforeunload', handleAbandon);
     };
   }, [pathname, searchParams]);
 
