@@ -28,39 +28,63 @@ function getRandomEvents() {
 export default function TrackingPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = use(params);
   const [events, setEvents] = useState<typeof trackingEventsData>([]);
-  const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [mapPosition, setMapPosition] = useState({ lat: -23.5505, lng: -46.6333 }); // São Paulo
+  const [progress, setProgress] = useState(0); // 0 to 1
+  const [timeLeft, setTimeLeft] = useState(48 * 60 * 60 * 1000); // 48h in ms
+  const [mapPosition, setMapPosition] = useState({ lat: -3.1190, lng: -60.0217 }); // Origin: Manaus
+  const destination = { lat: -23.5505, lng: -46.6333 }; // Dest: SP
 
-  // Generate events on mount
+  const TOTAL_DURATION = 48 * 60 * 60 * 1000;
+
+  // Init state
   useEffect(() => {
     setEvents(getRandomEvents());
-  }, []);
+    
+    // Setup start time in localStorage
+    const storageKey = `dopamina_order_time_${orderId}`;
+    let startTime = parseInt(localStorage.getItem(storageKey) || '0', 10);
+    
+    if (!startTime) {
+      startTime = Date.now();
+      localStorage.setItem(storageKey, startTime.toString());
+    }
 
-  // Auto-advance tracking events
-  useEffect(() => {
-    if (events.length === 0) return;
-    if (currentEventIndex >= events.length - 1) return;
-
+    // Tick every second
     const timer = setInterval(() => {
-      setCurrentEventIndex(prev => {
-        if (prev < events.length - 1) {
-          // Move map position randomly around Brazil
-          setMapPosition({
-            lat: -23.5 + (Math.random() - 0.5) * 20,
-            lng: -46.6 + (Math.random() - 0.5) * 20,
-          });
-          return prev + 1;
-        }
-        return prev;
+      const now = Date.now();
+      const elapsed = now - startTime;
+      let currentProgress = elapsed / TOTAL_DURATION;
+      
+      if (currentProgress > 1) currentProgress = 1;
+
+      setProgress(currentProgress);
+      setTimeLeft(Math.max(0, TOTAL_DURATION - elapsed));
+
+      // Interpolate Map Position (Manaus -> SP)
+      setMapPosition({
+        lat: -3.1190 + (destination.lat - (-3.1190)) * currentProgress,
+        lng: -60.0217 + (destination.lng - (-60.0217)) * currentProgress,
       });
-    }, 5000); // New event every 5 seconds
+
+    }, 1000);
 
     return () => clearInterval(timer);
-  }, [events, currentEventIndex]);
+  }, [orderId]);
+
+  // Determine current event based on progress
+  const currentEventIndex = Math.min(
+    Math.floor(progress * events.length),
+    events.length - 1
+  );
 
   const visibleEvents = events.slice(0, currentEventIndex + 1);
   const currentEvent = events[currentEventIndex];
-  const progress = events.length > 0 ? ((currentEventIndex + 1) / events.length) * 100 : 0;
+
+  // Format Time Left
+  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -82,14 +106,50 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
         </Link>
       </div>
 
+      {/* Countdown Timer */}
+      <div className="mt-8 flex flex-col items-center rounded-3xl border border-neon/30 bg-neon/5 p-6 neon-border">
+        <p className="text-sm font-bold uppercase tracking-widest text-neon">
+          {progress >= 1 ? '🎉 ENCOMENDA ENTREGUE!' : 'CLEITON CHEGA EM:'}
+        </p>
+        <div className="mt-4 flex items-center justify-center gap-2 sm:gap-4">
+          <div className="flex flex-col items-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-card border border-border shadow-inner sm:h-20 sm:w-20">
+              <span className="font-[var(--font-display)] text-3xl font-black text-foreground sm:text-4xl">{String(days).padStart(2, '0')}</span>
+            </div>
+            <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-muted">Dias</span>
+          </div>
+          <span className="text-2xl font-bold text-muted pb-6">:</span>
+          <div className="flex flex-col items-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-card border border-border shadow-inner sm:h-20 sm:w-20">
+              <span className="font-[var(--font-display)] text-3xl font-black text-foreground sm:text-4xl">{String(hours).padStart(2, '0')}</span>
+            </div>
+            <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-muted">Horas</span>
+          </div>
+          <span className="text-2xl font-bold text-muted pb-6">:</span>
+          <div className="flex flex-col items-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-card border border-border shadow-inner sm:h-20 sm:w-20">
+              <span className="font-[var(--font-display)] text-3xl font-black text-foreground sm:text-4xl">{String(minutes).padStart(2, '0')}</span>
+            </div>
+            <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-muted">Min</span>
+          </div>
+          <span className="text-2xl font-bold text-muted pb-6">:</span>
+          <div className="flex flex-col items-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-card border border-border shadow-inner sm:h-20 sm:w-20">
+              <span className="font-[var(--font-display)] text-3xl font-black text-neon sm:text-4xl">{String(seconds).padStart(2, '0')}</span>
+            </div>
+            <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-neon">Seg</span>
+          </div>
+        </div>
+      </div>
+
       {/* Progress Bar */}
-      <div className="mt-6 rounded-full bg-surface-light h-3 overflow-hidden">
+      <div className="mt-8 rounded-full bg-surface-light h-3 overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-neon to-purple rounded-full transition-all duration-1000 ease-out"
-          style={{ width: `${progress}%` }}
+          style={{ width: `${progress * 100}%` }}
         />
       </div>
-      <p className="mt-2 text-xs text-muted text-right">{Math.round(progress)}% concluído</p>
+      <p className="mt-2 text-xs font-bold text-muted text-right">{Math.round(progress * 100)}% concluído</p>
 
       {/* Current Status */}
       {currentEvent && (
@@ -105,45 +165,29 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
         </div>
       )}
 
-      {/* Map Placeholder */}
-      <div className="mt-8 rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="relative h-64 sm:h-80 bg-gradient-to-br from-surface via-surface-light to-[#0a1628]">
-          {/* Fake map grid */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="h-full w-full" style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '40px 40px',
-            }} />
-          </div>
+      {/* Real Map (OpenStreetMap iframe) */}
+      <div className="mt-8 rounded-2xl border border-border bg-card overflow-hidden shadow-lg">
+        <div className="relative h-72 sm:h-96 w-full pointer-events-none">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            frameBorder="0" 
+            scrolling="no" 
+            marginHeight={0} 
+            marginWidth={0} 
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapPosition.lng - 0.2}%2C${mapPosition.lat - 0.2}%2C${mapPosition.lng + 0.2}%2C${mapPosition.lat + 0.2}&layer=mapnik&marker=${mapPosition.lat}%2C${mapPosition.lng}`}
+            className="filter grayscale-[50%] invert-[90%] hue-rotate-[200deg]" // Dark mode futuristic map look
+          ></iframe>
 
-          {/* Animated marker */}
-          <div
-            className="absolute transition-all duration-1000 ease-in-out"
-            style={{
-              left: `${30 + (mapPosition.lng + 60) * 0.5}%`,
-              top: `${20 + (mapPosition.lat + 30) * 0.8}%`,
-            }}
-          >
-            <div className="relative">
-              <div className="absolute -inset-4 animate-ping rounded-full bg-neon/30" />
-              <div className="relative h-6 w-6 rounded-full bg-neon border-2 border-white shadow-lg flex items-center justify-center text-[10px]">
-                📦
-              </div>
-            </div>
-          </div>
-
-          {/* Map labels */}
-          <div className="absolute bottom-4 left-4 rounded-lg bg-surface/80 backdrop-blur px-3 py-2">
-            <p className="text-[10px] font-bold text-muted">LIVE TRACKING</p>
+          {/* Map labels overlay */}
+          <div className="absolute bottom-4 left-4 rounded-lg bg-surface/90 border border-border backdrop-blur px-3 py-2 pointer-events-auto">
+            <p className="text-[10px] font-bold text-neon uppercase">Sinal GPS do Cleiton</p>
             <p className="text-xs font-bold text-foreground">
-              {mapPosition.lat.toFixed(4)}°S, {mapPosition.lng.toFixed(4)}°W
+              {mapPosition.lat.toFixed(4)}°, {mapPosition.lng.toFixed(4)}°
             </p>
           </div>
 
-          <div className="absolute top-4 right-4 rounded-lg bg-neon/90 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider animate-pulse">
+          <div className="absolute top-4 right-4 rounded-lg bg-red-600/90 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider animate-pulse pointer-events-auto">
             🔴 Ao Vivo
           </div>
 
