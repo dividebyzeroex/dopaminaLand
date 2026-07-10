@@ -21,6 +21,10 @@ const outfit = Outfit({
   display: "swap",
 });
 
+export const viewport = {
+  themeColor: "#ff6b00",
+};
+
 export const metadata: Metadata = {
   title: "dopamina 💊 — a loja onde você compra sem gastar",
   description:
