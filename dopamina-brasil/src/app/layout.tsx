@@ -64,7 +64,7 @@ export default function RootLayout({
           <CartProvider>
             <TrackingProvider>
               <Header />
-              <main className="flex-1 overflow-x-clip">{children}</main>
+              <main className="flex-1 overflow-x-clip pt-28 pb-8">{children}</main>
               <Footer />
               <CartDrawer />
               <AchievementToast />

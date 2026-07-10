@@ -90,7 +90,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
   return (
     <div>
       {/* ============ HERO BANNER BENTO GRID ============ */}
-      <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-6">
+      <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4">
           
           {/* Main Hero Block */}
