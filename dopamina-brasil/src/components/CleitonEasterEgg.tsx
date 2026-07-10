@@ -25,7 +25,7 @@ export default function CleitonEasterEgg() {
         title="Onde está o Cleiton?"
       >
         <Image 
-          src="/cleiton.png" 
+          src="/cleiton2.png" 
           alt="Cleiton Mascot" 
           fill
           className="object-cover"

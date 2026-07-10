@@ -38,7 +38,7 @@ export default function CartDrawer() {
                 <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
                   <div className="relative mb-6 h-40 w-40 overflow-hidden rounded-full border-4 border-dashed border-border opacity-80">
                     <img 
-                      src="/cleiton.png" 
+                      src="/cleiton2.png" 
                       alt="Cleiton Mascot" 
                       className="h-full w-full object-cover opacity-50 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100"
                     />
