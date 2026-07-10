@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #ffffff;
-  --color-foreground: #09090b;
-  --color-magenta: #ff6b00;
-  --color-magenta-light: #ff8533;
-  --color-violet: #8b5cf6;
-  --color-violet-light: #a78bfa;
+  --color-background: #09090b;
+  --color-foreground: #f4f4f5;
+  --color-neon: #ccff00;
+  --color-neon-light: #d9ff33;
+  --color-purple: #7c3aed;
+  --color-purple-light: #8b5cf6;
   --color-cyan: #06b6d4;
   --color-neon-green: #10b981;
   --color-pop: #f59e0b;
-  --color-surface: #f4f4f5;
-  --color-surface-light: #e4e4e7;
-  --color-surface-lighter: #d4d4d8;
-  --color-card: #ffffff;
-  --color-card-hover: #fafafa;
-  --color-border: rgba(0, 0, 0, 0.1);
-  --color-muted: rgba(0, 0, 0, 0.5);
+  --color-surface: #18181b;
+  --color-surface-light: #27272a;
+  --color-surface-lighter: #3f3f46;
+  --color-card: #18181b;
+  --color-card-hover: #27272a;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-muted: rgba(255, 255, 255, 0.5);
   --font-sans: var(--font-inter);
   --font-display: var(--font-outfit);
 }
@@ -30,7 +30,7 @@ body {
 
 /* ---- Gradient Text ---- */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-magenta), var(--color-violet), var(--color-cyan));
+  background: linear-gradient(135deg, var(--color-neon), var(--color-purple), var(--color-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -76,10 +76,10 @@ body {
 /* ---- Pulse Glow ---- */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 107, 0, 0.3), 0 0 60px rgba(255, 107, 0, 0.1);
+    box-shadow: 0 0 20px rgba(204, 255, 0, 0.3), 0 0 60px rgba(204, 255, 0, 0.1);
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 107, 0, 0.5), 0 0 80px rgba(255, 107, 0, 0.2);
+    box-shadow: 0 0 30px rgba(204, 255, 0, 0.5), 0 0 80px rgba(204, 255, 0, 0.2);
   }
 }
 
@@ -140,8 +140,8 @@ body {
 
 /* ---- Neon Glow Border ---- */
 .neon-border {
-  border: 1px solid rgba(255, 107, 0, 0.3);
-  box-shadow: 0 0 15px rgba(255, 107, 0, 0.05), inset 0 0 15px rgba(255, 107, 0, 0.02);
+  border: 1px solid rgba(204, 255, 0, 0.3);
+  box-shadow: 0 0 15px rgba(204, 255, 0, 0.05), inset 0 0 15px rgba(204, 255, 0, 0.02);
 }
 
 /* ---- Scrollbar ---- */
@@ -165,7 +165,7 @@ body {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-magenta);
+  background: var(--color-neon);
 }
 
 /* ---- Toast Animation ---- */

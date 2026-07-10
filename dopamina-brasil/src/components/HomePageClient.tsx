@@ -7,7 +7,7 @@ import { trackEvent } from '@/lib/tracking';
 import { supabase } from '@/lib/supabase';
 
 const trustBadges = [
-  { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
+  { emoji: '🧾', title: '100% dopaminando real', desc: 'a fatura nunca chega' },
   { emoji: '🛵', title: 'motoboys (quase) reais', desc: 'saem de casa pra entregar pra você' },
   { emoji: '⚡', title: 'checkout 1-clique autopago', desc: 'em 15 segundos' },
   { emoji: '📍', title: 'rastreamento ao vivo', desc: 'a viagem real até sua porta' },
@@ -100,12 +100,12 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             {/* Slide 1 — Main Hero */}
             <div className="w-full shrink-0">
               <div className="grain relative flex min-h-[460px] items-center overflow-hidden bg-gradient-to-br from-surface via-surface-light to-[#ffedd5] px-6 py-10 sm:px-12">
-                <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-magenta/30 blur-3xl" />
-                <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-violet/20 blur-3xl" />
+                <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-neon/30 blur-3xl" />
+                <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-purple/20 blur-3xl" />
 
                 <div className="relative grid w-full items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
                   <div>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-magenta/30 bg-magenta/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-magenta">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-neon">
                       ✦ a única loja honesta da internet
                     </span>
                     <h1 className="mt-5 font-[var(--font-display)] text-5xl font-black leading-[0.95] tracking-tight text-foreground sm:text-7xl">
@@ -116,18 +116,18 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       <span className="gradient-text">nada</span>.
                     </h1>
                     <p className="mt-5 max-w-md text-base font-medium text-muted sm:text-lg">
-                      A loja que vende a dopamina de comprar. A fatura nunca chega. 🧠
+                      A loja que vende a dopaminando de comprar. A fatura nunca chega. 🧠
                     </p>
                     <div className="mt-7 flex flex-wrap items-center gap-3">
                       <a
                         href="#catalogo"
-                        className="rounded-full bg-magenta px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-magenta-light active:scale-95 whitespace-nowrap"
+                        className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap"
                       >
-                        quero minha dopamina 🚀
+                        quero minha dopaminando 🚀
                       </a>
                       <a
                         href="/ofertas"
-                        className="rounded-full border-2 border-border px-7 py-3 text-base font-bold text-foreground transition hover:border-magenta hover:text-magenta whitespace-nowrap"
+                        className="rounded-full border-2 border-border px-7 py-3 text-base font-bold text-foreground transition hover:border-neon hover:text-neon whitespace-nowrap"
                       >
                         ver ofertas 🔥
                       </a>
@@ -136,8 +136,8 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
                   {/* Hero Product */}
                   <div className="relative mx-auto flex aspect-square w-full max-w-sm items-center justify-center">
-                    <div className="absolute inset-6 rounded-full bg-gradient-to-br from-magenta to-violet opacity-90 blur-[2px]" />
-                    <div className="absolute inset-10 rounded-full bg-gradient-to-br from-magenta/80 to-violet/80" />
+                    <div className="absolute inset-6 rounded-full bg-gradient-to-br from-neon to-purple opacity-90 blur-[2px]" />
+                    <div className="absolute inset-10 rounded-full bg-gradient-to-br from-neon/80 to-purple/80" />
                     <span className="relative z-10 text-[120px] animate-float drop-shadow-[0_22px_40px_rgba(27,16,32,0.45)]">
                       🎮
                     </span>
@@ -153,14 +153,14 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                           DOPAMINA GRÁTIS ✦ VEM PEGAR A SUA ✦
                         </textPath>
                       </text>
-                      <text x="50" y="58" textAnchor="middle" fontSize="26">💊</text>
+                      <text x="50" y="58" textAnchor="middle" fontSize="26">⚡</text>
                     </svg>
 
                     {/* Product info card */}
                     <div className="absolute -bottom-3 left-0 z-20 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-xl">
                       <p className="text-[10px] font-bold uppercase tracking-wide text-muted">destaque</p>
                       <p className="max-w-[10rem] truncate text-xs font-bold text-foreground">{heroProduct.shortName}</p>
-                      <p className="font-[var(--font-display)] text-lg font-extrabold text-magenta">
+                      <p className="font-[var(--font-display)] text-lg font-extrabold text-neon">
                         R$ {heroProduct.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -173,7 +173,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             <div className="w-full shrink-0">
               <div className="relative flex min-h-[460px] items-center overflow-hidden bg-[#160c20] px-6 py-10 text-foreground sm:px-12">
                 <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-pop/20 blur-3xl" />
-                <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-magenta/20 blur-3xl" />
+                <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-neon/20 blur-3xl" />
 
                 <div className="relative grid w-full items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
                   <div>
@@ -227,7 +227,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
             {/* Slide 3 — Flash Deals */}
             <div className="w-full shrink-0">
-              <div className="relative flex min-h-[460px] items-center overflow-hidden bg-gradient-to-br from-magenta via-[#d61f8c] to-violet px-6 py-10 text-white sm:px-12">
+              <div className="relative flex min-h-[460px] items-center overflow-hidden bg-gradient-to-br from-neon via-[#d61f8c] to-purple px-6 py-10 text-white sm:px-12">
                 <div className="pointer-events-none absolute -left-10 bottom-0 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
 
                 <div className="relative grid w-full items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -242,11 +242,11 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       no que não existe
                     </h2>
                     <p className="mt-4 max-w-md text-base font-medium text-white/75">
-                      Descontos absurdos em produtos que você nunca vai receber. Pegue enquanto a dopamina tá em promoção. 🐋
+                      Descontos absurdos em produtos que você nunca vai receber. Pegue enquanto a dopaminando tá em promoção. 🐋
                     </p>
                     <a
                       href="/ofertas"
-                      className="mt-6 inline-block rounded-full bg-white px-8 py-3.5 text-base font-extrabold text-magenta shadow-lg transition hover:scale-105 active:scale-95 whitespace-nowrap"
+                      className="mt-6 inline-block rounded-full bg-white px-8 py-3.5 text-base font-extrabold text-neon shadow-lg transition hover:scale-105 active:scale-95 whitespace-nowrap"
                     >
                       ver ofertas →
                     </a>
@@ -259,7 +259,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                     <div className="absolute right-2 top-6 rotate-12 rounded-2xl bg-pop px-4 py-2 font-[var(--font-display)] text-2xl font-black text-background shadow-xl">
                       -38%
                     </div>
-                    <div className="absolute bottom-8 left-2 -rotate-6 rounded-2xl bg-white px-4 py-2 font-[var(--font-display)] text-xl font-black text-magenta shadow-xl">
+                    <div className="absolute bottom-8 left-2 -rotate-6 rounded-2xl bg-white px-4 py-2 font-[var(--font-display)] text-xl font-black text-neon shadow-xl">
                       -25%
                     </div>
                   </div>
@@ -292,7 +292,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                 aria-label={`slide ${i + 1}`}
                 onClick={() => setHeroSlide(i)}
                 className={`h-2 rounded-full transition-all ${
-                  heroSlide === i ? 'w-6 bg-magenta' : 'w-2 bg-muted hover:bg-foreground/40'
+                  heroSlide === i ? 'w-6 bg-neon' : 'w-2 bg-muted hover:bg-foreground/40'
                 }`}
               />
             ))}
@@ -330,8 +330,8 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               onClick={() => handleCategoryChange(cat.id)}
               className={`group flex items-center gap-3 rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${
                 activeCategory === cat.id
-                  ? 'border-magenta/50 bg-magenta/10'
-                  : 'border-border bg-card hover:border-magenta/30'
+                  ? 'border-neon/50 bg-neon/10'
+                  : 'border-border bg-card hover:border-neon/30'
               }`}
             >
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-surface-light to-surface-lighter text-2xl leading-none transition group-hover:scale-110">
@@ -353,7 +353,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
           </h2>
           <a
             href="/ofertas"
-            className="text-sm font-bold text-magenta hover:underline"
+            className="text-sm font-bold text-neon hover:underline"
           >
             ver todas as ofertas →
           </a>
@@ -372,7 +372,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="font-[var(--font-display)] text-2xl font-extrabold text-foreground">
-              catálogo completo 💊
+              catálogo completo ⚡
             </h2>
             <p className="mt-1 text-sm text-muted">
               muitos produtos fictícios esperando por você
@@ -387,7 +387,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                 onClick={() => handleCategoryChange(cat.id)}
                 className={`rounded-full px-4 py-2 text-xs font-bold transition ${
                   activeCategory === cat.id
-                    ? 'bg-magenta text-white'
+                    ? 'bg-neon text-white'
                     : 'bg-surface-light text-muted hover:bg-surface-lighter hover:text-foreground'
                 }`}
               >
@@ -409,7 +409,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             <button
               onClick={handleLoadMore}
               disabled={isLoading}
-              className="rounded-full border-2 border-magenta px-8 py-3.5 text-base font-extrabold text-magenta transition hover:bg-magenta/10 active:scale-95 disabled:opacity-50"
+              className="rounded-full border-2 border-neon px-8 py-3.5 text-base font-extrabold text-neon transition hover:bg-neon/10 active:scale-95 disabled:opacity-50"
             >
               {isLoading ? 'carregando mais dopamina...' : 'carregar mais produtos ✨'}
             </button>
@@ -424,13 +424,13 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         </h2>
         <div className="mt-8 space-y-4">
           {[
-            { q: 'Dopamina é uma loja de verdade?', a: 'Não — é uma loja paródia. Os produtos, o pagamento e a entrega são 100% falsos. A única coisa real é a dopamina de comprar algo.' },
+            { q: 'Dopaminando é uma loja de verdade?', a: 'Não — é uma loja paródia. Os produtos, o pagamento e a entrega são 100% falsos. A única coisa real é a dopaminando de comprar algo.' },
             { q: 'Como funciona?', a: "Você 'compra' um produto, 'paga' com um cartão imaginário ou Pix fantasma, e rastreia uma entrega absurda viajando pelo Brasil em tempo real — às vezes engolida por uma capivara ou abduzida por um OVNI. Nenhum centavo sai da sua conta." },
             { q: 'É realmente de graça?', a: 'Sim. Nenhuma cobrança: nenhum pagamento é processado e nenhuma fatura chega. Custo zero, sempre.' },
             { q: 'É golpe? É seguro?', a: 'Não é golpe — é comédia. Como nada é cobrado e nenhum pagamento é real, não há nada para roubar. É 100% seguro justamente porque é 100% falso.' },
             { q: 'Vocês armazenam meu cartão ou dados pessoais?', a: 'Não. A tela de pagamento é só de enfeite: nada é processado, nada é cobrado, nenhum dado de cartão é salvo. Seu endereço é usado apenas para desenhar a jornada ridícula do seu pacote no mapa.' },
           ].map((faq, i) => (
-            <details key={i} className="group rounded-2xl border border-border bg-card p-4 transition-colors hover:border-magenta/30">
+            <details key={i} className="group rounded-2xl border border-border bg-card p-4 transition-colors hover:border-neon/30">
               <summary className="cursor-pointer text-sm font-bold text-foreground list-none flex items-center justify-between">
                 {faq.q}
                 <span className="text-muted transition-transform group-open:rotate-45">+</span>

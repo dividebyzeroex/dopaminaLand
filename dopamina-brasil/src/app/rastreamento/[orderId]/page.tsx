@@ -85,7 +85,7 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
       {/* Progress Bar */}
       <div className="mt-6 rounded-full bg-surface-light h-3 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-magenta to-violet rounded-full transition-all duration-1000 ease-out"
+          className="h-full bg-gradient-to-r from-neon to-purple rounded-full transition-all duration-1000 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -93,11 +93,11 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
 
       {/* Current Status */}
       {currentEvent && (
-        <div className="mt-6 rounded-2xl border border-magenta/30 bg-magenta/5 p-6 neon-border">
+        <div className="mt-6 rounded-2xl border border-neon/30 bg-neon/5 p-6 neon-border">
           <div className="flex items-center gap-3">
             <span className="text-4xl">{currentEvent.icon}</span>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-magenta">Status Atual</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-neon">Status Atual</p>
               <p className="text-lg font-extrabold text-foreground">{currentEvent.title}</p>
               <p className="mt-1 text-sm text-muted">{currentEvent.description}</p>
             </div>
@@ -128,8 +128,8 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
             }}
           >
             <div className="relative">
-              <div className="absolute -inset-4 animate-ping rounded-full bg-magenta/30" />
-              <div className="relative h-6 w-6 rounded-full bg-magenta border-2 border-white shadow-lg flex items-center justify-center text-[10px]">
+              <div className="absolute -inset-4 animate-ping rounded-full bg-neon/30" />
+              <div className="relative h-6 w-6 rounded-full bg-neon border-2 border-white shadow-lg flex items-center justify-center text-[10px]">
                 📦
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
             </p>
           </div>
 
-          <div className="absolute top-4 right-4 rounded-lg bg-magenta/90 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider animate-pulse">
+          <div className="absolute top-4 right-4 rounded-lg bg-neon/90 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider animate-pulse">
             🔴 Ao Vivo
           </div>
 
@@ -171,7 +171,7 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
                 <div className="flex flex-col items-center">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ${
                     isActive
-                      ? 'bg-magenta text-white shadow-lg shadow-magenta/30'
+                      ? 'bg-neon text-white shadow-lg shadow-magenta/30'
                       : isCompleted
                         ? 'bg-neon-green/20 text-neon-green'
                         : 'bg-surface-light text-muted'
@@ -203,7 +203,7 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
           {currentEventIndex < events.length - 1 && (
             <div className="flex items-center gap-4 text-muted">
               <div className="flex h-10 w-10 items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-magenta animate-pulse" />
+                <div className="h-2 w-2 rounded-full bg-neon animate-pulse" />
               </div>
               <p className="text-xs italic">Aguardando próxima atualização...</p>
             </div>
@@ -217,13 +217,13 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
           <span className="text-5xl block mb-3">🎉</span>
           <h2 className="text-xl font-extrabold text-neon-green">Pedido Entregue!</h2>
           <p className="mt-1 text-sm text-muted">
-            (Na sua imaginação, claro. Mas a dopamina foi real.)
+            (Na sua imaginação, claro. Mas a dopaminando foi real.)
           </p>
           <Link
             href="/"
-            className="mt-4 inline-block rounded-full bg-magenta px-8 py-3 text-sm font-bold text-white transition hover:bg-magenta-light"
+            className="mt-4 inline-block rounded-full bg-neon px-8 py-3 text-sm font-bold text-white transition hover:bg-neon-light"
           >
-            Comprar mais 💊
+            Comprar mais ⚡
           </Link>
         </div>
       )}

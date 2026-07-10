@@ -22,7 +22,7 @@ export default function AchievementToast() {
       {toasts.slice(0, 3).map((toast) => (
         <div
           key={toast.id}
-          className="animate-toast-in flex items-center gap-3 rounded-2xl border border-magenta/30 bg-surface-light/95 px-5 py-4 shadow-[0_20px_60px_-15px_rgba(255,30,122,0.3)] backdrop-blur-xl max-w-sm"
+          className="animate-toast-in flex items-center gap-3 rounded-2xl border border-neon/30 bg-surface-light/95 px-5 py-4 shadow-[0_20px_60px_-15px_rgba(255,30,122,0.3)] backdrop-blur-xl max-w-sm"
         >
           <span className="text-3xl">{toast.icon}</span>
           <div className="min-w-0 flex-1">

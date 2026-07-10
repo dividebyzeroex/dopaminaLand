@@ -39,13 +39,13 @@ export default function CartDrawer() {
               <span className="text-6xl mb-4">🛒</span>
               <p className="text-lg font-bold text-foreground">Carrinho vazio!</p>
               <p className="mt-1 text-sm text-muted">
-                Sua dose de dopamina tá esperando no catálogo.
+                Sua dose de dopaminando tá esperando no catálogo.
               </p>
               <button
                 onClick={closeCart}
-                className="mt-4 rounded-full bg-magenta px-6 py-2.5 text-sm font-bold text-white transition hover:bg-magenta-light"
+                className="mt-4 rounded-full bg-neon px-6 py-2.5 text-sm font-bold text-white transition hover:bg-neon-light"
               >
-                Ir às compras 💊
+                Ir às compras ⚡
               </button>
             </div>
           ) : (
@@ -72,7 +72,7 @@ export default function CartDrawer() {
                     <p className="text-xs text-muted line-through">
                       R$ {item.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-sm font-extrabold text-magenta">
+                    <p className="text-sm font-extrabold text-neon">
                       R$ {item.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
 
@@ -93,7 +93,7 @@ export default function CartDrawer() {
                       </button>
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="ml-auto text-xs text-muted hover:text-magenta transition"
+                        className="ml-auto text-xs text-muted hover:text-neon transition"
                       >
                         🗑️
                       </button>
@@ -123,7 +123,7 @@ export default function CartDrawer() {
             </div>
 
             <p className="text-[10px] text-center text-muted">
-              💊 Porque a dopamina é de graça (e seu dinheiro continua no bolso)
+              ⚡ Porque a dopaminando é de graça (e seu dinheiro continua no bolso)
             </p>
 
             <Link
@@ -134,7 +134,7 @@ export default function CartDrawer() {
                   trackEvent('fake_checkout', item.id, item.salePrice, { quantity: item.quantity, source: 'cart_drawer' });
                 });
               }}
-              className="block w-full rounded-xl bg-magenta py-3.5 text-center text-base font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-95 animate-pulse-glow"
+              className="block w-full rounded-xl bg-neon py-3.5 text-center text-base font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-95 animate-pulse-glow"
             >
               FINALIZAR COMPRA 🚀
             </Link>

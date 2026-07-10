@@ -83,7 +83,7 @@ export default function CheckoutPage() {
           <h1 className="font-[var(--font-display)] text-4xl font-extrabold text-foreground">
             COMPRA CONCLUÍDA!
           </h1>
-          <p className="mt-2 text-xl text-magenta font-bold">
+          <p className="mt-2 text-xl text-neon font-bold">
             (Parabéns, você não gastou nada!)
           </p>
 
@@ -98,27 +98,27 @@ export default function CheckoutPage() {
             </div>
             <div className="mt-3 flex items-center justify-between">
               <span className="text-sm text-muted">Status:</span>
-              <span className="text-sm font-bold text-pop">Processando a alegria 💊</span>
+              <span className="text-sm font-bold text-pop">Processando a alegria ⚡</span>
             </div>
           </div>
 
           <div className="mt-8 space-y-3">
             <Link
               href={`/rastreamento/${orderId}`}
-              className="block w-full rounded-2xl bg-magenta py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light whitespace-nowrap overflow-hidden text-ellipsis px-2"
+              className="block w-full rounded-2xl bg-neon py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-neon-light whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
               RASTREAR PEDIDO 📍
             </Link>
             <Link
               href="/"
-              className="block w-full rounded-2xl border-2 border-border py-4 text-lg font-extrabold text-foreground transition hover:border-magenta hover:text-magenta whitespace-nowrap overflow-hidden text-ellipsis px-2"
+              className="block w-full rounded-2xl border-2 border-border py-4 text-lg font-extrabold text-foreground transition hover:border-neon hover:text-neon whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
               COMPRAR MAIS 🛒
             </Link>
           </div>
 
           <p className="mt-6 text-xs text-muted">
-            💊 Lembre-se: nenhum dinheiro foi gasto, nenhum produto será entregue, e a capivara está salva.
+            ⚡ Lembre-se: nenhum dinheiro foi gasto, nenhum produto será entregue, e a capivara está salva.
           </p>
         </div>
       </div>
@@ -141,9 +141,9 @@ export default function CheckoutPage() {
           <p className="mt-1 text-sm text-muted">Volte ao catálogo e escolha seus produtos fictícios favoritos.</p>
           <Link
             href="/"
-            className="mt-4 inline-block rounded-full bg-magenta px-8 py-3 text-sm font-bold text-white transition hover:bg-magenta-light"
+            className="mt-4 inline-block rounded-full bg-neon px-8 py-3 text-sm font-bold text-white transition hover:bg-neon-light"
           >
-            Ir às compras 💊
+            Ir às compras ⚡
           </Link>
         </div>
       ) : (
@@ -161,7 +161,7 @@ export default function CheckoutPage() {
                       <p className="text-sm font-bold text-foreground truncate">{item.shortName}</p>
                       <p className="text-xs text-muted">Qtd: {item.quantity}</p>
                     </div>
-                    <p className="text-sm font-bold text-magenta">
+                    <p className="text-sm font-bold text-neon">
                       R$ {(item.salePrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                   </div>
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Rua da Capivara, 42 - São Paulo"
-                className="mt-4 w-full min-w-0 rounded-xl border border-border bg-surface-light px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta transition"
+                className="mt-4 w-full min-w-0 rounded-xl border border-border bg-surface-light px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none focus:border-neon transition"
               />
             </div>
 
@@ -193,12 +193,12 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod(method.id)}
                     className={`w-full flex items-center gap-4 rounded-xl border p-4 text-left transition ${
                       paymentMethod === method.id
-                        ? 'border-magenta bg-magenta/10'
-                        : 'border-border bg-surface-light hover:border-magenta/30'
+                        ? 'border-neon bg-neon/10'
+                        : 'border-border bg-surface-light hover:border-neon/30'
                     }`}
                   >
                     <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${
-                      paymentMethod === method.id ? 'border-magenta bg-magenta' : 'border-muted'
+                      paymentMethod === method.id ? 'border-neon bg-neon' : 'border-muted'
                     }`} />
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-foreground truncate">{method.label}</p>
@@ -215,7 +215,7 @@ export default function CheckoutPage() {
                     type="text"
                     placeholder="0000 0000 0000 0000"
                     defaultValue="4242 4242 4242 4242"
-                    className="w-full rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                    className="w-full rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-neon"
                     readOnly
                   />
                   <div className="flex gap-3">
@@ -223,19 +223,19 @@ export default function CheckoutPage() {
                       type="text"
                       placeholder="MM/AA"
                       defaultValue="12/99"
-                      className="flex-1 min-w-0 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                      className="flex-1 min-w-0 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-neon"
                       readOnly
                     />
                     <input
                       type="text"
                       placeholder="CVV"
                       defaultValue="420"
-                      className="w-20 shrink-0 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                      className="w-20 shrink-0 rounded-lg border border-border bg-surface-light px-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-neon"
                       readOnly
                     />
                   </div>
                   <p className="text-[10px] text-muted text-center">
-                    💊 Relaxa, esses dados são pré-preenchidos e fictícios. Nada é processado.
+                    ⚡ Relaxa, esses dados são pré-preenchidos e fictícios. Nada é processado.
                   </p>
                 </div>
               )}
@@ -289,8 +289,8 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-muted">Desconto Dopamina:</span>
-                  <span className="text-magenta font-bold">
+                  <span className="text-muted">Desconto Dopaminando:</span>
+                  <span className="text-neon font-bold">
                     -R$ {totalFakePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -310,11 +310,11 @@ export default function CheckoutPage() {
                   value={coupon}
                   onChange={(e) => setCoupon(e.target.value.toUpperCase())}
                   placeholder="Cupom de desconto"
-                  className="flex-1 min-w-0 rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-magenta"
+                  className="flex-1 min-w-0 rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground placeholder:text-muted outline-none focus:border-neon"
                 />
                 <button
                   onClick={applyCoupon}
-                  className="rounded-lg bg-surface-lighter px-4 py-2 text-sm font-bold text-foreground hover:bg-magenta hover:text-white transition whitespace-nowrap shrink-0"
+                  className="rounded-lg bg-surface-lighter px-4 py-2 text-sm font-bold text-foreground hover:bg-neon hover:text-white transition whitespace-nowrap shrink-0"
                 >
                   Aplicar
                 </button>
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
                 className={`w-full rounded-2xl py-4 text-lg font-extrabold text-white shadow-lg transition active:scale-[0.98] whitespace-nowrap overflow-hidden text-ellipsis px-2 ${
                   isProcessing
                     ? 'bg-surface-lighter cursor-wait'
-                    : 'bg-magenta hover:bg-magenta-light animate-pulse-glow'
+                    : 'bg-neon hover:bg-neon-light animate-pulse-glow'
                 }`}
               >
                 {isProcessing ? (
@@ -342,7 +342,7 @@ export default function CheckoutPage() {
               </button>
 
               <p className="text-[10px] text-center text-muted">
-                💊 Ao clicar, você não concorda com nada porque não existe nada para concordar. É tudo falso. Aproveite.
+                ⚡ Ao clicar, você não concorda com nada porque não existe nada para concordar. É tudo falso. Aproveite.
               </p>
             </div>
           </div>

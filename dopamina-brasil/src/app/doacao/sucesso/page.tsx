@@ -20,7 +20,7 @@ function SuccessContent() {
           Doação Confirmada!
         </h1>
         <p className="mt-2 text-muted">
-          Muito obrigado por patrocinar o Dopamina Brasil! O seu dinheiro (esse sim real) 
+          Muito obrigado por patrocinar o Dopaminando Brasil! O seu dinheiro (esse sim real) 
           ajuda a manter nossa capivara alimentada e os servidores rodando.
         </p>
 
@@ -35,18 +35,18 @@ function SuccessContent() {
             <form className="mt-6 space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Em breve!'); }}>
               <div>
                 <label className="block text-sm font-bold text-foreground">Nome do Produto</label>
-                <input type="text" className="mt-1 w-full rounded-lg bg-surface-light border border-border p-3 text-sm text-foreground focus:border-magenta outline-none" placeholder="Ex: RTX 9090 (Edição de Ouro)" required />
+                <input type="text" className="mt-1 w-full rounded-lg bg-surface-light border border-border p-3 text-sm text-foreground focus:border-neon outline-none" placeholder="Ex: RTX 9090 (Edição de Ouro)" required />
               </div>
               <div>
                 <label className="block text-sm font-bold text-foreground">Preço Falso (R$)</label>
-                <input type="number" className="mt-1 w-full rounded-lg bg-surface-light border border-border p-3 text-sm text-foreground focus:border-magenta outline-none" placeholder="99999.99" required />
+                <input type="number" className="mt-1 w-full rounded-lg bg-surface-light border border-border p-3 text-sm text-foreground focus:border-neon outline-none" placeholder="99999.99" required />
               </div>
               <div>
                 <label className="block text-sm font-bold text-foreground">Emoji / URL da Imagem</label>
-                <input type="text" className="mt-1 w-full rounded-lg bg-surface-light border border-border p-3 text-sm text-foreground focus:border-magenta outline-none" placeholder="🤖" required />
+                <input type="text" className="mt-1 w-full rounded-lg bg-surface-light border border-border p-3 text-sm text-foreground focus:border-neon outline-none" placeholder="🤖" required />
               </div>
               
-              <button className="w-full rounded-xl bg-magenta py-3 font-bold text-white transition hover:bg-magenta-light mt-4">
+              <button className="w-full rounded-xl bg-neon py-3 font-bold text-white transition hover:bg-neon-light mt-4">
                 Enviar Produto para Moderação
               </button>
             </form>
@@ -54,7 +54,7 @@ function SuccessContent() {
         )}
 
         <div className="mt-8">
-          <Link href="/" className="text-sm font-bold text-magenta hover:underline">
+          <Link href="/" className="text-sm font-bold text-neon hover:underline">
             ← Voltar para a loja falsa
           </Link>
         </div>

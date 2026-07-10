@@ -5,7 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder'
   apiVersion: '2026-06-24.dahlia',
 });
 
-// Price ID for "Patrocinador Dopamina 💊" (R$ 8,99)
+// Price ID for "Patrocinador Dopaminando ⚡" (R$ 8,99)
 const DONATION_PRICE_ID = process.env.STRIPE_DONATION_PRICE_ID || 'price_1TrLWkGuOimeX7c0gEe05SYl';
 
 export async function POST(req: NextRequest) {

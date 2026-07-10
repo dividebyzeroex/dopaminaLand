@@ -70,11 +70,11 @@ export default function AnalyticsDashboardClient() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'dopamina') {
+    if (password === 'dopaminando') {
       setIsAuthenticated(true);
       fetchDashboardData();
     } else {
-      setError('Senha incorreta. Dica: dopamina');
+      setError('Senha incorreta. Dica: dopaminando');
     }
   };
 
@@ -325,13 +325,13 @@ export default function AnalyticsDashboardClient() {
               placeholder="Senha de administrador"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-magenta"
+              className="rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
               autoFocus
             />
             {error && <p className="text-sm text-rose-500">{error}</p>}
             <button
               type="submit"
-              className="rounded-xl bg-magenta px-8 py-4 font-extrabold text-white transition hover:scale-105 active:scale-95"
+              className="rounded-xl bg-neon px-8 py-4 font-extrabold text-white transition hover:scale-105 active:scale-95"
             >
               Acessar Painel
             </button>
@@ -354,7 +354,7 @@ export default function AnalyticsDashboardClient() {
           onClick={() => setActiveTab(tab.id as any)}
           className={`px-6 py-3 font-bold whitespace-nowrap transition border-b-2 ${
             activeTab === tab.id 
-              ? 'border-magenta text-magenta' 
+              ? 'border-neon text-neon' 
               : 'border-transparent text-muted hover:text-foreground hover:border-border'
           }`}
         >
@@ -387,7 +387,7 @@ export default function AnalyticsDashboardClient() {
 
       {loading && timelineData.length === 0 ? (
         <div className="flex py-20 justify-center">
-          <span className="h-10 w-10 animate-spin rounded-full border-4 border-magenta border-t-transparent"></span>
+          <span className="h-10 w-10 animate-spin rounded-full border-4 border-neon border-t-transparent"></span>
         </div>
       ) : (
         <>
@@ -409,7 +409,7 @@ export default function AnalyticsDashboardClient() {
                 </div>
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                   <div className="text-2xl">🛍️</div>
-                  <div className="mt-2 text-4xl font-black text-magenta">
+                  <div className="mt-2 text-4xl font-black text-neon">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(kpis.aov)}
                   </div>
                   <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Ticket Médio (AOV)</div>
@@ -642,7 +642,7 @@ export default function AnalyticsDashboardClient() {
                             </div>
                           </td>
                           <td className="py-4 text-xs text-muted">{lead.lastActive}</td>
-                          <td className="py-4 text-right font-black text-magenta">
+                          <td className="py-4 text-right font-black text-neon">
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.fakeRev)}
                           </td>
                         </tr>

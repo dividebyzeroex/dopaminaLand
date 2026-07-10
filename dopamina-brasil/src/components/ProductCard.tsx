@@ -47,11 +47,11 @@ export default function ProductCard({
   return (
     <Link
       href={`/produto/${slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition duration-300 hover:-translate-y-1 hover:border-magenta/30 hover:shadow-[0_18px_40px_-12px_rgba(255,30,122,0.28)]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition duration-300 hover:-translate-y-1 hover:border-neon/30 hover:shadow-[0_18px_40px_-12px_rgba(255,30,122,0.28)]"
     >
       {/* Image Area */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-surface-light to-surface">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-3/5 w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-magenta/10 blur-2xl" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-3/5 w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon/10 blur-2xl" />
 
         {/* Discount Badge */}
         {discount > 0 && (
@@ -62,7 +62,7 @@ export default function ProductCard({
 
         {/* Custom Badge */}
         {badge && (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-magenta px-2.5 py-1 text-[10px] font-black text-white shadow">
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-neon px-2.5 py-1 text-[10px] font-black text-white shadow">
             {badge}
           </span>
         )}
@@ -101,7 +101,7 @@ export default function ProductCard({
           <p className="text-xs text-muted line-through">
             R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <p className="font-[var(--font-display)] text-lg font-extrabold leading-tight tracking-tight tabular-nums text-magenta sm:text-xl">
+          <p className="font-[var(--font-display)] text-lg font-extrabold leading-tight tracking-tight tabular-nums text-neon sm:text-xl">
             R$ {salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[11px] font-medium text-muted">
@@ -111,7 +111,7 @@ export default function ProductCard({
           {/* CTA */}
           <button
             onClick={handleAddToCart}
-            className="mt-3 w-full rounded-xl bg-magenta py-2.5 text-[11px] sm:text-xs lg:text-sm font-extrabold text-white transition hover:bg-magenta-light active:scale-95 whitespace-nowrap px-2"
+            className="mt-3 w-full rounded-xl bg-neon py-2.5 text-[11px] sm:text-xs lg:text-sm font-extrabold text-white transition hover:bg-neon-light active:scale-95 whitespace-nowrap px-2"
           >
             <span className="hidden lg:inline">adicionar ao carrinho</span>
             <span className="lg:hidden">adicionar 🛒</span>

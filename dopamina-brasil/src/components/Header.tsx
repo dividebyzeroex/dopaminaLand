@@ -11,7 +11,7 @@ const marqueeItems = [
   '🛵 ENTREGA POR MOTOBOYS (QUASE) REAIS',
   '📍 RASTREAMENTO AO VIVO PELO BRASIL',
   '💸 CHECKOUT 1-CLIQUE QUE SE PAGA SOZINHO',
-  '💊 100% FALSO, 200% DOPAMINA',
+  '⚡ 100% FALSO, 200% DOPAMINA',
   '🧾 A FATURA NUNCA CHEGA',
   '🛍️ PREÇO FINAL: SEMPRE R$ 0,00',
 ];
@@ -65,7 +65,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40">
       {/* Marquee Banner */}
-      <div className="overflow-hidden bg-magenta py-2 text-[11px] font-bold uppercase tracking-wider text-white">
+      <div className="overflow-hidden bg-neon py-2 text-[11px] font-bold uppercase tracking-wider text-white">
         <div className="flex w-max animate-marquee gap-10 whitespace-nowrap pr-10">
           {[...marqueeItems, ...marqueeItems].map((item, i) => (
             <span key={i} className="flex items-center gap-2">
@@ -80,15 +80,15 @@ export default function Header() {
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
           {/* Logo */}
           <Link href="/" className="group flex shrink-0 items-center gap-2">
-            <span className="text-3xl transition-transform group-hover:rotate-12 group-hover:scale-110">💊</span>
+            <span className="text-3xl transition-transform group-hover:rotate-12 group-hover:scale-110">⚡</span>
             <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground">
-              dopamina
+              dopaminando
             </span>
           </Link>
 
           {/* Search */}
           <div ref={searchRef} className="relative ml-2 hidden flex-1 md:block">
-            <div className="flex items-center gap-2 rounded-full border border-border bg-surface-light px-4 py-2.5 transition focus-within:border-magenta">
+            <div className="flex items-center gap-2 rounded-full border border-border bg-surface-light px-4 py-2.5 transition focus-within:border-neon">
               <span className="text-muted">🔍</span>
               <input
                 type="text"
@@ -100,10 +100,10 @@ export default function Header() {
                 onFocus={() => {
                   if (query.trim()) setShowDropdown(true);
                 }}
-                placeholder="buscar dopamina, PS5, skincare..."
+                placeholder="buscar dopaminando, PS5, skincare..."
                 className="w-full bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted"
               />
-              {isSearching && <span className="h-4 w-4 animate-spin rounded-full border-2 border-magenta border-t-transparent"></span>}
+              {isSearching && <span className="h-4 w-4 animate-spin rounded-full border-2 border-neon border-t-transparent"></span>}
             </div>
 
             {/* Dropdown Results */}
@@ -170,7 +170,7 @@ export default function Header() {
             {/* Cart */}
             <button
               onClick={toggleCart}
-              className="relative flex items-center gap-2 rounded-full bg-magenta px-4 py-2.5 text-sm font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-95"
+              className="relative flex items-center gap-2 rounded-full bg-neon px-4 py-2.5 text-sm font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-95"
             >
               🛒 <span className="hidden sm:inline">Carrinho</span>
               {totalItems > 0 && (

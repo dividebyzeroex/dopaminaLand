@@ -22,28 +22,28 @@ const outfit = Outfit({
 });
 
 export const viewport = {
-  themeColor: "#ff6b00",
+  themeColor: "#ccff00",
 };
 
 export const metadata: Metadata = {
-  title: "dopamina 💊 — a loja onde você compra sem gastar",
+  title: "dopaminando ⚡ — Compre o que quiser. Gaste zero.",
   description:
-    "O e-commerce que vende a dopamina de comprar. Checkout 1-clique que se paga sozinho, rastreamento ao vivo pelo Brasil e a fatura nunca chega. 100% produtos falsos, 100% dopamina real.",
+    "O e-commerce cyberpunk onde você compra a dopamina sem usar o limite. Checkout blindado, produtos ultra-desejáveis e fatura em R$ 0,00.",
   keywords: [
-    "loja falsa",
+    "loja cyberpunk",
     "e-commerce paródia",
     "dopamina de comprar",
     "comprar sem gastar",
     "checkout falso",
     "rastreamento falso",
     "simulador de compras",
-    "dopamina brasil",
+    "dopaminando",
   ],
   robots: "index, follow",
   openGraph: {
-    title: "dopamina 💊 — a loja onde você compra sem gastar",
+    title: "dopaminando ⚡ — Compre o que quiser. Gaste zero.",
     description:
-      "O e-commerce que vende a dopamina de comprar. 100% falso, 200% dopamina.",
+      "O e-commerce cyberpunk que vende a emoção de comprar sem o peso da fatura.",
     locale: "pt_BR",
     type: "website",
   },

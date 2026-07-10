@@ -38,7 +38,7 @@ export default function OfertasClient({ flashDeals, todayPicks }: { flashDeals: 
               🔥 Ofertas
             </h1>
             <p className="mt-1 text-sm text-foreground/55">
-              100% produtos falsos, 100% dopamina real — ofertas frescas todos os dias.
+              100% produtos falsos, 100% dopaminando real — ofertas frescas todos os dias.
             </p>
           </div>
           <span className="rounded-full bg-foreground/5 px-3 py-1 text-xs font-bold text-foreground/55">
@@ -49,7 +49,7 @@ export default function OfertasClient({ flashDeals, todayPicks }: { flashDeals: 
         {/* Flash Deals Section */}
         <section className="mt-6 rounded-3xl border border-pop/30 bg-gradient-to-br from-[#fff7fb] to-[#fff1e8] p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <h2 className="font-[var(--font-display)] text-xl font-extrabold text-magenta">
+            <h2 className="font-[var(--font-display)] text-xl font-extrabold text-neon">
               ⚡ Ofertas Relâmpago
             </h2>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-xs font-black tabular-nums text-[#faf6f2]">
@@ -84,13 +84,13 @@ export default function OfertasClient({ flashDeals, todayPicks }: { flashDeals: 
                     <p className="mt-1 text-xs text-foreground/35 line-through">
                       R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="font-[var(--font-display)] text-lg font-extrabold text-magenta">
+                    <p className="font-[var(--font-display)] text-lg font-extrabold text-neon">
                       R$ {item.sale_price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                     <div className="mt-auto pt-1">
                       <div className="h-1.5 overflow-hidden rounded-full bg-foreground/10">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-pop to-magenta"
+                          className="h-full rounded-full bg-gradient-to-r from-pop to-neon"
                           style={{ width: `${stockSold}%` }}
                         ></div>
                       </div>

@@ -37,13 +37,13 @@ export default function RankingPage() {
       </p>
 
       {/* Player Stats Card */}
-      <div className="mt-8 rounded-2xl border border-magenta/30 bg-gradient-to-r from-magenta/10 via-violet/10 to-cyan/10 p-6 neon-border">
+      <div className="mt-8 rounded-2xl border border-neon/30 bg-gradient-to-r from-neon/10 via-purple/10 to-cyan/10 p-6 neon-border">
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-magenta/20 text-4xl">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neon/20 text-4xl">
             {levelEmoji}
           </div>
           <div className="flex-1 text-center sm:text-left">
-            <p className="text-xs font-bold uppercase tracking-wider text-magenta">Seu Perfil</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-neon">Seu Perfil</p>
             <h2 className="text-xl font-extrabold text-foreground">{nickname}</h2>
             <p className="text-sm text-muted">
               {levelEmoji} Nível {level} — {levelTitle}
@@ -51,7 +51,7 @@ export default function RankingPage() {
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-extrabold text-magenta">{xp}</p>
+              <p className="text-2xl font-extrabold text-neon">{xp}</p>
               <p className="text-[10px] text-muted uppercase">XP Total</p>
             </div>
             <div>
@@ -76,7 +76,7 @@ export default function RankingPage() {
           </div>
           <div className="mt-1 h-2 rounded-full bg-surface-lighter overflow-hidden">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-magenta to-violet transition-all duration-1000"
+              className="h-full rounded-full bg-gradient-to-r from-neon to-purple transition-all duration-1000"
               style={{ width: `${Math.min(100, ((xp - (gameData.levels.find(l => l.level === level)?.xpRequired || 0)) / ((gameData.levels.find(l => l.level === level + 1)?.xpRequired || xp) - (gameData.levels.find(l => l.level === level)?.xpRequired || 0))) * 100)}%` }}
             />
           </div>
@@ -96,24 +96,24 @@ export default function RankingPage() {
               <div key={entry.rank}>
                 {/* Insert player row */}
                 {isBeforePlayer && totalSpent > 0 && (
-                  <div className="flex items-center gap-4 rounded-xl border border-magenta/50 bg-magenta/10 p-4 mb-2 neon-border">
-                    <span className="w-8 text-center text-lg font-extrabold text-magenta">
+                  <div className="flex items-center gap-4 rounded-xl border border-neon/50 bg-neon/10 p-4 mb-2 neon-border">
+                    <span className="w-8 text-center text-lg font-extrabold text-neon">
                       #{displayRank}
                     </span>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-magenta/20 text-lg">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neon/20 text-lg">
                       {levelEmoji}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-extrabold text-foreground truncate">{nickname} <span className="text-magenta">(VOCÊ!)</span></p>
+                      <p className="text-sm font-extrabold text-foreground truncate">{nickname} <span className="text-neon">(VOCÊ!)</span></p>
                       <p className="text-xs text-muted">Nível {level} • {purchaseCount} compras</p>
                     </div>
-                    <p className="text-sm font-extrabold text-magenta">
+                    <p className="text-sm font-extrabold text-neon">
                       R$ {totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                   </div>
                 )}
 
-                <div className={`flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:border-magenta/20 ${
+                <div className={`flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:border-neon/20 ${
                   i < 3 ? 'bg-gradient-to-r from-card to-surface-light' : ''
                 }`}>
                   <span className="w-8 text-center text-lg font-extrabold text-muted">
@@ -138,18 +138,18 @@ export default function RankingPage() {
           {displayRank > fakeLeaderboard.length && totalSpent > 0 && (
             <>
               <div className="text-center text-muted py-2">• • •</div>
-              <div className="flex items-center gap-4 rounded-xl border border-magenta/50 bg-magenta/10 p-4 neon-border">
-                <span className="w-8 text-center text-lg font-extrabold text-magenta">
+              <div className="flex items-center gap-4 rounded-xl border border-neon/50 bg-neon/10 p-4 neon-border">
+                <span className="w-8 text-center text-lg font-extrabold text-neon">
                   #{displayRank}
                 </span>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-magenta/20 text-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neon/20 text-lg">
                   {levelEmoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-extrabold text-foreground truncate">{nickname} <span className="text-magenta">(VOCÊ!)</span></p>
+                  <p className="text-sm font-extrabold text-foreground truncate">{nickname} <span className="text-neon">(VOCÊ!)</span></p>
                   <p className="text-xs text-muted">Nível {level} • {purchaseCount} compras</p>
                 </div>
-                <p className="text-sm font-extrabold text-magenta">
+                <p className="text-sm font-extrabold text-neon">
                   R$ {totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function RankingPage() {
               <Link
                 key={order.id}
                 href={`/rastreamento/${order.id}`}
-                className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition hover:border-magenta/30"
+                className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition hover:border-neon/30"
               >
                 <div>
                   <p className="text-sm font-bold text-foreground font-mono">{order.id}</p>
@@ -234,9 +234,9 @@ export default function RankingPage() {
         <p className="text-muted text-sm">Quer subir no ranking?</p>
         <Link
           href="/"
-          className="mt-3 inline-block rounded-full bg-magenta px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:bg-magenta-light hover:scale-105 active:scale-95"
+          className="mt-3 inline-block rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:bg-neon-light hover:scale-105 active:scale-95"
         >
-          Comprar mais (de mentira) 💊
+          Comprar mais (de mentira) ⚡
         </Link>
       </div>
     </div>

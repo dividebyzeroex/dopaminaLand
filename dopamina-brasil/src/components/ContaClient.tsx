@@ -64,7 +64,7 @@ export default function ContaClient() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <div className="mb-8">
         <h1 className="font-[var(--font-display)] text-5xl font-black text-foreground">
-          Minha conta 💊
+          Minha conta ⚡
         </h1>
         <p className="mt-2 text-lg font-medium text-muted">
           Seu histórico de pedidos puramente dopaminérgico
@@ -87,7 +87,7 @@ export default function ContaClient() {
             placeholder="seu nome"
             value={inputName}
             onChange={(e) => setInputName(e.target.value)}
-            className="flex-1 rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-magenta"
+            className="flex-1 rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
             required
           />
           <input
@@ -95,12 +95,12 @@ export default function ContaClient() {
             placeholder="seu email"
             value={inputEmail}
             onChange={(e) => setInputEmail(e.target.value)}
-            className="flex-1 rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-magenta"
+            className="flex-1 rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
             required
           />
           <button
             type="submit"
-            className="rounded-xl bg-magenta px-8 py-4 font-extrabold text-white transition hover:scale-105 active:scale-95"
+            className="rounded-xl bg-neon px-8 py-4 font-extrabold text-white transition hover:scale-105 active:scale-95"
           >
             {isSaved ? 'Salvo! ✓' : 'Entrar'}
           </button>
@@ -132,7 +132,7 @@ export default function ContaClient() {
         </div>
         <div className="col-span-2 rounded-2xl border border-border bg-white p-6 shadow-sm md:col-span-1">
           <div className="text-2xl">💸</div>
-          <div className="mt-2 text-4xl font-black text-magenta">
+          <div className="mt-2 text-4xl font-black text-neon">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSpent)}
           </div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
@@ -150,10 +150,10 @@ export default function ContaClient() {
           </div>
         </div>
         <div className="col-span-1 rounded-2xl border border-border bg-white p-6 shadow-sm">
-          <div className="text-2xl">💊</div>
+          <div className="text-2xl">⚡</div>
           <div className="mt-2 text-4xl font-black text-purple-600">{xp}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
-            Dopamina Ganha
+            Dopaminando Ganha
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function ContaClient() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-magenta px-2.5 py-0.5 text-xs font-black uppercase">
+                <span className="rounded-full bg-neon px-2.5 py-0.5 text-xs font-black uppercase">
                   Level {level}
                 </span>
                 <h3 className="font-[var(--font-display)] text-3xl font-black">
@@ -187,21 +187,21 @@ export default function ContaClient() {
             </div>
           </div>
           <div className="text-right text-sm font-bold text-white/60">
-            {xp} 💊
+            {xp} ⚡
           </div>
         </div>
         
         <div className="mt-6">
           <div className="h-3 w-full overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-magenta to-purple-500 transition-all duration-1000 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-neon to-purple-500 transition-all duration-1000 ease-out"
               style={{ width: `${Math.max(0, Math.min(100, xpProgress))}%` }}
             />
           </div>
           <div className="mt-3 text-xs font-medium text-white/50">
             {nextLevel 
-              ? `${nextLevel.xpRequired - xp} 💊 restantes para: ${nextLevel.title}`
-              : 'Nível Máximo Alcançado! Sua dopamina transbordou.'}
+              ? `${nextLevel.xpRequired - xp} ⚡ restantes para: ${nextLevel.title}`
+              : 'Nível Máximo Alcançado! Sua dopaminando transbordou.'}
           </div>
         </div>
       </div>
@@ -238,8 +238,8 @@ export default function ContaClient() {
                 <h4 className="font-bold text-foreground">{ach.title}</h4>
                 <p className="mt-1 text-[11px] text-muted">{ach.description}</p>
                 {isUnlocked && (
-                  <div className="mt-3 rounded-full bg-magenta/10 px-2 py-0.5 text-[10px] font-black text-magenta">
-                    +{ach.xpReward} 💊
+                  <div className="mt-3 rounded-full bg-neon/10 px-2 py-0.5 text-[10px] font-black text-neon">
+                    +{ach.xpReward} ⚡
                   </div>
                 )}
               </div>
@@ -270,7 +270,7 @@ export default function ContaClient() {
                   {user.orders} pedidos
                 </div>
                 <div className="font-[var(--font-display)] text-lg font-black text-purple-600">
-                  {new Intl.NumberFormat('pt-BR').format(user.dopamine)} 💊
+                  {new Intl.NumberFormat('pt-BR').format(user.dopamine)} ⚡
                 </div>
               </div>
             </div>

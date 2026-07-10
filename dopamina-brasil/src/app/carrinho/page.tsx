@@ -22,9 +22,9 @@ export default function CartPage() {
           <p className="mt-2 text-muted">Nenhum produto fictício por aqui. Vamos resolver isso?</p>
           <Link
             href="/"
-            className="mt-6 inline-block rounded-full bg-magenta px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:bg-magenta-light hover:scale-105"
+            className="mt-6 inline-block rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:bg-neon-light hover:scale-105"
           >
-            Ir às compras 💊
+            Ir às compras ⚡
           </Link>
         </div>
       ) : (
@@ -34,7 +34,7 @@ export default function CartPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex gap-4 rounded-2xl border border-border bg-card p-4 transition hover:border-magenta/20"
+                className="flex gap-4 rounded-2xl border border-border bg-card p-4 transition hover:border-neon/20"
               >
                 {/* Product emoji */}
                 <Link
@@ -46,13 +46,13 @@ export default function CartPage() {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <Link href={`/produto/${item.slug}`} className="hover:text-magenta transition">
+                  <Link href={`/produto/${item.slug}`} className="hover:text-neon transition">
                     <h3 className="text-sm font-bold text-foreground">{item.shortName}</h3>
                   </Link>
                   <p className="text-xs text-muted line-through mt-1">
                     R$ {item.originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-lg font-extrabold text-magenta">
+                  <p className="text-lg font-extrabold text-neon">
                     R$ {item.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
 
@@ -73,7 +73,7 @@ export default function CartPage() {
                     </button>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="ml-auto text-sm text-muted hover:text-magenta transition"
+                      className="ml-auto text-sm text-muted hover:text-neon transition"
                     >
                       🗑️ Remover
                     </button>
@@ -84,7 +84,7 @@ export default function CartPage() {
 
             <button
               onClick={clearCart}
-              className="text-sm text-muted hover:text-magenta transition"
+              className="text-sm text-muted hover:text-neon transition"
             >
               🗑️ Limpar carrinho
             </button>
@@ -107,8 +107,8 @@ export default function CartPage() {
                   <span className="text-neon-green font-bold">GRÁTIS</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted">Desconto Dopamina:</span>
-                  <span className="text-magenta font-bold">-100%</span>
+                  <span className="text-muted">Desconto Dopaminando:</span>
+                  <span className="text-neon font-bold">-100%</span>
                 </div>
               </div>
 
@@ -124,13 +124,13 @@ export default function CartPage() {
 
               <Link
                 href="/checkout"
-                className="block w-full rounded-2xl bg-magenta py-4 text-center text-lg font-extrabold text-white shadow-lg transition hover:bg-magenta-light active:scale-[0.98] animate-pulse-glow"
+                className="block w-full rounded-2xl bg-neon py-4 text-center text-lg font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-[0.98] animate-pulse-glow"
               >
                 FINALIZAR COMPRA 🚀
               </Link>
 
               <p className="text-[10px] text-center text-muted">
-                💊 Nenhum cartão será cobrado. Nenhuma fatura será gerada. Zero stress.
+                ⚡ Nenhum cartão será cobrado. Nenhuma fatura será gerada. Zero stress.
               </p>
             </div>
           </div>

@@ -4,9 +4,9 @@ export default function Footer() {
   return (
     <footer className="mt-20 border-t border-border bg-surface">
       {/* Disclaimer Banner */}
-      <div className="bg-magenta/10 border-b border-magenta/20 px-4 py-4 text-center">
-        <p className="text-sm font-bold text-magenta">
-          ⚠️ AVISO IMPORTANTE: Este site é uma PIADA. Nenhum produto é real. Nenhuma compra é processada. Nenhum dinheiro é cobrado. É 100% gratuito e 100% fictício. 💊
+      <div className="bg-neon/10 border-b border-neon/20 px-4 py-4 text-center">
+        <p className="text-sm font-bold text-neon">
+          ⚠️ AVISO IMPORTANTE: Este site é uma PIADA. Nenhum produto é real. Nenhuma compra é processada. Nenhum dinheiro é cobrado. É 100% gratuito e 100% fictício. ⚡
         </p>
       </div>
 
@@ -15,8 +15,8 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">💊</span>
-              <span className="text-xl font-extrabold text-foreground">dopamina</span>
+              <span className="text-2xl">⚡</span>
+              <span className="text-xl font-extrabold text-foreground">dopaminando</span>
             </Link>
             <p className="mt-3 text-sm text-muted leading-relaxed">
               A única loja honesta da internet: você compra tudo e não paga nada.
@@ -30,9 +30,9 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Navegação</h3>
             <ul className="mt-3 space-y-2">
-              <li><Link href="/" className="text-sm text-foreground/60 hover:text-magenta transition">Catálogo</Link></li>
-              <li><Link href="/ranking" className="text-sm text-foreground/60 hover:text-magenta transition">Ranking 🏆</Link></li>
-              <li><Link href="/carrinho" className="text-sm text-foreground/60 hover:text-magenta transition">Carrinho</Link></li>
+              <li><Link href="/" className="text-sm text-foreground/60 hover:text-neon transition">Catálogo</Link></li>
+              <li><Link href="/ranking" className="text-sm text-foreground/60 hover:text-neon transition">Ranking 🏆</Link></li>
+              <li><Link href="/carrinho" className="text-sm text-foreground/60 hover:text-neon transition">Carrinho</Link></li>
             </ul>
           </div>
 
@@ -52,7 +52,7 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Apoie o Projeto</h3>
             <p className="mt-3 text-sm text-foreground/60 leading-relaxed">
-              Dopamina é gratuito e sem anúncios. Se curtiu, considere apoiar:
+              Dopaminando é gratuito e sem anúncios. Se curtiu, considere apoiar:
             </p>
             <a
               href="https://buymeacoffee.com"
@@ -71,7 +71,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-10 border-t border-border pt-6 text-center">
           <p className="text-xs text-muted/50">
-            © {new Date().getFullYear()} Dopamina Brasil 💊 — Feito com amor, sarcasmo e zero responsabilidade fiscal.
+            © {new Date().getFullYear()} Dopaminando Brasil ⚡ — Feito com amor, sarcasmo e zero responsabilidade fiscal.
           </p>
           <p className="mt-1 text-[10px] text-muted/30">
             Nenhum cartão de crédito foi clonado na produção deste site. Nenhum motoboy foi prejudicado. A capivara foi alimentada.
