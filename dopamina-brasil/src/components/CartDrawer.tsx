@@ -35,19 +35,27 @@ export default function CartDrawer() {
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <span className="text-6xl mb-4">🛒</span>
-              <p className="text-lg font-bold text-foreground">Carrinho vazio!</p>
-              <p className="mt-1 text-sm text-muted">
-                Sua dose de dopamina tá esperando no catálogo.
-              </p>
-              <button
-                onClick={closeCart}
-                className="mt-4 rounded-full bg-neon px-6 py-2.5 text-sm font-bold text-white transition hover:bg-neon-light"
-              >
-                Ir às compras ⚡
-              </button>
-            </div>
+                <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+                  <div className="relative mb-6 h-40 w-40 overflow-hidden rounded-full border-4 border-dashed border-border opacity-80">
+                    <img 
+                      src="/cleiton.png" 
+                      alt="Cleiton Mascot" 
+                      className="h-full w-full object-cover opacity-50 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100"
+                    />
+                  </div>
+                  <h3 className="font-[var(--font-display)] text-xl font-bold text-foreground">
+                    A bag do Cleiton tá leve demais!
+                  </h3>
+                  <p className="mt-2 text-muted">
+                    Bora encher essa mochila com o melhor da tecnologia?
+                  </p>
+                  <button
+                    onClick={closeCart}
+                    className="mt-8 rounded-full bg-surface px-8 py-3 font-bold text-foreground transition hover:bg-border"
+                  >
+                    Continuar Explorando
+                  </button>
+                </div>
           ) : (
             <div className="space-y-4">
               {items.map((item) => (

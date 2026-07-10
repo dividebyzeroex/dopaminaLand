@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CleitonEasterEgg from './CleitonEasterEgg';
 
 export default function Footer() {
   return (
@@ -67,6 +68,8 @@ export default function Footer() {
             </p>
           </div>
         </div>
+
+        <CleitonEasterEgg />
 
         {/* Bottom */}
         <div className="mt-10 border-t border-border pt-6 text-center">

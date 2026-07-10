@@ -86,14 +86,26 @@ export default function CheckoutPage() {
           />
         ))}
 
-        <div className="mx-auto max-w-lg px-4 py-20 text-center">
-          <span className="text-8xl block mb-6">🎉</span>
+        <div className="mx-auto max-w-lg px-4 py-20 text-center relative">
+          <div className="relative mx-auto mb-8 h-48 w-48 overflow-hidden rounded-full border-4 border-neon shadow-[0_0_30px_rgba(204,255,0,0.3)]">
+            <img 
+              src="/cleiton.png" 
+              alt="Cleiton Mascot" 
+              className="h-full w-full object-cover animate-pulse"
+              style={{ transform: 'scale(1.1) translateY(5%)' }}
+            />
+          </div>
           <h1 className="font-[var(--font-display)] text-4xl font-extrabold text-foreground">
-            COMPRA CONCLUÍDA!
+            CLEITON LIGOU A MOTO! 🏍️💨
           </h1>
           <p className="mt-2 text-xl text-neon font-bold">
-            (Parabéns, você não gastou nada!)
+            (Sua compra fake foi um sucesso!)
           </p>
+          <div className="mt-6 flex flex-col items-center gap-2 text-sm text-muted">
+            <p className="flex items-center gap-2"><span>📦</span> Cleiton está empacotando sua caixa.</p>
+            <p className="flex items-center gap-2"><span>🚀</span> Cleiton ligou a moto e está a caminho!</p>
+            <p className="flex items-center gap-2 font-bold text-foreground"><span>🚨</span> Chegou! Abre o portão que o Cleiton tá buzinando!</p>
+          </div>
 
           <div className="mt-8 rounded-2xl border border-border bg-card p-6 text-left">
             <div className="flex items-center justify-between">

@@ -105,10 +105,10 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               <h1 className="mt-5 font-[var(--font-display)] text-5xl font-black leading-[0.95] tracking-tight text-foreground sm:text-7xl">
                 escolha. <span className="gradient-text">clique</span>.
                 <br />
-                sinta <span className="gradient-text">o brilho</span>.
+                o cleiton <span className="gradient-text">entrega</span>.
               </h1>
               <p className="mx-auto mt-5 max-w-md text-base font-medium text-muted sm:text-lg lg:mx-0">
-                O único e-commerce onde seu limite é infinito e a culpa financeira não existe. Inicie seu ritual de dopamina. ⚡
+                Sua encomenda não viaja, ela teleporta. O único e-commerce onde seu limite é infinito e a culpa não existe. ⚡
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <a
@@ -121,17 +121,20 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             </div>
 
             {/* Product floating illustration (hidden on small screens, shown absolute on desktop) */}
-            <div className="pointer-events-none absolute -bottom-10 -right-10 z-0 hidden w-[350px] lg:block">
-              <div className="absolute inset-6 rounded-full bg-gradient-to-br from-neon to-purple opacity-90 blur-[20px]" />
-              <div className="absolute inset-10 rounded-full bg-gradient-to-br from-neon/80 to-purple/80" />
-              <div className="relative z-10 text-[180px] animate-float drop-shadow-[0_22px_40px_rgba(27,16,32,0.45)] text-center">
-                🎮
+            <div className="pointer-events-none absolute -bottom-4 -right-10 z-0 hidden w-[380px] lg:block">
+              <div className="absolute inset-6 rounded-full bg-gradient-to-br from-neon to-cyan-400 opacity-60 blur-[30px]" />
+              <div className="relative z-10 h-80 w-80 animate-float drop-shadow-[0_22px_40px_rgba(27,16,32,0.45)] text-center mt-10">
+                <img 
+                  src="/cleiton.png" 
+                  alt="Cleiton Express" 
+                  className="w-full h-full object-cover scale-110"
+                />
               </div>
-              <div className="absolute bottom-16 -left-4 z-20 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-xl">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-muted">destaque</p>
-                <p className="max-w-[10rem] truncate text-xs font-bold text-foreground">{heroProduct?.shortName || "DualSense Edge"}</p>
+              <div className="absolute bottom-10 left-0 z-20 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-xl">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-muted">A mais rápida do brasil</p>
+                <p className="max-w-[12rem] truncate text-xs font-bold text-foreground">Entrega Cleiton Express ⚡</p>
                 <p className="font-[var(--font-display)] text-lg font-extrabold text-neon">
-                  R$ {(heroProduct?.salePrice || 1499).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  Em até 30min
                 </p>
               </div>
             </div>
