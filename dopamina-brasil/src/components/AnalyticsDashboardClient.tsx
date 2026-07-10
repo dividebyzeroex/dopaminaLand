@@ -418,6 +418,8 @@ export default function AnalyticsDashboardClient() {
           const ga4Json = await ga4Res.json();
           if (ga4Json.data) {
             setGa4Data(ga4Json.data);
+          } else if (ga4Json.data === null) {
+            setGa4Data('empty'); // Explicitly set to empty string to differentiate from null (unconfigured/loading)
           }
         }
       } catch (err) {
@@ -692,7 +694,7 @@ export default function AnalyticsDashboardClient() {
           {/* TAB: GOOGLE ANALYTICS */}
           {activeTab === 'ga4' && (
             <div className="animate-fade-in space-y-6">
-              {ga4Data ? (
+              {ga4Data && ga4Data !== 'empty' ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                     <div className="text-2xl">👥</div>
@@ -714,6 +716,15 @@ export default function AnalyticsDashboardClient() {
                     <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.bounceRate}%</div>
                     <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Taxa de Rejeição</div>
                   </div>
+                </div>
+              ) : ga4Data === 'empty' ? (
+                <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
+                  <div className="text-4xl mb-4">⏳</div>
+                  <h3 className="text-xl font-bold text-foreground">Processando Dados...</h3>
+                  <p className="mt-2 text-muted max-w-lg mx-auto">
+                    A API conectou com sucesso, mas o Google Analytics ainda não processou os dados desta propriedade. 
+                    O GA4 costuma levar de 24 a 48 horas para exibir métricas em propriedades recém-criadas.
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
