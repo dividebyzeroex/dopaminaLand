@@ -85,8 +85,7 @@ export default function CartScreen() {
             <TouchableOpacity 
               className="bg-neon py-4 rounded-2xl items-center shadow-[0_0_15px_rgba(204,255,0,0.4)]"
               onPress={() => {
-                clearCart();
-                alert('A simulação de checkout será implementada na Fase 3!');
+                router.push('/checkout');
               }}
             >
               <Text className="font-black text-background text-lg">FINALIZAR COMPRA ⚡</Text>

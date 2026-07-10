@@ -7,6 +7,7 @@ import { useCart, CartItem } from '@/contexts/CartContext';
 export default function HomeScreen() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clicks, setClicks] = useState(0);
   const router = useRouter();
   const { addItem, items } = useCart();
 
@@ -93,6 +94,22 @@ export default function HomeScreen() {
           contentContainerStyle={{ padding: 8, paddingBottom: 40 }}
         />
       )}
+
+      {/* Floating Easter Egg */}
+      <TouchableOpacity 
+        className="absolute bottom-6 right-6 w-16 h-16 bg-surface border border-border rounded-full items-center justify-center shadow-lg"
+        onPress={() => {
+          setClicks(c => {
+            if (c + 1 >= 5) {
+              alert('Parabéns! Cupom imaginário CLEITON50 aplicado! Tudo custa 0,00 reais agora.');
+              return 0;
+            }
+            return c + 1;
+          });
+        }}
+      >
+        <Image source={{ uri: 'https://raw.githubusercontent.com/dividebyzeroex/dopaminaLand/main/dopamina-brasil/public/cleiton_nobg.png' }} className="w-10 h-10" resizeMode="contain" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
