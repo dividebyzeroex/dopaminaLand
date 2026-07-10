@@ -29,7 +29,7 @@ export default function AnalyticsDashboardClient() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'ux' | 'ecommerce' | 'intent'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'ux' | 'ecommerce' | 'intent' | 'ga4'>('overview');
 
   // Intent Data State
   const [intentData, setIntentData] = useState({
@@ -82,6 +82,9 @@ export default function AnalyticsDashboardClient() {
     boughtTogether: [] as any[],
     topProducts: [] as any[]
   });
+
+  // GA4 State
+  const [ga4Data, setGa4Data] = useState<any>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -404,12 +407,24 @@ export default function AnalyticsDashboardClient() {
           ...p,
           metrics: productInteractions[p.id],
         })) || [];
-
         formattedTopProducts.sort((a, b) => b.metrics.carts - a.metrics.carts);
         setTopProducts(formattedTopProducts);
       }
 
-    } catch (err) {
+      // 3. Fetch GA4 Data (if credentials are set)
+      try {
+        const ga4Res = await fetch('/api/analytics/ga4');
+        if (ga4Res.ok) {
+          const ga4Json = await ga4Res.json();
+          if (ga4Json.data) {
+            setGa4Data(ga4Json.data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch GA4 data:', err);
+      }
+
+    } catch (err: any) {
       console.error('Error fetching dashboard data:', err);
     } finally {
       setLoading(false);
@@ -454,6 +469,7 @@ export default function AnalyticsDashboardClient() {
     { id: 'intent', label: 'Intent Data B2B 🔥', icon: '🎯' },
     { id: 'ecommerce', label: 'Insights de E-commerce 🛒', icon: '🛍️' },
     { id: 'ux', label: 'Telemetria UX', icon: '🖱️' },
+    { id: 'ga4', label: 'Google Analytics 📈', icon: '📈' },
   ];
 
   const renderTabs = () => (
@@ -670,6 +686,45 @@ export default function AnalyticsDashboardClient() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB: GOOGLE ANALYTICS */}
+          {activeTab === 'ga4' && (
+            <div className="animate-fade-in space-y-6">
+              {ga4Data ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                    <div className="text-2xl">👥</div>
+                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.activeUsers}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Usuários Ativos (30d)</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                    <div className="text-2xl">🌐</div>
+                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.sessions}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões (30d)</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                    <div className="text-2xl">👀</div>
+                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.pageViews}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Page Views (30d)</div>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                    <div className="text-2xl">⚡</div>
+                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.bounceRate}%</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Taxa de Rejeição</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
+                  <div className="text-4xl mb-4">⚠️</div>
+                  <h3 className="text-xl font-bold text-foreground">API do Google Analytics não configurada</h3>
+                  <p className="mt-2 text-muted max-w-lg mx-auto">
+                    Para visualizar as métricas do GA4 aqui, você precisa configurar as variáveis de ambiente 
+                    <code>GA_PROPERTY_ID</code>, <code>GA_CLIENT_EMAIL</code> e <code>GA_PRIVATE_KEY</code> no painel da Vercel.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
