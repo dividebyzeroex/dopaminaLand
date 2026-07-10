@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import productsData from '@/data/products.json';
 import {
   BarChart,
   Bar,
@@ -352,12 +353,16 @@ export default function AnalyticsDashboardClient() {
         searchTerms: formatMap(searchMap).slice(0, 10),
         abandonedCarts: abandonedList.sort((a, b) => b.value - a.value).slice(0, 10),
         boughtTogether: formatMap(pairMap).slice(0, 10),
-        topProducts: Object.keys(productInteractions).map(id => ({
-          id,
-          views: productInteractions[id].views,
-          carts: productInteractions[id].carts,
-          rev: productInteractions[id].rev
-        })).sort((a, b) => b.rev - a.rev).slice(0, 10)
+        topProducts: Object.keys(productInteractions).map(id => {
+          const product = productsData.find((p: any) => p.id === id);
+          return {
+            id,
+            name: product ? product.name : `Produto ${id.split('-')[0]}`,
+            views: productInteractions[id].views,
+            carts: productInteractions[id].carts,
+            rev: productInteractions[id].rev
+          };
+        }).sort((a, b) => b.rev - a.rev).slice(0, 10)
       });
 
       // Format Products
@@ -686,7 +691,7 @@ export default function AnalyticsDashboardClient() {
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-border text-muted">
-                        <th className="pb-3 font-medium">Produto ID</th>
+                        <th className="pb-3 font-medium">Produto</th>
                         <th className="pb-3 font-medium text-center">Visualizações</th>
                         <th className="pb-3 font-medium text-center">Adições ao Carrinho</th>
                         <th className="pb-3 font-medium text-right">Faturamento (Fake)</th>
@@ -695,7 +700,7 @@ export default function AnalyticsDashboardClient() {
                     <tbody className="divide-y divide-border">
                       {ecommerceInsights.topProducts.map((p, i) => (
                         <tr key={i} className="transition hover:bg-surface">
-                          <td className="py-4 text-foreground"><code className="rounded bg-surface px-1">{p.id.split('-')[0]}...</code></td>
+                          <td className="py-4 text-foreground max-w-[250px] truncate" title={p.name}>{p.name}</td>
                           <td className="py-4 text-center text-muted">{p.views}</td>
                           <td className="py-4 text-center text-muted">{p.carts}</td>
                           <td className="py-4 text-right font-bold text-neon">R$ {p.rev.toFixed(2)}</td>
