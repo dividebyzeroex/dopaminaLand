@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     if (error && error.code === '23503') {
       // Foreign key violation: session doesn't exist yet (race condition or adblock)
       // Create a fallback session to satisfy the constraint
-      await supabase.from('intent_sessions').insert({
+      await supabase.from('sessions').insert({
         session_id,
         device_info: { fallback: true, os_name: 'Unknown', browser_name: 'Unknown' }
       });

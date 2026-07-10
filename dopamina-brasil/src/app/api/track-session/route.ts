@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     };
 
     const { error } = await supabase
-      .from('intent_sessions')
+      .from('sessions')
       .upsert({ session_id, device_info: enrichedDeviceInfo }, { onConflict: 'session_id' });
 
     if (error) {

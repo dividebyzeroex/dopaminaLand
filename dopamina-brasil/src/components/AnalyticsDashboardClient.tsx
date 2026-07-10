@@ -92,7 +92,7 @@ export default function AnalyticsDashboardClient() {
     try {
       // 1. Fetch Sessions (Demographics & Marketing)
       const { data: sessionData, count: sessionCount } = await supabase
-        .from('intent_sessions')
+        .from('sessions')
         .select('*', { count: 'exact' });
 
       const genderMap: Record<string, number> = {};
@@ -270,7 +270,7 @@ export default function AnalyticsDashboardClient() {
       let consideration = 0;
       let decision = 0;
       
-      // Fallback for missing intent_sessions
+      // Fallback for missing sessions
       let finalSessionData = sessionData || [];
       if (finalSessionData.length === 0 && events && events.length > 0) {
         const uniqueSids = Array.from(new Set(events.map(e => e.session_id).filter(Boolean)));
