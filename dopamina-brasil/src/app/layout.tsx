@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { GameProvider } from "@/contexts/GameContext";
@@ -76,6 +77,7 @@ export default function RootLayout({
           </CartProvider>
         </GameProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
