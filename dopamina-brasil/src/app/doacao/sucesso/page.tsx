@@ -20,7 +20,7 @@ function SuccessContent() {
           Doação Confirmada!
         </h1>
         <p className="mt-2 text-muted">
-          Muito obrigado por patrocinar o Dopaminando Brasil! O seu dinheiro (esse sim real) 
+          Muito obrigado por patrocinar o Dopamina Brasil! O seu dinheiro (esse sim real) 
           ajuda a manter nossa capivara alimentada e os servidores rodando.
         </p>
 

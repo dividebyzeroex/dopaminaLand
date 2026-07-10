@@ -81,9 +81,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="group flex shrink-0 items-center gap-2">
             <span className="text-3xl transition-transform group-hover:rotate-12 group-hover:scale-110">⚡</span>
-            <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground">
-              dopaminando
-            </span>
+            <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground">dopaminando</span>
           </Link>
 
           {/* Search */}
@@ -100,7 +98,7 @@ export default function Header() {
                 onFocus={() => {
                   if (query.trim()) setShowDropdown(true);
                 }}
-                placeholder="buscar dopaminando, PS5, skincare..."
+                placeholder="buscar dopamina, PS5, skincare..."
                 className="w-full bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted"
               />
               {isSearching && <span className="h-4 w-4 animate-spin rounded-full border-2 border-neon border-t-transparent"></span>}

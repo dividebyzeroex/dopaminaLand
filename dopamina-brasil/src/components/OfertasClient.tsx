@@ -38,7 +38,7 @@ export default function OfertasClient({ flashDeals, todayPicks }: { flashDeals: 
               🔥 Ofertas
             </h1>
             <p className="mt-1 text-sm text-foreground/55">
-              100% produtos falsos, 100% dopaminando real — ofertas frescas todos os dias.
+              100% produtos falsos, 100% dopamina real — ofertas frescas todos os dias.
             </p>
           </div>
           <span className="rounded-full bg-foreground/5 px-3 py-1 text-xs font-bold text-foreground/55">

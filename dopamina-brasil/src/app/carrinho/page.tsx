@@ -107,7 +107,7 @@ export default function CartPage() {
                   <span className="text-neon-green font-bold">GRÁTIS</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted">Desconto Dopaminando:</span>
+                  <span className="text-muted">Desconto Dopamina:</span>
                   <span className="text-neon font-bold">-100%</span>
                 </div>
               </div>

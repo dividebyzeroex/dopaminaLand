@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Dopaminando',
-    short_name: 'Dopaminando',
+    name: 'dopaminando',
+    short_name: 'dopaminando',
     description: 'Compre o que quiser. Gaste zero.',
     start_url: '/',
     display: 'standalone',

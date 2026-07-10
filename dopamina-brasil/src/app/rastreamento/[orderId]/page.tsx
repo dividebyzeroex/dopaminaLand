@@ -217,7 +217,7 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
           <span className="text-5xl block mb-3">🎉</span>
           <h2 className="text-xl font-extrabold text-neon-green">Pedido Entregue!</h2>
           <p className="mt-1 text-sm text-muted">
-            (Na sua imaginação, claro. Mas a dopaminando foi real.)
+            (Na sua imaginação, claro. Mas a dopamina foi real.)
           </p>
           <Link
             href="/"

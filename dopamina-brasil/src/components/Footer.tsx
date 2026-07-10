@@ -16,7 +16,7 @@ export default function Footer() {
           <div>
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl">⚡</span>
-              <span className="text-xl font-extrabold text-foreground">dopaminando</span>
+              <span className="text-xl font-extrabold text-foreground">dopamina</span>
             </Link>
             <p className="mt-3 text-sm text-muted leading-relaxed">
               A única loja honesta da internet: você compra tudo e não paga nada.
@@ -52,7 +52,7 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Apoie o Projeto</h3>
             <p className="mt-3 text-sm text-foreground/60 leading-relaxed">
-              Dopaminando é gratuito e sem anúncios. Se curtiu, considere apoiar:
+              Dopamina é gratuito e sem anúncios. Se curtiu, considere apoiar:
             </p>
             <a
               href="https://buymeacoffee.com"
@@ -71,7 +71,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-10 border-t border-border pt-6 text-center">
           <p className="text-xs text-muted/50">
-            © {new Date().getFullYear()} Dopaminando Brasil ⚡ — Feito com amor, sarcasmo e zero responsabilidade fiscal.
+            © {new Date().getFullYear()} Dopamina Brasil ⚡ — Feito com amor, sarcasmo e zero responsabilidade fiscal.
           </p>
           <p className="mt-1 text-[10px] text-muted/30">
             Nenhum cartão de crédito foi clonado na produção deste site. Nenhum motoboy foi prejudicado. A capivara foi alimentada.

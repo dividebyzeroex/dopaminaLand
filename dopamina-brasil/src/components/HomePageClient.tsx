@@ -7,7 +7,7 @@ import { trackEvent } from '@/lib/tracking';
 import { supabase } from '@/lib/supabase';
 
 const trustBadges = [
-  { emoji: '🧾', title: '100% dopaminando real', desc: 'a fatura nunca chega' },
+  { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
   { emoji: '🛵', title: 'motoboys (quase) reais', desc: 'saem de casa pra entregar pra você' },
   { emoji: '⚡', title: 'checkout 1-clique autopago', desc: 'em 15 segundos' },
   { emoji: '📍', title: 'rastreamento ao vivo', desc: 'a viagem real até sua porta' },
@@ -116,14 +116,14 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       <span className="gradient-text">nada</span>.
                     </h1>
                     <p className="mt-5 max-w-md text-base font-medium text-muted sm:text-lg">
-                      A loja que vende a dopaminando de comprar. A fatura nunca chega. 🧠
+                      A loja que vende a dopamina de comprar. A fatura nunca chega. 🧠
                     </p>
                     <div className="mt-7 flex flex-wrap items-center gap-3">
                       <a
                         href="#catalogo"
                         className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap"
                       >
-                        quero minha dopaminando 🚀
+                        quero minha dopamina 🚀
                       </a>
                       <a
                         href="/ofertas"
@@ -242,7 +242,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                       no que não existe
                     </h2>
                     <p className="mt-4 max-w-md text-base font-medium text-white/75">
-                      Descontos absurdos em produtos que você nunca vai receber. Pegue enquanto a dopaminando tá em promoção. 🐋
+                      Descontos absurdos em produtos que você nunca vai receber. Pegue enquanto a dopamina tá em promoção. 🐋
                     </p>
                     <a
                       href="/ofertas"
@@ -424,7 +424,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         </h2>
         <div className="mt-8 space-y-4">
           {[
-            { q: 'Dopaminando é uma loja de verdade?', a: 'Não — é uma loja paródia. Os produtos, o pagamento e a entrega são 100% falsos. A única coisa real é a dopaminando de comprar algo.' },
+            { q: 'Dopamina é uma loja de verdade?', a: 'Não — é uma loja paródia. Os produtos, o pagamento e a entrega são 100% falsos. A única coisa real é a dopamina de comprar algo.' },
             { q: 'Como funciona?', a: "Você 'compra' um produto, 'paga' com um cartão imaginário ou Pix fantasma, e rastreia uma entrega absurda viajando pelo Brasil em tempo real — às vezes engolida por uma capivara ou abduzida por um OVNI. Nenhum centavo sai da sua conta." },
             { q: 'É realmente de graça?', a: 'Sim. Nenhuma cobrança: nenhum pagamento é processado e nenhuma fatura chega. Custo zero, sempre.' },
             { q: 'É golpe? É seguro?', a: 'Não é golpe — é comédia. Como nada é cobrado e nenhum pagamento é real, não há nada para roubar. É 100% seguro justamente porque é 100% falso.' },

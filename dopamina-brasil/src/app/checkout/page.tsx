@@ -289,7 +289,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-muted">Desconto Dopaminando:</span>
+                  <span className="text-muted">Desconto Dopamina:</span>
                   <span className="text-neon font-bold">
                     -R$ {totalFakePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>

@@ -39,7 +39,7 @@ export default function CartDrawer() {
               <span className="text-6xl mb-4">🛒</span>
               <p className="text-lg font-bold text-foreground">Carrinho vazio!</p>
               <p className="mt-1 text-sm text-muted">
-                Sua dose de dopaminando tá esperando no catálogo.
+                Sua dose de dopamina tá esperando no catálogo.
               </p>
               <button
                 onClick={closeCart}
@@ -123,7 +123,7 @@ export default function CartDrawer() {
             </div>
 
             <p className="text-[10px] text-center text-muted">
-              ⚡ Porque a dopaminando é de graça (e seu dinheiro continua no bolso)
+              ⚡ Porque a dopamina é de graça (e seu dinheiro continua no bolso)
             </p>
 
             <Link

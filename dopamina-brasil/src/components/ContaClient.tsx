@@ -153,7 +153,7 @@ export default function ContaClient() {
           <div className="text-2xl">⚡</div>
           <div className="mt-2 text-4xl font-black text-purple-600">{xp}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
-            Dopaminando Ganha
+            Dopamina Ganha
           </div>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function ContaClient() {
           <div className="mt-3 text-xs font-medium text-white/50">
             {nextLevel 
               ? `${nextLevel.xpRequired - xp} ⚡ restantes para: ${nextLevel.title}`
-              : 'Nível Máximo Alcançado! Sua dopaminando transbordou.'}
+              : 'Nível Máximo Alcançado! Sua dopamina transbordou.'}
           </div>
         </div>
       </div>

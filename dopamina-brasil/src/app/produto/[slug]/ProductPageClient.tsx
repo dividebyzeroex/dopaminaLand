@@ -158,7 +158,7 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
                 if (navigator.share) {
                   navigator.share({
                     title: `Compre ${product.shortName} por R$ 0,00!`,
-                    text: `Olha só o que eu encontrei na Dopaminando: ${product.name}. 100% gratuito e 200% dopaminando! ⚡`,
+                    text: `Olha só o que eu encontrei na Dopamina: ${product.name}. 100% gratuito e 200% dopamina! ⚡`,
                     url: url,
                   }).catch(console.error);
                 } else {
@@ -176,7 +176,7 @@ export default function ProductPageClient({ product, relatedProducts }: { produc
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
               </svg>
-              Compartilhar dopaminando
+              Compartilhar dopamina
             </button>
           </div>
 

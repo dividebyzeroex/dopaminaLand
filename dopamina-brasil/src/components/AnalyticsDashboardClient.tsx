@@ -70,11 +70,11 @@ export default function AnalyticsDashboardClient() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'dopaminando') {
+    if (password === 'dopamina') {
       setIsAuthenticated(true);
       fetchDashboardData();
     } else {
-      setError('Senha incorreta. Dica: dopaminando');
+      setError('Senha incorreta. Dica: dopamina');
     }
   };
 

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import AnalyticsDashboardClient from '@/components/AnalyticsDashboardClient';
 
 export const metadata: Metadata = {
-  title: 'Insights | Dopaminando',
+  title: 'Insights | Dopamina',
   description: 'Analytics de Intenções de Compra.',
 };
 
