@@ -89,7 +89,7 @@ export default function CheckoutPage() {
         <div className="mx-auto max-w-lg px-4 py-20 text-center relative">
           <div className="relative mx-auto mb-8 h-48 w-48 overflow-hidden rounded-full border-4 border-neon shadow-[0_0_30px_rgba(204,255,0,0.3)]">
             <img 
-              src="/cleiton.png" 
+              src="/cleiton_nobg.png" 
               alt="Cleiton Mascot" 
               className="h-full w-full object-cover animate-pulse"
               style={{ transform: 'scale(1.1) translateY(5%)' }}

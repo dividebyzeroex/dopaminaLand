@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
       <div className="relative mb-8 h-48 w-48 overflow-hidden rounded-full border-4 border-neon shadow-[0_0_30px_rgba(204,255,0,0.3)] animate-float">
         <Image 
-          src="/cleiton2.png" 
+          src="/cleiton_nobg2.png" 
           alt="Cleiton Mascot" 
           fill
           className="object-cover"

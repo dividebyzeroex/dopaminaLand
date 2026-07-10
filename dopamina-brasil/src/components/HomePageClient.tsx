@@ -125,7 +125,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               <div className="absolute inset-6 rounded-full bg-gradient-to-br from-neon to-cyan-400 opacity-60 blur-[30px]" />
               <div className="relative z-10 h-80 w-80 animate-float drop-shadow-[0_22px_40px_rgba(27,16,32,0.45)] text-center mt-10">
                 <img 
-                  src="/cleiton.png" 
+                  src="/cleiton_nobg.png" 
                   alt="Cleiton Express" 
                   className="w-full h-full object-cover scale-110"
                 />
