@@ -139,7 +139,7 @@ export default function AnalyticsDashboardClient() {
       // 2. Fetch Events (Funnel, Products, UX)
       const { data: events, error: eventsError } = await supabase
         .from('intent_events')
-        .select('session_id, event_type, price_displayed, created_at, product_id, metadata');
+        .select('id, session_id, event_type, price_displayed, created_at, product_id, metadata');
 
       if (eventsError) throw eventsError;
 
