@@ -100,15 +100,15 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
             <div className="relative z-10 w-full text-center lg:text-left">
               <span className="inline-flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-neon">
-                ✦ a única loja honesta da internet
+                ✦ sua dose de consumismo simulado
               </span>
               <h1 className="mt-5 font-[var(--font-display)] text-5xl font-black leading-[0.95] tracking-tight text-foreground sm:text-7xl">
-                compre <span className="gradient-text">tudo</span>.
+                escolha. <span className="gradient-text">clique</span>.
                 <br />
-                pague <span className="gradient-text">nada</span>.
+                sinta <span className="gradient-text">o brilho</span>.
               </h1>
               <p className="mx-auto mt-5 max-w-md text-base font-medium text-muted sm:text-lg lg:mx-0">
-                A loja que vende a dopamina de comprar. A fatura nunca chega. 🧠
+                O único e-commerce onde seu limite é infinito e a culpa financeira não existe. Inicie seu ritual de dopamina. ⚡
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <a
@@ -146,17 +146,18 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               <div className="relative z-10 grid w-full items-center gap-6 sm:grid-cols-[1fr_auto]">
                 <div>
                   <span className="inline-flex items-center gap-2 rounded-full border border-pop/40 bg-pop/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-pop">
-                    ✦ cupom de boas-vindas
+                    ✦ hackeando o sistema
                   </span>
                   <h2 className="mt-3 font-[var(--font-display)] text-3xl font-black leading-[0.98] tracking-tight sm:text-4xl">
-                    <span className="gradient-text-gold">25% OFF</span> no seu 1º pedido
+                    Código <span className="gradient-text-gold">VIP</span> liberado
                   </h2>
+                  <p className="mt-2 text-sm text-white/70">Aplique no checkout e tenha a ilusão de economizar uma grana violenta.</p>
                   <button
-                    onClick={() => navigator.clipboard?.writeText('DOPAMINA25')}
+                    onClick={() => navigator.clipboard?.writeText('DOPAMINANDO')}
                     className="mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-pop/50 bg-white/5 px-4 py-2.5 transition hover:border-pop w-full sm:w-auto"
                   >
                     <span className="font-[var(--font-display)] text-base font-extrabold tracking-wide text-pop">
-                      DOPAMINA25
+                      DOPAMINANDO
                     </span>
                     <span className="shrink-0 rounded-lg bg-pop px-3 py-1 text-[10px] font-black text-background">
                       copiar
@@ -178,16 +179,17 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               <div className="relative z-10 flex w-full flex-col justify-between sm:flex-row sm:items-center">
                 <div>
                   <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white backdrop-blur">
-                    🔥 ofertas relâmpago
+                    🔥 delírio de descontos
                   </span>
                   <h2 className="mt-3 font-[var(--font-display)] text-3xl font-black leading-[0.98] tracking-tight sm:text-4xl">
-                    até <span className="text-pop">38% OFF</span> no que não existe
+                    Ofertas que <span className="text-pop">desaparecem</span>
                   </h2>
+                  <p className="mt-2 text-sm text-white/75">Preços derretidos em itens que só existem na sua tela. Aproveite a adrenalina. 🛒</p>
                   <a
                     href="/ofertas"
                     className="mt-4 inline-block rounded-full bg-white px-6 py-2.5 text-sm font-extrabold text-neon shadow-lg transition hover:scale-105 active:scale-95"
                   >
-                    ver ofertas →
+                    ver ofertas imaginárias →
                   </a>
                 </div>
               </div>
