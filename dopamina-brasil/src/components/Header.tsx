@@ -7,14 +7,6 @@ import { useCart } from '@/contexts/CartContext';
 import { useGame } from '@/contexts/GameContext';
 import { supabase } from '@/lib/supabase';
 
-const marqueeItems = [
-  '🛵 ENTREGA POR MOTOBOYS (QUASE) REAIS',
-  '📍 RASTREAMENTO AO VIVO PELO BRASIL',
-  '💸 CHECKOUT 1-CLIQUE QUE SE PAGA SOZINHO',
-  '⚡ 100% FALSO, 200% DOPAMINA',
-  '🧾 A FATURA NUNCA CHEGA',
-  '🛍️ PREÇO FINAL: SEMPRE R$ 0,00',
-];
 
 export default function Header() {
   const router = useRouter();
@@ -63,21 +55,9 @@ export default function Header() {
   }, [query]);
 
   return (
-    <header className="sticky top-0 z-40">
-      {/* Marquee Banner */}
-      <div className="overflow-hidden bg-neon py-2 text-[11px] font-bold uppercase tracking-wider text-white">
-        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap pr-10">
-          {[...marqueeItems, ...marqueeItems].map((item, i) => (
-            <span key={i} className="flex items-center gap-2">
-              <span className="text-pop">✦</span> {item}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Nav */}
-      <div className="border-b border-border bg-surface/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
+    <header className="fixed left-1/2 top-4 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2">
+      <div className="rounded-full border border-border bg-surface/80 backdrop-blur-2xl shadow-xl">
+        <div className="mx-auto flex items-center gap-4 px-4 py-2.5 sm:px-6">
           {/* Logo */}
           <Link href="/" className="group flex shrink-0 items-center gap-2">
             <span className="text-3xl transition-transform group-hover:rotate-12 group-hover:scale-110">⚡</span>
