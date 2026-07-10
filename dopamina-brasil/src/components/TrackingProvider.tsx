@@ -14,11 +14,11 @@ function TrackingLogic() {
   const maxScrollRef = useRef<number>(0);
   const clickHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);
   
-  const { items, totalValue } = useCart();
-  const cartRef = useRef({ items, totalValue });
+  const { items, totalFakePrice } = useCart();
+  const cartRef = useRef({ items, totalFakePrice });
   useEffect(() => {
-    cartRef.current = { items, totalValue };
-  }, [items, totalValue]);
+    cartRef.current = { items, totalFakePrice };
+  }, [items, totalFakePrice]);
 
   useEffect(() => {
     // UTMs and Referrer tracking handled in initSession
@@ -55,6 +55,7 @@ function TrackingLogic() {
       if (clickHistoryRef.current.length >= 3) {
         // Check if clicks are close to each other (within 50px radius)
         const first = clickHistoryRef.current[0];
+        const lastPrice = cartRef.current.totalFakePrice;
         const isRage = clickHistoryRef.current.every(c => 
           Math.abs(c.x - first.x) < 50 && Math.abs(c.y - first.y) < 50
         );

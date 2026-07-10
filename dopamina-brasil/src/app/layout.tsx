@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
+import { Analytics } from '@vercel/analytics/react';
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { GameProvider } from "@/contexts/GameContext";
@@ -74,6 +75,7 @@ export default function RootLayout({
             </TrackingProvider>
           </CartProvider>
         </GameProvider>
+        <Analytics />
       </body>
     </html>
   );
