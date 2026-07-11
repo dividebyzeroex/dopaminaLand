@@ -30,11 +30,11 @@ interface PhysicalReward {
 }
 
 const PHYSICAL_REWARDS: PhysicalReward[] = [
-  { id: 'adesivos', name: 'Kit de Adesivos Cyberpunk', levelRequired: 2, xpRequired: 100, description: 'Um pacote de adesivos holográficos irados para colar no seu notebook.', icon: '📦' },
-  { id: 'chaveiro', name: 'Chaveiro Neon Dopamina', levelRequired: 3, xpRequired: 500, description: 'Chaveiro futurista com logo brilhante da Dopamina Brasil.', icon: '🔑' },
-  { id: 'copo', name: 'Copo Térmico Futurista', levelRequired: 4, xpRequired: 1500, description: 'Mantém seu café quente e sua dopamina gelada.', icon: '🥤' },
-  { id: 'oculos', name: 'Óculos LED Holográfico', levelRequired: 5, xpRequired: 5000, description: 'O acessório definitivo para se destacar no metaverso.', icon: '👓' },
-  { id: 'camiseta', name: 'Camiseta Dopaminado Corp', levelRequired: 6, xpRequired: 15000, description: 'Camiseta cyberpunk oversized oficial da marca Dopaminado.', icon: '👕' },
+  { id: 'adesivos', name: 'Kit de Adesivos Cyberpunk', levelRequired: 2, xpRequired: 500, description: 'Um pacote de adesivos holográficos irados para colar no seu notebook.', icon: '📦' },
+  { id: 'chaveiro', name: 'Chaveiro Neon Dopamina', levelRequired: 3, xpRequired: 2500, description: 'Chaveiro futurista com logo brilhante da Dopamina Brasil.', icon: '🔑' },
+  { id: 'copo', name: 'Copo Térmico Futurista', levelRequired: 4, xpRequired: 10000, description: 'Mantém seu café quente e sua dopamina gelada.', icon: '🥤' },
+  { id: 'oculos', name: 'Óculos LED Holográfico', levelRequired: 5, xpRequired: 35000, description: 'O acessório definitivo para se destacar no metaverso.', icon: '👓' },
+  { id: 'camiseta', name: 'Camiseta Dopaminado Corp', levelRequired: 6, xpRequired: 100000, description: 'Camiseta cyberpunk oversized oficial da marca Dopaminado.', icon: '👕' },
 ];
 
 export default function ContaClient() {
