@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useState, useEffect, useCallback, type ReactNode } from 'react';
 import gameData from '@/data/achievements.json';
 
 interface OrderHistory {
@@ -226,6 +226,8 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
+  const [isLoaded, setIsLoaded] = useState(false);
+
   // Load from localStorage
   useEffect(() => {
     try {
@@ -235,15 +237,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'LOAD_STATE', payload: parsed });
       }
     } catch {}
+    setIsLoaded(true);
   }, []);
 
   // Save to localStorage (exclude toasts)
   useEffect(() => {
+    if (!isLoaded) return;
     try {
       const { toasts, ...rest } = state;
       localStorage.setItem('dopamina-game', JSON.stringify(rest));
     } catch {}
-  }, [state]);
+  }, [state, isLoaded]);
 
   const nextLevel = getNextLevel(state.level);
   const currentLevelXP = gameData.levels.find(l => l.level === state.level)?.xpRequired || 0;

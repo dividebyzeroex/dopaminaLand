@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import { useInsightsData } from '@/hooks/useInsightsData';
 import PostHogTab from '@/components/insights/PostHogTab';
+import HubSpotTab from '@/components/insights/HubSpotTab';
 
 const COLORS = ['#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#10b981', '#ff00ff'];
 
@@ -29,7 +30,7 @@ export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'posthog' | 'ga4' | 'ecommerce' | 'intent' | 'ux' | 'marketing'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'posthog' | 'ga4' | 'hubspot' | 'ecommerce' | 'intent' | 'ux' | 'marketing'>('overview');
 
   // Intent UI state
   const [showWeightSettings, setShowWeightSettings] = useState(false);
@@ -44,7 +45,7 @@ export default function AnalyticsDashboardClient() {
     loading, fetchDashboardData,
     kpis, funnelData, topProducts, timelineData, demographics, hardware, uxMetrics, ecommerceInsights,
     intentData, scoreWeights, setScoreWeights,
-    ga4Data, posthogData,
+    ga4Data, posthogData, hubspotCrmData,
   } = useInsightsData();
 
   const handleCrmSync = async (leadId: string, type: 'hubspot' | 'salesforce' | 'slack') => {
@@ -133,6 +134,7 @@ export default function AnalyticsDashboardClient() {
     { id: 'overview', label: '📊 Visão Geral' },
     { id: 'posthog', label: '🦔 PostHog Analytics' },
     { id: 'ga4', label: '📈 Google Analytics' },
+    { id: 'hubspot', label: '🟠 HubSpot CRM' },
     { id: 'ecommerce', label: '🛒 E-commerce' },
     { id: 'intent', label: '🎯 Intent Data B2B' },
     { id: 'ux', label: '🖱️ Telemetria UX' },
@@ -284,6 +286,11 @@ export default function AnalyticsDashboardClient() {
           {/* ═══════════ TAB: POSTHOG ═══════════ */}
           {activeTab === 'posthog' && (
             <PostHogTab data={posthogData} />
+          )}
+
+          {/* ═══════════ TAB: HUBSPOT CRM ═══════════ */}
+          {activeTab === 'hubspot' && (
+            <HubSpotTab data={hubspotCrmData} />
           )}
 
           {/* ═══════════ TAB: GOOGLE ANALYTICS ═══════════ */}
@@ -547,8 +554,18 @@ export default function AnalyticsDashboardClient() {
                         .map((lead) => (
                           <tr key={lead.id} className="transition hover:bg-surface-light">
                             <td className="py-4 font-bold text-foreground">
-                              <div className="text-sm font-black">{lead.deviceLocal}</div>
-                              <div className="text-[10px] text-muted font-mono">{lead.id.split('-')[0]}...</div>
+                              {lead.nickname || lead.email ? (
+                                <div>
+                                  <div className="text-sm font-black text-indigo-600">{lead.nickname || 'Anônimo'}</div>
+                                  {lead.email && <div className="text-xs text-foreground/80 font-semibold">{lead.email}</div>}
+                                  <div className="text-[10px] text-muted font-mono mt-1">{lead.deviceLocal}</div>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="text-sm font-black">{lead.deviceLocal}</div>
+                                  <div className="text-[10px] text-muted font-mono">{lead.id.split('-')[0]}...</div>
+                                </div>
+                              )}
                             </td>
                             <td className="py-4 text-muted max-w-[150px] truncate">
                               <span className="text-xs font-semibold bg-surface px-2 py-1 rounded-lg border border-border block w-max max-w-[140px] truncate">{lead.source}</span>
@@ -593,8 +610,11 @@ export default function AnalyticsDashboardClient() {
                     <div className="flex h-full flex-col overflow-y-auto">
                       <div className="flex items-center justify-between border-b border-border p-6 bg-surface-light">
                         <div>
-                          <h2 className="text-md font-black text-foreground">{selectedLead.deviceLocal}</h2>
-                          <p className="text-xs text-muted font-mono">{selectedLead.id}</p>
+                          <h2 className="text-md font-black text-foreground">
+                            {selectedLead.nickname ? `${selectedLead.nickname} (${selectedLead.deviceLocal.split('-').pop()?.trim()})` : selectedLead.deviceLocal}
+                          </h2>
+                          {selectedLead.email && <p className="text-xs text-indigo-600 font-semibold">{selectedLead.email}</p>}
+                          <p className="text-[10px] text-muted font-mono">{selectedLead.id}</p>
                         </div>
                         <button onClick={() => setSelectedLead(null)} className="rounded-lg p-2 text-muted hover:bg-border hover:text-foreground text-sm font-bold">✕</button>
                       </div>

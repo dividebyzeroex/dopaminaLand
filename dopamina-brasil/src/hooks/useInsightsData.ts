@@ -56,6 +56,12 @@ export interface PostHogData {
   deviceTypes: { type: string; count: number }[];
 }
 
+export interface HubSpotCrmData {
+  kpis: { totalContacts: number; totalDeals: number; pipelineValue: number; closedWon: number };
+  pipelineFunnel: { stageId: string; name: string; value: number }[];
+  recentContacts: { id: string; name: string; email: string; status: string; createdDate: string }[];
+}
+
 export const DEFAULT_WEIGHTS: ScoreWeights = {
   fake_checkout: 50,
   share_product: 30,
@@ -93,6 +99,8 @@ export function useInsightsData() {
   const [ga4Data, setGa4Data] = useState<any>(null);
   const [posthogData, setPosthogData] = useState<PostHogData | null>(null);
   const [posthogError, setPosthogError] = useState<string | null>(null);
+  const [hubspotCrmData, setHubspotCrmData] = useState<HubSpotCrmData | null>(null);
+  const [hubspotError, setHubspotError] = useState<string | null>(null);
 
   // ── Intent Metrics Computation ──
   const recomputeIntentMetrics = useCallback((
@@ -365,6 +373,16 @@ export function useInsightsData() {
         }
       } catch (err) { console.error('Failed to fetch PostHog data:', err); }
 
+      // HubSpot Data
+      try {
+        const hsRes = await fetch('/api/analytics/hubspot');
+        if (hsRes.ok) {
+          const hsJson = await hsRes.json();
+          if (hsJson.data) { setHubspotCrmData(hsJson.data); setHubspotError(null); }
+          else if (hsJson.error) setHubspotError(hsJson.error);
+        }
+      } catch (err) { console.error('Failed to fetch HubSpot CRM data:', err); }
+
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err);
     } finally {
@@ -379,6 +397,6 @@ export function useInsightsData() {
     // Intent data
     intentData, scoreWeights, setScoreWeights,
     // External
-    ga4Data, posthogData, posthogError,
+    ga4Data, posthogData, posthogError, hubspotCrmData, hubspotError,
   };
 }

@@ -21,6 +21,9 @@ function TrackingLogic() {
   }, [items, totalFakePrice]);
 
   useEffect(() => {
+    // Disable tracking on admin routes
+    if (pathname.includes('/admin')) return;
+
     // UTMs and Referrer tracking handled in initSession
     initSession();
 
