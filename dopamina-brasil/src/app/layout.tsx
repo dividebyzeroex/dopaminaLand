@@ -30,6 +30,7 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://dopaminado.com.br'),
   title: "dopaminado ⚡ — Compre o que quiser. Gaste zero.",
   description:
     "O e-commerce cyberpunk onde você compra a dopamina sem usar o limite. Checkout blindado, produtos ultra-desejáveis e fatura em R$ 0,00.",
