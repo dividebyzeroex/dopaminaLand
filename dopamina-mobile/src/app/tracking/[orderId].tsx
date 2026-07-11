@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useSheet } from '@/contexts/SheetContext';
 import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // We can just define some basic events directly here for mobile
@@ -15,6 +16,15 @@ const trackingEventsData = [
 export default function TrackingScreen() {
   const { orderId } = useLocalSearchParams();
   const router = useRouter();
+  const { setTabBarVisible } = useSheet();
+
+  // Hide floating tab bar when focused on this screen, restore on blur
+  useFocusEffect(
+    useCallback(() => {
+      setTabBarVisible(false);
+      return () => setTabBarVisible(true);
+    }, [])
+  );
   
   const [progress, setProgress] = useState(0); // 0 to 1
   const [timeLeft, setTimeLeft] = useState(48 * 60 * 60 * 1000); // 48h in ms

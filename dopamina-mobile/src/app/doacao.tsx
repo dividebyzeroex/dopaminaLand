@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function DoacaoScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -56,14 +59,19 @@ export default function DoacaoScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <ScrollView className="flex-1 px-6">
           <View className="py-4 flex-row items-center border-b border-border mb-6">
             <TouchableOpacity onPress={() => router.back()}>
               <Text className="text-foreground text-2xl font-bold">←</Text>
             </TouchableOpacity>
-            <Text className="text-white font-black text-xl ml-4">Doação Fictícia</Text>
+            <Text className="text-foreground font-black text-xl ml-4 flex-1">Doação Fictícia</Text>
+            <Image 
+              source={require('@/assets/images/cleiton_nobg.png')} 
+              style={{ width: 45, height: 45 }} 
+              contentFit="contain" 
+            />
           </View>
 
           <Text className="text-muted text-sm mb-8">
@@ -75,7 +83,7 @@ export default function DoacaoScreen() {
             <View>
               <Text className="text-foreground font-bold mb-2">Nome do Produto *</Text>
               <TextInput 
-                className="bg-surface border border-border rounded-xl p-4 text-white"
+                className="bg-surface border border-border rounded-xl p-4 text-foreground"
                 placeholder="Ex: Pedra de Estimação Sem Fio"
                 placeholderTextColor="#8b8496"
                 value={form.name}
@@ -86,7 +94,7 @@ export default function DoacaoScreen() {
             <View>
               <Text className="text-foreground font-bold mb-2">Nome Curto *</Text>
               <TextInput 
-                className="bg-surface border border-border rounded-xl p-4 text-white"
+                className="bg-surface border border-border rounded-xl p-4 text-foreground"
                 placeholder="Ex: Pedra Pro"
                 placeholderTextColor="#8b8496"
                 value={form.shortName}
@@ -98,7 +106,7 @@ export default function DoacaoScreen() {
               <View className="flex-1">
                 <Text className="text-foreground font-bold mb-2">Emoji da Foto</Text>
                 <TextInput 
-                  className="bg-surface border border-border rounded-xl p-4 text-white text-center text-2xl"
+                  className="bg-surface border border-border rounded-xl p-4 text-foreground text-center text-2xl"
                   placeholder="🪨"
                   placeholderTextColor="#8b8496"
                   maxLength={2}
@@ -109,7 +117,7 @@ export default function DoacaoScreen() {
               <View className="flex-1">
                 <Text className="text-foreground font-bold mb-2">Desconto Falso (%)</Text>
                 <TextInput 
-                  className="bg-surface border border-border rounded-xl p-4 text-white"
+                  className="bg-surface border border-border rounded-xl p-4 text-foreground"
                   placeholder="10"
                   placeholderTextColor="#8b8496"
                   keyboardType="numeric"
@@ -122,7 +130,7 @@ export default function DoacaoScreen() {
             <View>
               <Text className="text-foreground font-bold mb-2">Preço Falso (R$) *</Text>
               <TextInput 
-                className="bg-surface border border-border rounded-xl p-4 text-white font-mono text-xl"
+                className="bg-surface border border-border rounded-xl p-4 text-foreground font-mono text-xl"
                 placeholder="999.99"
                 placeholderTextColor="#8b8496"
                 keyboardType="numeric"
@@ -133,18 +141,18 @@ export default function DoacaoScreen() {
           </View>
 
           <TouchableOpacity 
-            className="mt-8 bg-purple py-4 rounded-2xl items-center shadow-[0_0_15px_rgba(166,74,255,0.4)] mb-10"
+            className="mt-8 bg-purple py-4 rounded-2xl items-center shadow-[0_0_15px_rgba(204,255,0,0.4)] mb-10"
             onPress={handleSubmit}
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#ffffff" />
+              <ActivityIndicator color="#09090b" />
             ) : (
-              <Text className="font-black text-white text-lg">DOAR PRODUTO INÚTIL 🚀</Text>
+              <Text className="font-black text-foreground text-lg">DOAR PRODUTO INÚTIL 🚀</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }

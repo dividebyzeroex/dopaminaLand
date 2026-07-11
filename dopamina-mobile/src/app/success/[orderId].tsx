@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, SafeAreaView } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useSheet } from '@/contexts/SheetContext';
 
 export default function SuccessScreen() {
   const { orderId } = useLocalSearchParams();
   const router = useRouter();
+  const { setTabBarVisible } = useSheet();
+
+  // Hide floating tab bar when focused on this screen, restore on blur
+  useFocusEffect(
+    useCallback(() => {
+      setTabBarVisible(false);
+      return () => setTabBarVisible(true);
+    }, [])
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-background justify-center">

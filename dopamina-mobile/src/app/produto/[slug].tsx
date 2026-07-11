@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/contexts/CartContext';
+import { useIntentTracker } from '@/hooks/useIntentTracker';
+import { useCartToast } from '@/contexts/CartToastContext';
+import { useSheet } from '@/contexts/SheetContext';
+import DopaminaLoading from '@/components/DopaminaLoading';
 
 const fakeReviews = [
   { name: 'Maria S.', rating: 5, text: 'Melhor compra que já fiz! Não paguei nada e recebi nada. 10/10 recomendo! ⚡', date: '3 dias atrás' },
@@ -15,8 +23,23 @@ export default function ProductPage() {
   const { slug } = useLocalSearchParams();
   const router = useRouter();
   const { addItem } = useCart();
+  const insets = useSafeAreaInsets();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const { trackAddToCart } = useIntentTracker(product?.id, product?.sale_price);
+  const { showCartToast } = useCartToast();
+  const { setTabBarVisible } = useSheet();
+
+  // Hide floating tab bar when focused on this screen, restore on blur
+  useFocusEffect(
+    useCallback(() => {
+      setTabBarVisible(false);
+      return () => setTabBarVisible(true);
+    }, [])
+  );
 
   useEffect(() => {
     async function fetchProduct() {
@@ -30,67 +53,122 @@ export default function ProductPage() {
     fetchProduct();
   }, [slug]);
 
-  useEffect(() => {
-    if (!product) return;
-    
-    // Telemetry: view_item
-    const sessionId = 'mobile-session-' + Date.now();
-    supabase.from('intent_events').insert([{
-      session_id: sessionId,
-      event_type: 'view_item',
-      product_id: product.id,
-      price: product.sale_price,
-      metadata: { source: 'mobile_product_page', slug: product.slug }
-    }]).then(() => {});
-
-    // Telemetry: dwell_time_exceeded (15s)
-    const timer = setTimeout(() => {
-      supabase.from('intent_events').insert([{
-        session_id: sessionId,
-        event_type: 'dwell_time_exceeded',
-        product_id: product.id,
-        price: product.sale_price,
-        metadata: { source: 'mobile_product_page', slug: product.slug, time_spent: 15 }
-      }]).then(() => {});
-    }, 15000);
-
-    return () => clearTimeout(timer);
-  }, [product]);
-
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator color="#ccff00" />
-      </SafeAreaView>
+      <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+        <DopaminaLoading />
+      </View>
     );
   }
 
   if (!product) {
     return (
-      <SafeAreaView className="flex-1 bg-background justify-center items-center">
-        <Text className="text-white">Produto não encontrado.</Text>
+      <View className="flex-1 bg-background justify-center items-center" style={{ paddingTop: insets.top }}>
+        <Text className="text-foreground">Produto não encontrado.</Text>
         <TouchableOpacity onPress={() => router.back()} className="mt-4"><Text className="text-neon">Voltar</Text></TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
   const numRating = Number(product.rating) || 5;
   const stars = '★'.repeat(Math.floor(numRating)) + (numRating % 1 >= 0.5 ? '★' : '');
 
+  // Parallax title animations
+  const nameInImageOpacity = scrollY.interpolate({
+    inputRange: [0, 40, 100],
+    outputRange: [0, 0, 1],
+    extrapolate: 'clamp',
+  });
+  const nameInImageTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [24, 0],
+    extrapolate: 'clamp',
+  });
+  const nameBelowOpacity = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+  const nameBelowTranslateY = scrollY.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, -16],
+    extrapolate: 'clamp',
+  });
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-row items-center px-6 py-4 border-b border-border">
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text className="text-foreground text-2xl font-bold">←</Text>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      {/* Floating glass back button over parallax */}
+      <View style={{
+        position: 'absolute',
+        top: insets.top + 12,
+        left: 16,
+        zIndex: 10,
+      }}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          activeOpacity={0.8}
+          style={{ borderRadius: 20, overflow: 'hidden' }}
+        >
+          <BlurView intensity={70} tint="light" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+          <View style={{
+            backgroundColor: 'rgba(255,255,255,0.55)',
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.7)',
+            paddingVertical: 8,
+            paddingHorizontal: 14,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: '#09090b' }}>←</Text>
+          </View>
         </TouchableOpacity>
-        <Text className="text-muted ml-4 truncate font-bold text-sm" numberOfLines={1}>{product.short_name || product.name}</Text>
       </View>
 
-      <ScrollView className="flex-1">
-        <View className="relative w-full aspect-square bg-surface border-b border-border items-center justify-center p-8">
+      <Animated.ScrollView 
+        className="flex-1"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
+        <Animated.View 
+          className="relative w-full aspect-square bg-surface border-b border-border items-center justify-center overflow-hidden"
+          style={{
+            transform: [
+              {
+                translateY: scrollY.interpolate({
+                  inputRange: [-200, 0, 300],
+                  outputRange: [-100, 0, 150],
+                  extrapolate: 'clamp'
+                })
+              },
+              {
+                scale: scrollY.interpolate({
+                  inputRange: [-200, 0],
+                  outputRange: [2, 1],
+                  extrapolateLeft: 'extend',
+                  extrapolateRight: 'clamp'
+                })
+              }
+            ]
+          }}
+        >
           <View className="absolute inset-0 bg-neon/10 rounded-full blur-3xl scale-75 pointer-events-none" />
-          {product.local_image ? (
-            <Image source={{ uri: `https://raw.githubusercontent.com/dividebyzeroex/dopaminaLand/main/dopamina-brasil/public${product.local_image}` }} className="w-full h-full drop-shadow-2xl" resizeMode="contain" />
+          
+          {!imageLoaded && product.image_url && (
+            <View className="absolute inset-0 bg-muted/20 animate-pulse" />
+          )}
+
+          {product.image_url ? (
+            <Image 
+              source={{ uri: product.image_url }} 
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
+              contentFit="cover"
+              transition={500}
+              onLoad={() => setImageLoaded(true)}
+            />
           ) : (
             <Text className="text-[160px] drop-shadow-2xl">{product.image}</Text>
           )}
@@ -99,16 +177,45 @@ export default function ProductPage() {
               <Text className="text-white font-black">-{product.discount}%</Text>
             </View>
           )}
-        </View>
-
-        <View className="p-6">
-          <View className="flex-row items-center gap-2 mb-2">
-            <Text className="text-amber-400 font-bold">{stars}</Text>
-            <Text className="text-neon font-black">{product.rating}</Text>
-            <Text className="text-muted text-xs">({product.reviews} avaliações)</Text>
+          {/* Bottom vignette fade -> surface color */}
+          <View style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 160,
+            flexDirection: 'column',
+          }}>
+            {[0, 0.04, 0.1, 0.18, 0.3, 0.48, 0.68, 0.85, 0.94, 1].map((opacity, i) => (
+              <View key={i} style={{ flex: 1, backgroundColor: `rgba(244,244,245,${opacity})` }} />
+            ))}
           </View>
 
-          <Text className="text-foreground font-black text-3xl mb-4">{product.name}</Text>
+          {/* Product name overlaid on gradient - animates IN as user scrolls */}
+          <Animated.View style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 20,
+            paddingBottom: 16,
+            opacity: nameInImageOpacity,
+            transform: [{ translateY: nameInImageTranslateY }],
+          }}>
+            <Text style={{ color: '#09090b', fontWeight: '900', fontSize: 22, lineHeight: 26 }} numberOfLines={2}>{product.name}</Text>
+          </Animated.View>
+        </Animated.View>
+
+        <View className="p-6">
+          {/* stars + name below image - animates OUT together as user scrolls up */}
+          <Animated.View style={{ opacity: nameBelowOpacity, transform: [{ translateY: nameBelowTranslateY }] }}>
+            <View className="flex-row items-center gap-2 mb-3">
+              <Text className="text-amber-400 font-bold">{stars}</Text>
+              <Text className="text-neon font-black">{product.rating}</Text>
+              <Text className="text-muted text-xs">({product.reviews} avaliações)</Text>
+            </View>
+            <Text className="text-foreground font-black text-3xl mb-4">{product.name}</Text>
+          </Animated.View>
 
           <View className="bg-surface-light p-6 rounded-2xl border border-border mb-6">
             <Text className="text-muted line-through">De R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
@@ -128,7 +235,7 @@ export default function ProductPage() {
             {fakeReviews.map((r, i) => (
               <View key={i} className="bg-surface p-4 rounded-xl border border-border">
                 <View className="flex-row justify-between mb-2">
-                  <Text className="text-white font-bold">{r.name}</Text>
+                  <Text className="text-foreground font-bold">{r.name}</Text>
                   <Text className="text-muted text-xs">{r.date}</Text>
                 </View>
                 <Text className="text-amber-400 text-xs mb-2">{'★'.repeat(r.rating)}</Text>
@@ -137,30 +244,25 @@ export default function ProductPage() {
             ))}
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Fixed Bottom CTA */}
-      <View className="p-6 bg-card border-t border-border flex-row gap-4">
+      <View style={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: insets.bottom + 16, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.08)', flexDirection: 'row', gap: 12 }}>
         <TouchableOpacity 
-          className="flex-1 bg-neon py-4 rounded-2xl items-center shadow-[0_0_15px_rgba(204,255,0,0.4)]"
+          className="flex-1 bg-neon py-4 rounded-2xl items-center shadow-[0_0_15px_rgba(124,58,237,0.4)]"
           onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             addItem({
               id: product.id,
               slug: product.slug,
               name: product.name,
               shortName: product.short_name,
               image: product.image,
-              localImage: product.local_image,
+              localImage: product.image_url,
               originalPrice: product.price,
               salePrice: product.sale_price,
             });
-            supabase.from('intent_events').insert([{
-              session_id: 'mobile-session-' + Date.now(),
-              event_type: 'add_to_cart',
-              product_id: product.id,
-              price: product.sale_price,
-              metadata: { source: 'mobile_product_page_buy' }
-            }]).then(() => {});
+            trackAddToCart();
             router.push('/checkout');
           }}
         >
@@ -170,29 +272,24 @@ export default function ProductPage() {
         <TouchableOpacity 
           className="bg-surface border-2 border-neon w-16 h-16 rounded-2xl items-center justify-center"
           onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             addItem({
               id: product.id,
               slug: product.slug,
               name: product.name,
               shortName: product.short_name,
               image: product.image,
-              localImage: product.local_image,
+              localImage: product.image_url,
               originalPrice: product.price,
               salePrice: product.sale_price,
             });
-            supabase.from('intent_events').insert([{
-              session_id: 'mobile-session-' + Date.now(),
-              event_type: 'add_to_cart',
-              product_id: product.id,
-              price: product.sale_price,
-              metadata: { source: 'mobile_product_page_add' }
-            }]).then(() => {});
-            alert('Adicionado ao carrinho!');
+            trackAddToCart();
+            showCartToast();
           }}
         >
           <Text className="text-2xl">🛒</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
