@@ -47,14 +47,45 @@ export default function AnalyticsDashboardClient() {
     ga4Data, posthogData,
   } = useInsightsData();
 
-  const handleCrmSync = (leadId: string, type: 'hubspot' | 'salesforce' | 'slack') => {
+  const handleCrmSync = async (leadId: string, type: 'hubspot' | 'salesforce' | 'slack') => {
     const key = `${leadId}-${type}`;
+    
+    if (type !== 'hubspot') {
+      setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'loading' }));
+      setTimeout(() => {
+        setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'success' }));
+        setSuccessToast(`Lead sincronizado com o ${type.toUpperCase()}! 🚀`);
+        setTimeout(() => setSuccessToast(null), 3000);
+      }, 1200);
+      return;
+    }
+
+    const lead = intentData.topLeads.find(l => l.id === leadId);
+    if (!lead) return;
+
     setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'loading' }));
-    setTimeout(() => {
-      setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'success' }));
-      setSuccessToast(`Lead sincronizado com o ${type.toUpperCase()}! 🚀`);
-      setTimeout(() => setSuccessToast(null), 3000);
-    }, 1200);
+
+    try {
+      const response = await fetch('/api/crm/hubspot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead }),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'success' }));
+        setSuccessToast("Sincronizado com o HubSpot com sucesso! 🚀");
+      } else {
+        setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'idle' }));
+        alert(`Falha ao sincronizar com HubSpot: ${result.error || 'Erro desconhecido'}`);
+      }
+    } catch (err) {
+      setCrmIntegrationStatus(prev => ({ ...prev, [key]: 'idle' }));
+      alert("Erro de rede ao conectar com o serviço do HubSpot.");
+    }
+
+    setTimeout(() => setSuccessToast(null), 4000);
   };
 
   const handleLogin = (e: React.FormEvent) => {

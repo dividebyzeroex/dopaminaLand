@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useGame } from '@/contexts/GameContext';
 import gameData from '@/data/achievements.json';
 
+import { initSession } from '@/lib/tracking';
+
 // Leaderboard Mock
 const leaderboard = [
   { rank: 1, name: 'Chuck Norris', orders: 999, dopamine: 149850 },
@@ -54,8 +56,24 @@ export default function ContaClient() {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    setNickname(inputName || 'Anônimo');
-    setEmail(inputEmail);
+    const newNickname = inputName || 'Anônimo';
+    const newEmail = inputEmail;
+
+    setNickname(newNickname);
+    setEmail(newEmail);
+
+    // Save to localStorage immediately so tracking picks it up
+    try {
+      const saved = localStorage.getItem('dopamina-game');
+      const parsed = saved ? JSON.parse(saved) : {};
+      parsed.nickname = newNickname;
+      parsed.email = newEmail;
+      localStorage.setItem('dopamina-game', JSON.stringify(parsed));
+    } catch {}
+
+    // Force-update the session in DB
+    initSession(true);
+
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
   };

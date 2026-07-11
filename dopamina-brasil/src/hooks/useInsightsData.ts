@@ -25,6 +25,8 @@ export interface IntentLead {
   views: string[];
   carts: string[];
   timeline: any[];
+  email?: string;
+  nickname?: string;
 }
 
 export interface IntentData {
@@ -150,6 +152,8 @@ export function useInsightsData() {
       const os = sess.device_info?.os_name || 'Desconhecido';
       const source = sess.device_info?.utm_source || sess.device_info?.referrer || 'Tráfego Direto/Orgânico';
       const isMobile = sess.device_info?.is_mobile ? '📱' : '💻';
+      const email = sess.device_info?.email || '';
+      const nickname = sess.device_info?.nickname || '';
       const sortedTimeline = [...stats.eventTimeline].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
       return {
@@ -158,6 +162,8 @@ export function useInsightsData() {
         lastActive: new Date(stats.lastActive).toLocaleString('pt-BR'),
         views: Array.from(stats.productsViewed), carts: Array.from(stats.productsCarted),
         timeline: sortedTimeline,
+        email,
+        nickname,
       };
     }).filter(lead => lead.events > 0);
 

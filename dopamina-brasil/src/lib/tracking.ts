@@ -18,13 +18,13 @@ export function getSessionId() {
   return sessionId;
 }
 
-export async function initSession() {
+export async function initSession(forceUpdate: boolean = false) {
   if (typeof window === 'undefined') return;
   const sessionId = getSessionId();
   const initialized = sessionStorage.getItem('dopamina_session_initialized');
   
-  // Only track session once per browser session
-  if (initialized) return;
+  // Only track session once per browser session (unless forced)
+  if (initialized && !forceUpdate) return;
 
   const urlParams = new URLSearchParams(window.location.search);
   const utm_source = urlParams.get('utm_source') || '';
@@ -36,6 +36,17 @@ export async function initSession() {
   const nav = navigator as any;
   const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
   
+  let email = '';
+  let nickname = '';
+  try {
+    const saved = localStorage.getItem('dopamina-game');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      email = parsed.email || '';
+      nickname = parsed.nickname || '';
+    }
+  } catch {}
+
   const deviceInfo = {
     userAgent: navigator.userAgent,
     language: navigator.language,
@@ -49,7 +60,9 @@ export async function initSession() {
     utm_source,
     utm_medium,
     utm_campaign,
-    referrer
+    referrer,
+    email,
+    nickname
   };
 
   // Simulação de Gênero para composição de Dashboard de Vendas por Impulso
