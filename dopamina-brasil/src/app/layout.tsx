@@ -95,6 +95,13 @@ export default function RootLayout({
             gtag('config', 'G-JG8ZCXR32T');
           `}
         </Script>
+
+        {/* HubSpot Embed Code */}
+        <Script 
+          id="hs-script-loader" 
+          src="//js-na1.hs-scripts.com/51726820.js" 
+          strategy="afterInteractive" 
+        />
       </body>
     </html>
   );
