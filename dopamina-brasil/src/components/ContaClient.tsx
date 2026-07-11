@@ -301,17 +301,54 @@ export default function ContaClient() {
 
       {/* ═══════════ CATALOGO DE RECOMPENSAS FÍSICAS ═══════════ */}
       <div className="mb-12 rounded-3xl border border-orange-500/20 bg-white p-6 shadow-sm md:p-8 animate-fade-in">
-        <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600">
-              <span>🎁</span> Recompensas no Mundo Real
+        {/* Swag Hero Card */}
+        <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a0e2e] via-[#2a133d] to-[#4c1256] p-6 text-white shadow-xl border border-purple-500/20 md:p-8">
+          {/* Abstract light glow effects */}
+          <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl" />
+          <div className="absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
+          
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="space-y-4 max-w-xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wider text-white">
+                🔥 Swag Lab Oficial
+              </div>
+              <h2 className="font-[var(--font-display)] text-3xl md:text-4xl font-black tracking-tight leading-none bg-gradient-to-r from-orange-400 via-rose-400 to-purple-400 bg-clip-text text-transparent">
+                DOPAMINA SWAG LAB 🧪
+              </h2>
+              <p className="text-sm text-white/80 leading-relaxed">
+                Transforme seu engajamento e conquistas virtuais em recompensas do mundo real. Cada nível desbloqueia um item exclusivo produzido pela Dopamina Brasil. Frete 100% grátis para todo o território nacional.
+              </p>
             </div>
-            <h2 className="font-[var(--font-display)] text-2xl font-extrabold text-foreground mt-2">
-              Seu Swag Cyberpunk Exclusivo 📦
-            </h2>
-            <p className="text-sm text-muted max-w-xl">
-              Suba de nível fazendo compras e desbloqueando conquistas fictícias. Ao alcançar os níveis indicados, resgate brindes reais na sua casa gratuitamente!
-            </p>
+
+            {/* XP Requirements Legend Panel */}
+            <div className="w-full lg:max-w-md rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur-sm space-y-4">
+              <h4 className="text-xs font-black tracking-widest text-orange-400 uppercase">Tabela de Conversão de XP</h4>
+              <div className="space-y-2.5">
+                {PHYSICAL_REWARDS.map((rew) => {
+                  const isCurrentUnlocked = level >= rew.levelRequired;
+                  return (
+                    <div key={rew.id} className="flex items-center justify-between text-xs border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{rew.icon}</span>
+                        <div>
+                          <p className="font-bold text-white">{rew.name}</p>
+                          <p className="text-[10px] text-white/40">Desbloqueia no Nível {rew.levelRequired}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`font-black rounded-lg px-2.5 py-1 text-[10px] ${
+                          isCurrentUnlocked 
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                            : 'bg-white/5 text-white/50 border border-white/10'
+                        }`}>
+                          {rew.xpRequired.toLocaleString('pt-BR')} ⚡ XP
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 

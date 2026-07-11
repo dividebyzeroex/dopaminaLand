@@ -8,17 +8,45 @@ interface FomoEvent {
   icon: string;
 }
 
-const FOMO_EVENTS: FomoEvent[] = [
-  { name: 'Lucas de São Paulo', action: 'acabou de garantir seus adesivos!', icon: '📦' },
-  { name: 'Mariana de Belo Horizonte', action: 'acabou de levar para casa um chaveiro neon dopamina irado!!', icon: '🔑' },
-  { name: 'Felipe de Curitiba', action: 'resgatou um copo térmico futurista de graça!!', icon: '🥤' },
-  { name: 'Beatriz do Rio de Janeiro', action: 'acabou de garantir o seu óculos led holográfico!!', icon: '👓' },
-  { name: 'Renato de Porto Alegre', action: 'levou a camiseta Dopaminado Corp oficial de graça!!', icon: '👕' },
-  { name: 'Amanda de Florianópolis', action: 'acabou de garantir seus adesivos!', icon: '📦' },
-  { name: 'Gabriel de Salvador', action: 'acabou de levar para casa um chaveiro neon dopamina irado!!', icon: '🔑' },
-  { name: 'Isabela de Brasília', action: 'resgatou um copo térmico futurista de graça!!', icon: '🥤' },
-  { name: 'Rafael de Fortaleza', action: 'acabou de garantir o seu óculos led holográfico!!', icon: '👓' },
-  { name: 'Larissa de Recife', action: 'levou a camiseta Dopaminado Corp oficial de graça!!', icon: '👕' },
+const BRAZILIAN_NAMES = [
+  'Lucas', 'Gabriel', 'Pedro', 'Matheus', 'João', 'Enzo', 'Gustavo', 'Felipe', 'Rodrigo', 'Bruno', 
+  'Thiago', 'Daniel', 'Rafael', 'Leonardo', 'Vitor', 'André', 'Caio', 'Marcos', 'Arthur', 'Guilherme',
+  'Mariana', 'Beatriz', 'Julia', 'Camila', 'Larissa', 'Isabela', 'Amanda', 'Paula', 'Gabriela', 'Fernanda',
+  'Letícia', 'Sofia', 'Carolina', 'Alice', 'Luana', 'Bruna', 'Clara', 'Manuela', 'Yasmin', 'Jéssica',
+  'Alexandre', 'Diego', 'Eduardo', 'Henrique', 'Marcelo', 'Murilo', 'Renan', 'Samuel', 'Vanessa', 'Patrícia',
+  'Aline', 'Bárbara', 'Cintia', 'Débora', 'Elisa', 'Flávia', 'Gisele', 'Helena', 'Ingrid', 'Juliana',
+  'Karina', 'Lívia', 'Mirella', 'Natália', 'Olívia', 'Priscila', 'Raquel', 'Sabrina', 'Tainá', 'Valéria'
+];
+
+const BRAZILIAN_CITIES = [
+  'São Paulo - SP', 'Rio de Janeiro - RJ', 'Belo Horizonte - MG', 'Curitiba - PR', 'Porto Alegre - RS',
+  'Florianópolis - SC', 'Salvador - BA', 'Brasília - DF', 'Recife - PE', 'Fortaleza - CE',
+  'Campinas - SP', 'Niterói - RJ', 'Joinville - SC', 'Vitória - ES', 'Manaus - AM',
+  'Goiânia - GO', 'Belém - PA', 'São Luís - MA', 'Maceió - AL', 'Natal - RN',
+  'Teresina - PI', 'João Pessoa - PB', 'Aracaju - SE', 'Cuiabá - MT', 'Campo Grande - MS',
+  'Porto Velho - RO', 'Macapá - AP', 'Rio Branco - AC', 'Boa Vista - RR', 'Palmas - TO',
+  'Santos - SP', 'Ribeirão Preto - SP', 'Sorocaba - SP', 'Londrina - PR', 'Maringá - PR',
+  'Caxias do Sul - RS', 'Pelotas - RS', 'Blumenau - SC', 'Balneário Camboriú - SC', 'Uberlândia - MG',
+  'Juiz de Fora - MG', 'Niterói - RJ', 'São Bernardo do Campo - SP', 'Santo André - SP', 'Guarulhos - SP'
+];
+
+const ACTIONS = [
+  'acabou de garantir',
+  'resgatou agora mesmo',
+  'levou para casa de graça',
+  'garantiu com frete grátis',
+  'acabou de levar para casa',
+  'solicitou o envio de',
+  'reivindicou com sucesso',
+  'resgatou em segundos'
+];
+
+const REWARDS = [
+  { name: 'Kit de Adesivos Cyberpunk', icon: '📦', suffix: 'irado!' },
+  { name: 'Chaveiro Neon Dopamina', icon: '🔑', suffix: 'ultra futurista!!' },
+  { name: 'Copo Térmico Futurista', icon: '🥤', suffix: 'para o seu café/drink!' },
+  { name: 'Óculos LED Holográfico', icon: '👓', suffix: 'estiloso!' },
+  { name: 'Camiseta Dopaminado Corp', icon: '👕', suffix: 'oversized oficial!' },
 ];
 
 export default function FomoToast() {
@@ -43,8 +71,16 @@ export default function FomoToast() {
   }, []);
 
   const triggerRandomToast = () => {
-    const randomIdx = Math.floor(Math.random() * FOMO_EVENTS.length);
-    setCurrentEvent(FOMO_EVENTS[randomIdx]);
+    const name = BRAZILIAN_NAMES[Math.floor(Math.random() * BRAZILIAN_NAMES.length)];
+    const city = BRAZILIAN_CITIES[Math.floor(Math.random() * BRAZILIAN_CITIES.length)];
+    const action = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
+    const reward = REWARDS[Math.floor(Math.random() * REWARDS.length)];
+
+    setCurrentEvent({
+      name: `${name} de ${city}`,
+      action: `${action} um ${reward.name} ${reward.suffix}`,
+      icon: reward.icon,
+    });
     setIsVisible(true);
 
     // Auto-dismiss after 6 seconds

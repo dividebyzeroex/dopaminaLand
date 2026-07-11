@@ -202,6 +202,53 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         </div>
       </section>
 
+      {/* ============ PROMO SWAG REAL BANNER ============ */}
+      <section className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 animate-fade-in">
+        <div className="group relative overflow-hidden rounded-[2rem] border border-orange-500/20 bg-gradient-to-br from-[#1a0e2e] via-[#2a133d] to-[#4c1256] p-8 text-white shadow-lg md:p-10">
+          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-orange-500/10 blur-3xl transition-transform duration-1000 group-hover:scale-110" />
+          <div className="absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl transition-transform duration-1000 group-hover:scale-110" />
+          
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-white">
+                🎁 RECOMPENSA FÍSICA REAL
+              </span>
+              <h2 className="font-[var(--font-display)] text-3xl md:text-5xl font-black tracking-tight leading-none bg-gradient-to-r from-orange-400 via-rose-400 to-purple-400 bg-clip-text text-transparent">
+                GANHE BRINDES REAIS DE GRAÇA 📦
+              </h2>
+              <p className="text-sm md:text-base text-white/80 leading-relaxed">
+                Nós transformamos seus pontos de dopamina virtuais em brindes cyberpunk físicos reais de verdade! Junte XP comprando e completando conquistas no site, e resgate prêmios como adesivos, chaveiro, copo térmico, óculos LED e camiseta com frete 100% grátis.
+              </p>
+              <div className="pt-2 flex flex-wrap gap-3">
+                <a
+                  href="/minha-conta"
+                  className="rounded-full bg-orange-500 px-8 py-3.5 text-sm font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-orange-600 active:scale-95 whitespace-nowrap"
+                >
+                  Ver Meu Nível & Swag 🧪
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Preview Icons Grid */}
+            <div className="grid grid-cols-5 gap-3 shrink-0 lg:max-w-md w-full">
+              {[
+                { icon: '📦', name: 'Adesivos', level: 'Nív. 2' },
+                { icon: '🔑', name: 'Chaveiro', level: 'Nív. 3' },
+                { icon: '🥤', name: 'Copo', level: 'Nív. 4' },
+                { icon: '👓', name: 'Óculos LED', level: 'Nív. 5' },
+                { icon: '👕', name: 'Camiseta', level: 'Nív. 6' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-orange-500/30">
+                  <span className="text-3xl md:text-4xl">{item.icon}</span>
+                  <span className="text-[10px] font-black text-white mt-2 text-center leading-none">{item.name}</span>
+                  <span className="text-[9px] text-orange-400 font-bold mt-1 text-center leading-none">{item.level}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ MARQUEE DIVIDER ============ */}
       <div className="mt-12 overflow-hidden bg-foreground py-3 text-[13px] font-bold uppercase tracking-wider text-background">
         <div className="flex w-max animate-marquee gap-12 whitespace-nowrap pr-12">
