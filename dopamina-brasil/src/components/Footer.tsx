@@ -69,6 +69,18 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* SEO Semântico: O que é Dopamina? */}
+        <div className="mt-12 border-t border-border pt-8 text-left max-w-4xl">
+          <h4 className="text-xs font-bold uppercase tracking-widest text-muted">Estudo de Caso & SEO Semântico</h4>
+          <h3 className="text-lg font-black text-foreground mt-2">O que é a Dopamina e como ela afeta as compras por impulso? 🧠⚡</h3>
+          <p className="text-xs text-muted leading-relaxed mt-2">
+            A <strong>dopamina</strong> é um neurotransmissor liberado pelo cérebro que atua diretamente no nosso sistema de recompensa e motivação. Ao contrário do que muitos pensam, a dopamina não é liberada no momento em que você recebe ou consome o produto, mas sim durante a <strong>antecipação</strong> e o desejo da recompensa.
+          </p>
+          <p className="text-xs text-muted leading-relaxed mt-2">
+            Quando você entra em um e-commerce, pesquisa por produtos de desejo, preenche cupons e finaliza uma compra, seu cérebro recebe descargas rápidas de <strong>dopamina</strong>. O projeto <strong>Dopamina Brasil</strong> (dopaminado.com.br) serve como uma paródia e um laboratório UX para explorar esses gatilhos mentais do consumismo sem as faturas de cobrança, demonstrando que o estímulo da dopamina e a sensação de alívio podem ser gerados e saciados de forma 100% fictícia e gratuita.
+          </p>
+        </div>
+
         <CleitonEasterEgg />
 
         {/* Bottom */}

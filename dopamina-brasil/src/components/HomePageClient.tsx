@@ -100,22 +100,22 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
             <div className="relative z-10 w-full text-center lg:text-left">
               <span className="inline-flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-neon">
-                ✦ sua dose de consumismo simulado
+                ✦ liberação de dopamina instantânea e gratuita
               </span>
               <h1 className="mt-5 font-[var(--font-display)] text-5xl font-black leading-[0.95] tracking-tight text-foreground sm:text-7xl">
-                escolha. <span className="gradient-text">clique</span>.
+                libere sua <span className="gradient-text">dopamina</span>.
                 <br />
-                o cleiton <span className="gradient-text">entrega</span>.
+                gaste <span className="gradient-text">zero</span>.
               </h1>
               <p className="mx-auto mt-5 max-w-md text-base font-medium text-muted sm:text-lg lg:mx-0">
-                Sua encomenda não viaja, ela teleporta. O único e-commerce onde seu limite é infinito e a culpa não existe. ⚡
+                O dopaminado.com.br é o simulador de e-commerce cyberpunk projetado para você obter o prazer da dopamina de compras sem fatura. ⚡
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <a
                   href="#catalogo"
                   className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap"
                 >
-                  quero minha dopamina 🚀
+                  extravasar minha dopamina 🚀
                 </a>
               </div>
             </div>

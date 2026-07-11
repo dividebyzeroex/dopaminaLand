@@ -31,13 +31,16 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dopaminado.com.br'),
-  title: "dopaminado ⚡ — Compre o que quiser. Gaste zero.",
+  title: "Dopamina Brasil ⚡ — Estimule sua Dopamina de Compras Grátis",
   description:
-    "O e-commerce cyberpunk onde você compra a dopamina sem usar o limite. Checkout blindado, produtos ultra-desejáveis e fatura em R$ 0,00.",
+    "Extravase e estimule sua dopamina de compras sem gastar um único centavo. O simulador de e-commerce cyberpunk onde a dopamina é infinita e o preço é R$ 0,00.",
   keywords: [
+    "dopamina",
+    "o que é dopamina",
+    "dopamina de comprar",
+    "estimular dopamina",
     "loja cyberpunk",
     "e-commerce paródia",
-    "dopamina de comprar",
     "comprar sem gastar",
     "checkout falso",
     "rastreamento falso",
@@ -49,9 +52,9 @@ export const metadata: Metadata = {
   ],
   robots: "index, follow",
   openGraph: {
-    title: "dopaminado ⚡ — Compre o que quiser. Gaste zero.",
+    title: "Dopamina Brasil ⚡ — Estimule sua Dopamina de Compras Grátis",
     description:
-      "O e-commerce cyberpunk que vende a emoção de comprar sem o peso da fatura.",
+      "O simulador de e-commerce cyberpunk projetado para você obter o prazer da dopamina de compras sem fatura.",
     locale: "pt_BR",
     type: "website",
   },
