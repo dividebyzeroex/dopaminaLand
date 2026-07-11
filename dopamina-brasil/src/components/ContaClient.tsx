@@ -20,6 +20,23 @@ const leaderboard = [
   { rank: 10, name: 'Zé das Compras', orders: 8, dopamine: 1050 },
 ];
 
+interface PhysicalReward {
+  id: string;
+  name: string;
+  levelRequired: number;
+  xpRequired: number;
+  description: string;
+  icon: string;
+}
+
+const PHYSICAL_REWARDS: PhysicalReward[] = [
+  { id: 'adesivos', name: 'Kit de Adesivos Cyberpunk', levelRequired: 2, xpRequired: 100, description: 'Um pacote de adesivos holográficos irados para colar no seu notebook.', icon: '📦' },
+  { id: 'chaveiro', name: 'Chaveiro Neon Dopamina', levelRequired: 3, xpRequired: 500, description: 'Chaveiro futurista com logo brilhante da Dopamina Brasil.', icon: '🔑' },
+  { id: 'copo', name: 'Copo Térmico Futurista', levelRequired: 4, xpRequired: 1500, description: 'Mantém seu café quente e sua dopamina gelada.', icon: '🥤' },
+  { id: 'oculos', name: 'Óculos LED Holográfico', levelRequired: 5, xpRequired: 5000, description: 'O acessório definitivo para se destacar no metaverso.', icon: '👓' },
+  { id: 'camiseta', name: 'Camiseta Dopaminado Corp', levelRequired: 6, xpRequired: 15000, description: 'Camiseta cyberpunk oversized oficial da marca Dopaminado.', icon: '👕' },
+];
+
 export default function ContaClient() {
   const {
     nickname,
@@ -35,11 +52,27 @@ export default function ContaClient() {
     purchaseCount,
     totalSpent,
     achievements,
+    claimedRewards,
+    claimReward,
   } = useGame();
 
   const [inputName, setInputName] = useState(nickname);
   const [inputEmail, setInputEmail] = useState(email);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Physical Reward form states
+  const [cep, setCep] = useState('');
+  const [address, setAddress] = useState('');
+  const [number, setNumber] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [city, setCity] = useState('');
+  const [stateName, setStateName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [jobtitle, setJobtitle] = useState('');
+  const [company, setCompany] = useState('');
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+
+  const [selectedRewardToClaim, setSelectedRewardToClaim] = useState<PhysicalReward | null>(null);
 
   // Stats mock
   const delivered = purchaseCount; // Assumes all arrived immediately
@@ -76,6 +109,48 @@ export default function ContaClient() {
 
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
+  };
+
+  const handleClaimReward = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRewardToClaim) return;
+    setSubmittingClaim(true);
+
+    try {
+      const response = await fetch('/api/crm/hubspot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          claimData: {
+            email: email || localStorage.getItem('dopamina-email') || '',
+            nickname,
+            address,
+            number,
+            bairro,
+            city,
+            state: stateName,
+            zip: cep,
+            phone,
+            jobtitle,
+            company,
+            rewardId: selectedRewardToClaim.id,
+            rewardName: selectedRewardToClaim.name,
+          }
+        })
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        claimReward(selectedRewardToClaim.id, selectedRewardToClaim.name);
+        setSelectedRewardToClaim(null);
+      } else {
+        alert(`Erro ao processar resgate: ${result.error || 'Erro desconhecido'}`);
+      }
+    } catch (err) {
+      alert('Erro de rede ao conectar com o HubSpot.');
+    } finally {
+      setSubmittingClaim(false);
+    }
   };
 
   return (
@@ -222,6 +297,218 @@ export default function ContaClient() {
               : 'Nível Máximo Alcançado! Sua dopamina transbordou.'}
           </div>
         </div>
+      </div>
+
+      {/* ═══════════ CATALOGO DE RECOMPENSAS FÍSICAS ═══════════ */}
+      <div className="mb-12 rounded-3xl border border-orange-500/20 bg-white p-6 shadow-sm md:p-8 animate-fade-in">
+        <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-600">
+              <span>🎁</span> Recompensas no Mundo Real
+            </div>
+            <h2 className="font-[var(--font-display)] text-2xl font-extrabold text-foreground mt-2">
+              Seu Swag Cyberpunk Exclusivo 📦
+            </h2>
+            <p className="text-sm text-muted max-w-xl">
+              Suba de nível fazendo compras e desbloqueando conquistas fictícias. Ao alcançar os níveis indicados, resgate brindes reais na sua casa gratuitamente!
+            </p>
+          </div>
+        </div>
+
+        {/* Grid de Brindes */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {PHYSICAL_REWARDS.map((rew) => {
+            const isUnlocked = level >= rew.levelRequired;
+            const isClaimed = (claimedRewards || []).includes(rew.id);
+
+            return (
+              <div
+                key={rew.id}
+                className={`relative flex flex-col justify-between rounded-2xl border p-5 transition ${
+                  isClaimed
+                    ? 'border-emerald-500/30 bg-emerald-50/20'
+                    : isUnlocked
+                    ? 'border-orange-500/30 bg-orange-50/5 shadow-sm'
+                    : 'border-transparent bg-surface-light opacity-60'
+                }`}
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <span className="text-4xl mb-3 block">{rew.icon}</span>
+                    {!isUnlocked ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                        🔒 Nível {rew.levelRequired}
+                      </span>
+                    ) : isClaimed ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        ✓ Resgatado
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200 animate-pulse">
+                        🎁 Pronto
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-extrabold text-foreground text-sm mt-2">{rew.name}</h3>
+                  <p className="text-[11px] text-muted leading-tight mt-1">{rew.description}</p>
+                </div>
+
+                <div className="mt-4">
+                  {!isUnlocked ? (
+                    <div className="text-[10px] text-slate-400 font-bold">
+                      Falta {rew.levelRequired - level} nível{rew.levelRequired - level > 1 ? 's' : ''}
+                    </div>
+                  ) : isClaimed ? (
+                    <div className="text-[10px] text-emerald-600 font-bold">Solicitação enviada</div>
+                  ) : (
+                    <button
+                      onClick={() => setSelectedRewardToClaim(rew)}
+                      className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs py-2 uppercase tracking-wide transition active:scale-95"
+                    >
+                      Resgatar
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Formulário de Resgate (se selecionado) */}
+        {selectedRewardToClaim && (
+          <div className="mt-8 border-t border-border pt-8 animate-fade-in">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+                Solicitando Resgate: <span className="text-orange-600">{selectedRewardToClaim.name} {selectedRewardToClaim.icon}</span>
+              </h3>
+              <button
+                onClick={() => setSelectedRewardToClaim(null)}
+                className="text-xs text-muted hover:text-foreground font-bold"
+              >
+                Cancelar ×
+              </button>
+            </div>
+
+            <form onSubmit={handleClaimReward} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Cargo</label>
+                  <input
+                    type="text"
+                    placeholder="ex: Tech Lead, Dev, Estudante"
+                    value={jobtitle}
+                    onChange={(e) => setJobtitle(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Empresa / Instituição</label>
+                  <input
+                    type="text"
+                    placeholder="ex: Google, Freelancer, UFSC"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">WhatsApp / Celular</label>
+                  <input
+                    type="tel"
+                    placeholder="(48) 99999-9999"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="sm:col-span-1 space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">CEP</label>
+                  <input
+                    type="text"
+                    placeholder="88000-000"
+                    value={cep}
+                    onChange={(e) => setCep(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Rua / Logradouro</label>
+                  <input
+                    type="text"
+                    placeholder="Av. Beira Mar Norte"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Número</label>
+                  <input
+                    type="text"
+                    placeholder="123"
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Bairro</label>
+                  <input
+                    type="text"
+                    placeholder="Centro"
+                    value={bairro}
+                    onChange={(e) => setBairro(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Cidade</label>
+                  <input
+                    type="text"
+                    placeholder="Florianópolis"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-muted uppercase">Estado (UF)</label>
+                  <input
+                    type="text"
+                    placeholder="SC"
+                    value={stateName}
+                    onChange={(e) => setStateName(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingClaim}
+                className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 py-4 font-black text-white text-sm tracking-wider uppercase transition active:scale-[0.98]"
+              >
+                {submittingClaim ? 'Processando envio...' : 'Confirmar Solicitação de Recompensa 🎁'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Achievements Grid */}

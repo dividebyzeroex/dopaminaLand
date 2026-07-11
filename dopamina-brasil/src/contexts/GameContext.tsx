@@ -23,6 +23,8 @@ interface GameState {
   nickname: string;
   email: string;
   toasts: { id: string; title: string; description: string; icon: string }[];
+  rewardClaimed?: boolean;
+  claimedRewards?: string[];
 }
 
 type GameAction =
@@ -32,6 +34,7 @@ type GameAction =
   | { type: 'SET_NICKNAME'; payload: string }
   | { type: 'SET_EMAIL'; payload: string }
   | { type: 'DISMISS_TOAST'; payload: string }
+  | { type: 'CLAIM_REWARD'; payload: { id: string; name: string } }
   | { type: 'LOAD_STATE'; payload: Partial<GameState> };
 
 function getLevelForXP(xp: number) {
@@ -188,6 +191,25 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'DISMISS_TOAST':
       return { ...state, toasts: state.toasts.filter(t => t.id !== action.payload) };
 
+    case 'CLAIM_REWARD': {
+      const alreadyClaimed = state.claimedRewards || [];
+      const newClaimed = [...alreadyClaimed, action.payload.id];
+      return {
+        ...state,
+        rewardClaimed: true,
+        claimedRewards: newClaimed,
+        toasts: [
+          ...state.toasts,
+          {
+            id: `claim-reward-${action.payload.id}-${Date.now()}`,
+            title: 'Recompensa Resgatada! 📦',
+            description: `Seu ${action.payload.name} foi solicitado com sucesso.`,
+            icon: '🎁',
+          },
+        ],
+      };
+    }
+
     case 'LOAD_STATE':
       return { ...state, ...action.payload, toasts: [] };
 
@@ -208,6 +230,8 @@ const initialState: GameState = {
   nickname: defaultNicknames[Math.floor(Math.random() * defaultNicknames.length)] + ' #' + Math.floor(Math.random() * 9999),
   email: '',
   toasts: [],
+  rewardClaimed: false,
+  claimedRewards: [],
 };
 
 interface GameContextType extends GameState {
@@ -216,6 +240,7 @@ interface GameContextType extends GameState {
   setNickname: (name: string) => void;
   setEmail: (email: string) => void;
   dismissToast: (id: string) => void;
+  claimReward: (id: string, name: string) => void;
   nextLevel: { level: number; xpRequired: number; title: string; emoji: string } | null;
   xpProgress: number;
   latestOrderId: string | null;
@@ -269,6 +294,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setNickname: (name) => dispatch({ type: 'SET_NICKNAME', payload: name }),
     setEmail: (email) => dispatch({ type: 'SET_EMAIL', payload: email }),
     dismissToast: (id) => dispatch({ type: 'DISMISS_TOAST', payload: id }),
+    claimReward: (id, name) => dispatch({ type: 'CLAIM_REWARD', payload: { id, name } }),
     nextLevel,
     xpProgress,
     latestOrderId: state.orders[0]?.id || null,

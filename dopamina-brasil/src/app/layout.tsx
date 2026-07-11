@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import AchievementToast from "@/components/AchievementToast";
+import FomoToast from "@/components/FomoToast";
 import TrackingProvider from "@/components/TrackingProvider";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
 const inter = Inter({
@@ -75,6 +76,7 @@ export default function RootLayout({
                 <Footer />
                 <CartDrawer />
                 <AchievementToast />
+                <FomoToast />
               </CSPostHogProvider>
             </TrackingProvider>
           </CartProvider>
