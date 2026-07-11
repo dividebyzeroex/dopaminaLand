@@ -6,11 +6,10 @@ import { supabase } from '@/lib/supabase';
 // ────── Types ──────
 export interface KpiData {
   totalSessions: number;
-  totalCheckouts: number;
-  conversionRate: number;
-  fakeRevenue: number;
-  aov: number;
-  cartAbandonment: number;
+  identifiedLeads: number;
+  identificationRate: number;
+  highIntentLeads: number;
+  frictionIndex: number;
 }
 
 export interface IntentLead {
@@ -84,7 +83,7 @@ export function useInsightsData() {
   const [productDict, setProductDict] = useState<Record<string, any>>({});
 
   // Computed data
-  const [kpis, setKpis] = useState<KpiData>({ totalSessions: 0, totalCheckouts: 0, conversionRate: 0, fakeRevenue: 0, aov: 0, cartAbandonment: 0 });
+  const [kpis, setKpis] = useState<KpiData>({ totalSessions: 0, identifiedLeads: 0, identificationRate: 0, highIntentLeads: 0, frictionIndex: 0 });
   const [funnelData, setFunnelData] = useState<any[]>([]);
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [timelineData, setTimelineData] = useState<any[]>([]);
@@ -315,14 +314,34 @@ export function useInsightsData() {
       setRawEvents(events || []);
       setProductDict(pDict);
 
-      // KPIs
-      const totalSess = finalSessionData.length > 0 ? finalSessionData.length : 1;
-      const safeCartCount = cartCount || 1;
+      // Calculate identified count
+      let identifiedCount = 0;
+      finalSessionData.forEach((sess) => {
+        const info = sess.device_info;
+        if (info && (info.email || info.nickname)) {
+          identifiedCount++;
+        }
+      });
+
+      // Calculate sessions with rage clicks
+      const sessionsWithRage = new Set<string>();
+      events?.forEach((ev) => {
+        if (ev.event_type === 'rage_click' && ev.session_id) {
+          sessionsWithRage.add(ev.session_id);
+        }
+      });
+
+      const computedIntent = recomputeIntentMetrics(finalSessionData, events || [], pDict, scoreWeights);
+      const highIntentCount = computedIntent.funnelStages.decision;
+
+      const totalSess = sessionCount || finalSessionData.length || 0;
+
       setKpis({
-        totalSessions: sessionCount || 0, totalCheckouts: checkoutCount,
-        conversionRate: ((checkoutCount / totalSess) * 100) || 0,
-        fakeRevenue: fakeRev, aov: checkoutCount > 0 ? fakeRev / checkoutCount : 0,
-        cartAbandonment: ((cartCount - checkoutCount) / safeCartCount) * 100,
+        totalSessions: totalSess,
+        identifiedLeads: identifiedCount,
+        identificationRate: totalSess > 0 ? (identifiedCount / totalSess) * 100 : 0,
+        highIntentLeads: highIntentCount,
+        frictionIndex: totalSess > 0 ? (sessionsWithRage.size / totalSess) * 100 : 0,
       });
 
       setFunnelData([

@@ -6,7 +6,6 @@ import {
   ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell,
 } from 'recharts';
 import { useInsightsData } from '@/hooks/useInsightsData';
-import PostHogTab from '@/components/insights/PostHogTab';
 import HubSpotTab from '@/components/insights/HubSpotTab';
 
 const COLORS = ['#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b', '#ef4444', '#10b981', '#ff00ff'];
@@ -30,7 +29,7 @@ export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'posthog' | 'ga4' | 'hubspot' | 'ecommerce' | 'intent' | 'ux' | 'marketing'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'intent' | 'products' | 'hubspot' | 'ux'>('overview');
 
   // Intent UI state
   const [showWeightSettings, setShowWeightSettings] = useState(false);
@@ -131,14 +130,11 @@ export default function AnalyticsDashboardClient() {
   }
 
   const TABS = [
-    { id: 'overview', label: '📊 Visão Geral' },
-    { id: 'posthog', label: '🦔 PostHog Analytics' },
-    { id: 'ga4', label: '📈 Google Analytics' },
+    { id: 'overview', label: '📊 Cockpit de Intenção' },
+    { id: 'intent', label: '🎯 Leads & Sinais B2B' },
+    { id: 'products', label: '📦 Sinais de Produto' },
     { id: 'hubspot', label: '🟠 HubSpot CRM' },
-    { id: 'ecommerce', label: '🛒 E-commerce' },
-    { id: 'intent', label: '🎯 Intent Data B2B' },
     { id: 'ux', label: '🖱️ Telemetria UX' },
-    { id: 'marketing', label: '📣 Campanhas' },
   ];
 
   return (
@@ -188,30 +184,31 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'overview' && (
             <div className="animate-fade-in">
               {/* KPI Cards */}
-              <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                   <div className="text-2xl">👥</div>
                   <div className="mt-2 text-4xl font-black text-foreground">{kpis.totalSessions}</div>
                   <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões Totais</div>
                 </div>
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                  <div className="text-2xl">💸</div>
-                  <div className="mt-2 text-4xl font-black text-emerald-500">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: "compact" }).format(kpis.fakeRevenue)}
-                  </div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Faturamento "Perdido"</div>
+                  <div className="text-2xl">📧</div>
+                  <div className="mt-2 text-4xl font-black text-indigo-600">{kpis.identifiedLeads}</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Leads Identificados</div>
                 </div>
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                  <div className="text-2xl">🛍️</div>
-                  <div className="mt-2 text-4xl font-black text-neon">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(kpis.aov)}
-                  </div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Ticket Médio (AOV)</div>
+                  <div className="text-2xl">📈</div>
+                  <div className="mt-2 text-4xl font-black text-neon">{kpis.identificationRate.toFixed(1)}%</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Taxa de Identificação</div>
                 </div>
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                  <div className="text-2xl">🏃</div>
-                  <div className="mt-2 text-4xl font-black text-rose-500">{kpis.cartAbandonment.toFixed(1)}%</div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Abandono de Carrinho</div>
+                  <div className="text-2xl">🔥</div>
+                  <div className="mt-2 text-4xl font-black text-rose-500">{kpis.highIntentLeads}</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Alta Intenção</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                  <div className="text-2xl">💢</div>
+                  <div className="mt-2 text-4xl font-black text-amber-500">{kpis.frictionIndex.toFixed(1)}%</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Índice de Fricção</div>
                 </div>
               </div>
 
@@ -283,75 +280,17 @@ export default function AnalyticsDashboardClient() {
             </div>
           )}
 
-          {/* ═══════════ TAB: POSTHOG ═══════════ */}
-          {activeTab === 'posthog' && (
-            <PostHogTab data={posthogData} />
-          )}
-
           {/* ═══════════ TAB: HUBSPOT CRM ═══════════ */}
           {activeTab === 'hubspot' && (
             <HubSpotTab data={hubspotCrmData} />
           )}
 
-          {/* ═══════════ TAB: GOOGLE ANALYTICS ═══════════ */}
-          {activeTab === 'ga4' && (
-            <div className="animate-fade-in space-y-6">
-              {ga4Data && ga4Data !== 'empty' ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                  <div className="rounded-2xl border-2 border-neon bg-neon/5 p-6 shadow-[0_0_15px_rgba(204,255,0,0.2)]">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon opacity-75" />
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-neon" />
-                      </span>
-                      <div className="text-xs font-bold uppercase tracking-wider text-neon">Agora</div>
-                    </div>
-                    <div className="text-4xl font-black text-foreground">{ga4Data.realtimeUsers || '0'}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Usuários Ativos (30m)</div>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                    <div className="text-2xl">👥</div>
-                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.activeUsers}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Usuários Ativos (30d)</div>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                    <div className="text-2xl">🌐</div>
-                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.sessions}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões (30d)</div>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                    <div className="text-2xl">👀</div>
-                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.pageViews}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Page Views (30d)</div>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-                    <div className="text-2xl">⚡</div>
-                    <div className="mt-2 text-4xl font-black text-foreground">{ga4Data.bounceRate}%</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Taxa de Rejeição</div>
-                  </div>
-                </div>
-              ) : ga4Data === 'empty' ? (
-                <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
-                  <div className="text-4xl mb-4">⏳</div>
-                  <h3 className="text-xl font-bold text-foreground">Processando Dados...</h3>
-                  <p className="mt-2 text-muted max-w-lg mx-auto">A API conectou com sucesso, mas o Google Analytics ainda não processou os dados desta propriedade. O GA4 costuma levar de 24 a 48 horas.</p>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
-                  <div className="text-4xl mb-4">⚠️</div>
-                  <h3 className="text-xl font-bold text-foreground">API do Google Analytics não configurada</h3>
-                  <p className="mt-2 text-muted max-w-lg mx-auto">Configure <code>GA_PROPERTY_ID</code>, <code>GA_CLIENT_EMAIL</code> e <code>GA_PRIVATE_KEY</code> no painel da Vercel.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ═══════════ TAB: E-COMMERCE ═══════════ */}
-          {activeTab === 'ecommerce' && (
+          {/* ═══════════ TAB: SINAIS DE PRODUTO ═══════════ */}
+          {activeTab === 'products' && (
             <div className="animate-fade-in space-y-6">
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl border border-border bg-surface-light p-6">
-                  <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>🔍</span> Termos Mais Buscados</h3>
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>🔍</span> Buscas com Intenção (Search Signals)</h3>
                   {ecommerceInsights.searchTerms.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {ecommerceInsights.searchTerms.map((term, i) => (
@@ -364,13 +303,13 @@ export default function AnalyticsDashboardClient() {
                   ) : <p className="text-sm text-muted">Nenhuma busca registrada ainda.</p>}
                 </div>
                 <div className="rounded-2xl border border-border bg-surface-light p-6">
-                  <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>🤝</span> Comprados Juntos (Cesta)</h3>
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>🤝</span> Combinação de Interesses (Cesta)</h3>
                   {ecommerceInsights.boughtTogether.length > 0 ? (
                     <div className="space-y-3">
                       {ecommerceInsights.boughtTogether.map((pair, i) => (
                         <div key={i} className="flex items-center justify-between rounded-xl border border-border bg-surface p-3">
                           <span className="text-sm font-medium text-foreground">{pair.name}</span>
-                          <span className="shrink-0 rounded-full bg-neon/10 px-2 py-1 text-xs font-bold text-neon">{pair.value} pedidos</span>
+                          <span className="shrink-0 rounded-full bg-neon/10 px-2 py-1 text-xs font-bold text-neon">{pair.value} vezes</span>
                         </div>
                       ))}
                     </div>
@@ -380,15 +319,15 @@ export default function AnalyticsDashboardClient() {
 
               {/* Carrinhos Abandonados */}
               <div className="rounded-2xl border border-border bg-surface-light p-6">
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>🛒</span> Carrinhos Abandonados (Lost Revenue)</h3>
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>🛒</span> Perda de Interesse / Drop-off no Carrinho</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-border text-muted">
                         <th className="pb-3 font-medium">Data</th>
                         <th className="pb-3 font-medium">Sessão ID</th>
-                        <th className="pb-3 font-medium">Valor Perdido</th>
-                        <th className="pb-3 font-medium">Itens no Carrinho</th>
+                        <th className="pb-3 font-medium">Valor do Interesse (Fake)</th>
+                        <th className="pb-3 font-medium">Itens Abandonados</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -407,7 +346,7 @@ export default function AnalyticsDashboardClient() {
                         </tr>
                       ))}
                       {ecommerceInsights.abandonedCarts.length === 0 && (
-                        <tr><td colSpan={4} className="py-8 text-center text-muted">Nenhum carrinho abandonado. A conversão está voando!</td></tr>
+                        <tr><td colSpan={4} className="py-8 text-center text-muted">Nenhum abandono registrado.</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -416,7 +355,7 @@ export default function AnalyticsDashboardClient() {
 
               {/* Funil de Produtos */}
               <div className="rounded-2xl border border-border bg-surface-light p-6">
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>📦</span> Funil de Produtos</h3>
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground"><span>📦</span> Sinais de Interesse por Produto</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead>
@@ -424,7 +363,7 @@ export default function AnalyticsDashboardClient() {
                         <th className="pb-3 font-medium">Produto</th>
                         <th className="pb-3 font-medium text-center">Visualizações</th>
                         <th className="pb-3 font-medium text-center">Adições ao Carrinho</th>
-                        <th className="pb-3 font-medium text-right">Faturamento (Fake)</th>
+                        <th className="pb-3 font-medium text-right">Valor Total Estimado (Fake)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -803,50 +742,7 @@ export default function AnalyticsDashboardClient() {
             </div>
           )}
 
-          {/* ═══════════ TAB: MARKETING ═══════════ */}
-          {activeTab === 'marketing' && (
-            <div className="animate-fade-in space-y-8 pb-12">
-              <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="font-[var(--font-display)] text-2xl font-black text-foreground">📣 Central de Conteúdo e Campanhas</h2>
-                    <p className="text-sm text-muted mt-1">Idéias de posts de alta conversão para redes sociais.</p>
-                  </div>
-                  <span className="text-3xl shrink-0">💡</span>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  { badge: '🎬 Reels', badgeColor: 'bg-pink-100 text-pink-700', obj: 'Atração', title: 'Cleiton contra o Tempo', desc: 'Roteiro focado em demonstrar a velocidade de entrega do motoboy "Cleiton".', script: 'Roteiro: Alguém rolando o celular triste. Fatura R$ 0,15. Abertura do Dopaminado e compra grátis. Moto do Cleiton cortando giro.', prompt: '3D render, delivery courier character wearing a green cybernetic helmet, riding an electric neon scooter, cyberpunk background' },
-                  { badge: '🎠 Carrossel', badgeColor: 'bg-blue-100 text-blue-700', obj: 'Engajamento', title: 'O Ciclo da Compra por Impulso', desc: 'Infográfico cômico explicando a psicologia por trás da dopamina.', script: 'Slide 1: Ciclo do Consumidor. Slide 2: Tédio. Slide 3: O clique. Slide 4: A ressaca da fatura. Slide 5: Solução Dopaminado.', prompt: 'Instagram post, dark mode cyberpunk, neon purple and lime green accents, minimalist tech interface design' },
-                  { badge: '🖼️ Meme', badgeColor: 'bg-purple-100 text-purple-700', obj: 'Viralidade', title: 'A Fatura Invisível', desc: 'Meme contrastando um carrinho alto com custo zero.', script: 'Sem faturas. Sem ligações de cobrança. Apenas dopamina direto no celular. Compre tudo o que não precisa!', prompt: '3D render, cyberpunk smartphone floating, neon interface, electric violet and glowing neon lime-green' },
-                  { badge: '📱 Stories', badgeColor: 'bg-amber-100 text-amber-700', obj: 'Conversão', title: 'Termômetro de Dopamina Diária', desc: 'Enquetes interativas para medir vontade de consumo impulsivo.', script: 'Enquete: Onde você busca dopamina hoje? Opções: comprando blusas, comendo doces, no Dopaminado de graça.', prompt: 'Escreva 5 frases curtas e impactantes para Instagram sobre o app Dopaminado. Tom humorístico e sarcástico.' },
-                ].map((post, i) => (
-                  <div key={i} className="rounded-3xl border border-border bg-white p-6 shadow-sm flex flex-col justify-between space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className={`rounded-full ${post.badgeColor} px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider`}>{post.badge}</span>
-                        <span className="text-xs text-muted font-bold">Objetivo: {post.obj}</span>
-                      </div>
-                      <h3 className="text-lg font-black text-foreground">{post.title}</h3>
-                      <p className="text-xs text-muted">{post.desc}</p>
-                      <div className="rounded-xl bg-surface-light p-3.5 border border-border text-xs">
-                        <div className="font-bold text-foreground">Roteiro:</div>
-                        <p className="text-muted leading-relaxed italic mt-1">{post.script}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => { navigator.clipboard.writeText(post.script); setSuccessToast('Copiado! 📋'); setTimeout(() => setSuccessToast(null), 2000); }}
-                        className="flex-1 rounded-xl bg-surface hover:bg-border py-2.5 text-xs font-bold text-foreground transition text-center">Copiar Roteiro</button>
-                      <button onClick={() => { navigator.clipboard.writeText(post.prompt); setSuccessToast('Prompt Canva copiado! 🎨'); setTimeout(() => setSuccessToast(null), 2000); }}
-                        className="rounded-xl border border-border hover:bg-surface-light px-4 py-2.5 text-xs font-bold text-foreground transition">Prompt 🎨</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Global Success Toast */}
           {successToast && activeTab !== 'intent' && (
