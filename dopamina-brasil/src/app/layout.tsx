@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import AchievementToast from "@/components/AchievementToast";
 import TrackingProvider from "@/components/TrackingProvider";
-
+import { CSPostHogProvider } from "@/providers/PostHogProvider";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -69,11 +69,13 @@ export default function RootLayout({
         <GameProvider>
           <CartProvider>
             <TrackingProvider>
-              <Header />
-              <main className="flex-1 overflow-x-clip pt-28 pb-8">{children}</main>
-              <Footer />
-              <CartDrawer />
-              <AchievementToast />
+              <CSPostHogProvider>
+                <Header />
+                <main className="flex-1 overflow-x-clip pt-28 pb-8">{children}</main>
+                <Footer />
+                <CartDrawer />
+                <AchievementToast />
+              </CSPostHogProvider>
             </TrackingProvider>
           </CartProvider>
         </GameProvider>
