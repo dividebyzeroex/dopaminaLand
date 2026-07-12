@@ -12,7 +12,7 @@ export default function Footer() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2">
@@ -46,6 +46,16 @@ export default function Footer() {
               <li><span className="text-sm text-foreground/60">💄 Beleza</span></li>
               <li><span className="text-sm text-foreground/60">👟 Moda</span></li>
               <li><span className="text-sm text-foreground/60">🛋️ Casa</span></li>
+            </ul>
+          </div>
+
+          {/* Transparência & Legal */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Legal</h3>
+            <ul className="mt-3 space-y-2">
+              <li><Link href="/legal/privacidade" className="text-sm text-foreground/60 hover:text-neon transition">Privacidade</Link></li>
+              <li><Link href="/legal/termos" className="text-sm text-foreground/60 hover:text-neon transition">Termos de Uso</Link></li>
+              <li><Link href="/legal/lgpd" className="text-sm text-foreground/60 hover:text-neon transition">LGPD</Link></li>
             </ul>
           </div>
 
