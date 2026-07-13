@@ -186,15 +186,17 @@ export function useInsightsData() {
   }, [rawSessions, rawEvents, productDict, scoreWeights, recomputeIntentMetrics]);
 
   // ── Fetch All Data ──
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async (startDate?: string, endDate?: string) => {
     setLoading(true);
     try {
       const formatMap = (map: Record<string, number>) =>
         Object.keys(map).map(name => ({ name, value: map[name] })).sort((a, b) => b.value - a.value);
 
       // 1. Fetch Sessions
-      const { data: sessionData, count: sessionCount } = await supabase
-        .from('sessions').select('*', { count: 'exact' });
+      let sessionQuery = supabase.from('sessions').select('*', { count: 'exact' });
+      if (startDate) sessionQuery = sessionQuery.gte('created_at', startDate);
+      if (endDate) sessionQuery = sessionQuery.lte('created_at', endDate);
+      const { data: sessionData, count: sessionCount } = await sessionQuery;
 
       const genderMap: Record<string, number> = {};
       const osMap: Record<string, number> = {};
@@ -237,9 +239,11 @@ export function useInsightsData() {
       setHardware({ connection: formatMap(connMap).slice(0, 5), ram: formatMap(ramMap).slice(0, 5), cores: formatMap(coresMap).slice(0, 5), theme: formatMap(themeMap).slice(0, 3) });
 
       // 2. Fetch Events
-      const { data: events, error: eventsError } = await supabase
-        .from('intent_events')
+      let eventQuery = supabase.from('intent_events')
         .select('id, session_id, event_type, price_displayed, created_at, product_id, metadata');
+      if (startDate) eventQuery = eventQuery.gte('created_at', startDate);
+      if (endDate) eventQuery = eventQuery.lte('created_at', endDate);
+      const { data: events, error: eventsError } = await eventQuery;
       if (eventsError) throw eventsError;
 
       // 3. Fetch Product Dictionary
@@ -373,8 +377,16 @@ export function useInsightsData() {
       }
 
       // GA4 Data
+      let queryParams = '';
+      if (startDate || endDate) {
+        const p = new URLSearchParams();
+        if (startDate) p.append('startDate', startDate);
+        if (endDate) p.append('endDate', endDate);
+        queryParams = `?${p.toString()}`;
+      }
+
       try {
-        const ga4Res = await fetch('/api/analytics/ga4');
+        const ga4Res = await fetch(`/api/analytics/ga4${queryParams}`);
         if (ga4Res.ok) {
           const ga4Json = await ga4Res.json();
           if (ga4Json.data) setGa4Data(ga4Json.data);
@@ -384,7 +396,7 @@ export function useInsightsData() {
 
       // PostHog Data
       try {
-        const phRes = await fetch('/api/analytics/posthog');
+        const phRes = await fetch(`/api/analytics/posthog${queryParams}`);
         if (phRes.ok) {
           const phJson = await phRes.json();
           if (phJson.data) { setPosthogData(phJson.data); setPosthogError(null); }
@@ -394,7 +406,7 @@ export function useInsightsData() {
 
       // HubSpot Data
       try {
-        const hsRes = await fetch('/api/analytics/hubspot');
+        const hsRes = await fetch(`/api/analytics/hubspot${queryParams}`);
         if (hsRes.ok) {
           const hsJson = await hsRes.json();
           if (hsJson.data) { setHubspotCrmData(hsJson.data); setHubspotError(null); }

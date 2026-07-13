@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell,
@@ -31,6 +31,11 @@ export default function AnalyticsDashboardClient() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'intent' | 'products' | 'hubspot' | 'ux'>('overview');
 
+  // Time selector state
+  const [timeRange, setTimeRange] = useState<string>('all');
+  const [customStart, setCustomStart] = useState<string>('');
+  const [customEnd, setCustomEnd] = useState<string>('');
+
   // Intent UI state
   const [showWeightSettings, setShowWeightSettings] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
@@ -39,6 +44,48 @@ export default function AnalyticsDashboardClient() {
   const [leadStageFilter, setLeadStageFilter] = useState<'all' | 'Awareness' | 'Consideration' | 'Decision'>('all');
   const [leadSortBy, setLeadSortBy] = useState<'score' | 'events' | 'fakeRev'>('score');
   const [crmIntegrationStatus, setCrmIntegrationStatus] = useState<Record<string, 'idle' | 'loading' | 'success'>>({});
+
+  // Helper to compute start and end dates based on selected range
+  const getTimeFilterDates = useCallback((range: string, start?: string, end?: string) => {
+    const now = new Date();
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
+    switch (range) {
+      case '2h':
+        startDate = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+        endDate = now.toISOString();
+        break;
+      case '6h':
+        startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString();
+        endDate = now.toISOString();
+        break;
+      case '12h':
+        startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString();
+        endDate = now.toISOString();
+        break;
+      case '24h':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+        endDate = now.toISOString();
+        break;
+      case '7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        endDate = now.toISOString();
+        break;
+      case '15d':
+        startDate = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString();
+        endDate = now.toISOString();
+        break;
+      case 'custom':
+        if (start) startDate = new Date(start).toISOString();
+        if (end) endDate = new Date(end).toISOString();
+        break;
+      default:
+        // 'all' leaves undefined (fetches all data)
+        break;
+    }
+    return { startDate, endDate };
+  }, []);
 
   const {
     loading, fetchDashboardData,
@@ -92,11 +139,20 @@ export default function AnalyticsDashboardClient() {
     e.preventDefault();
     if (password === 'dopamina') {
       setIsAuthenticated(true);
-      fetchDashboardData();
+      const { startDate, endDate } = getTimeFilterDates(timeRange, customStart, customEnd);
+      fetchDashboardData(startDate, endDate);
     } else {
       setError('Senha incorreta. Dica: dopamina');
     }
   };
+
+  // Automatically fetch data when timeRange changes (except custom)
+  useEffect(() => {
+    if (isAuthenticated && timeRange !== 'custom') {
+      const { startDate, endDate } = getTimeFilterDates(timeRange);
+      fetchDashboardData(startDate, endDate);
+    }
+  }, [timeRange, isAuthenticated, fetchDashboardData, getTimeFilterDates]);
 
   // ── Login Screen ──
   if (!isAuthenticated) {
@@ -140,7 +196,7 @@ export default function AnalyticsDashboardClient() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="mb-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 border-b border-border pb-6">
         <div>
           <h1 className="font-[var(--font-display)] text-4xl font-black text-foreground md:text-5xl">
             Telemetria Avançada 📡
@@ -149,12 +205,76 @@ export default function AnalyticsDashboardClient() {
             Insights de Comportamento, Marketing e Intenção de Compra.
           </p>
         </div>
-        <button
-          onClick={fetchDashboardData}
-          className="rounded-xl bg-surface-light px-6 py-3 font-bold text-foreground transition hover:bg-border"
-        >
-          {loading ? 'Atualizando...' : '🔄 Atualizar Dados'}
-        </button>
+
+        {/* Time Selector Panel */}
+        <div className="flex flex-wrap items-center gap-4 bg-surface-light/35 border border-border/50 p-4 rounded-2xl backdrop-blur-md w-full lg:w-auto">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-black text-muted uppercase tracking-widest">Período</label>
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-bold text-foreground focus:outline-none focus:border-neon transition"
+            >
+              <option value="all">Todas as Datas 🌐</option>
+              <option value="2h">Últimas 2 Horas ⚡</option>
+              <option value="6h">Últimas 6 Horas 🕒</option>
+              <option value="12h">Últimas 12 Horas ⏳</option>
+              <option value="24h">Últimas 24 Horas 📅</option>
+              <option value="7d">Últimos 7 Dias 🗓️</option>
+              <option value="15d">Últimos 15 Dias 📊</option>
+              <option value="custom">Personalizado ⚙️</option>
+            </select>
+          </div>
+
+          {timeRange === 'custom' && (
+            <>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black text-muted uppercase tracking-widest">Início</label>
+                <input
+                  type="datetime-local"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  max={new Date().toISOString().slice(0, 16)}
+                  className="rounded-xl border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:border-neon transition"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black text-muted uppercase tracking-widest">Fim</label>
+                <input
+                  type="datetime-local"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  max={new Date().toISOString().slice(0, 16)}
+                  className="rounded-xl border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:border-neon transition"
+                />
+              </div>
+              <div className="flex flex-col justify-end pt-5">
+                <button
+                  onClick={() => {
+                    const { startDate, endDate } = getTimeFilterDates('custom', customStart, customEnd);
+                    fetchDashboardData(startDate, endDate);
+                  }}
+                  disabled={!customStart || !customEnd}
+                  className="rounded-xl bg-neon px-4 py-2 text-sm font-bold text-background transition hover:bg-neon-dark disabled:opacity-50"
+                >
+                  Aplicar
+                </button>
+              </div>
+            </>
+          )}
+
+          <div className="flex flex-col justify-end pt-5">
+            <button
+              onClick={() => {
+                const { startDate, endDate } = getTimeFilterDates(timeRange, customStart, customEnd);
+                fetchDashboardData(startDate, endDate);
+              }}
+              className="rounded-xl bg-surface px-4 py-2 text-sm font-bold text-foreground border border-border transition hover:bg-border"
+            >
+              {loading ? 'Carregando...' : '🔄 Atualizar'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tabs */}
