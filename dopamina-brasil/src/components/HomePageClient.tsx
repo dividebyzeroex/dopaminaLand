@@ -113,7 +113,8 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <a
                   href="#catalogo"
-                  className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap"
+                  className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap glitch-hover"
+                  data-text="extravasar minha dopamina 🚀"
                 >
                   extravasar minha dopamina 🚀
                 </a>

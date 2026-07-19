@@ -130,7 +130,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isOpen: state.isOpen,
     totalItems,
     totalFakePrice,
-    addItem: (item) => dispatch({ type: 'ADD_ITEM', payload: { ...item, quantity: 1 } }),
+    addItem: (item) => {
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#ccff00', '#ff1e7a', '#00f0ff']
+        });
+      });
+      dispatch({ type: 'ADD_ITEM', payload: { ...item, quantity: 1 } });
+    },
     removeItem: (id) => dispatch({ type: 'REMOVE_ITEM', payload: id }),
     updateQuantity: (id, quantity) => dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } }),
     clearCart: () => dispatch({ type: 'CLEAR_CART' }),

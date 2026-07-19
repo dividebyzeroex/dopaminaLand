@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Playfair_Display, Host_Grotesk } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
-const sans = Plus_Jakarta_Sans({
+const sans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
@@ -16,15 +16,9 @@ const serif = Playfair_Display({
   display: "swap",
 });
 
-const hostGrotesk = Host_Grotesk({
-  variable: "--font-host-grotesk",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "H53 — Inteligência Preditiva",
-  description: "Plataforma de inteligência para líderes de marketing. Mapeie sinais invisíveis.",
+  title: "Dopamina Agency — We build brands that last.",
+  description: "Cinematic agency portfolio.",
 };
 
 export default function RootLayout({
@@ -35,9 +29,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${serif.variable} ${hostGrotesk.variable} h-full antialiased dark`}
+      className={`${sans.variable} ${serif.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col film-grain vignette bg-black text-white">
+      <body className="min-h-full flex flex-col film-grain bg-[#050505] text-[#f5f5f5] selection:bg-cyan-500/30">
         <SmoothScroll>
           {children}
         </SmoothScroll>
