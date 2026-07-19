@@ -25,6 +25,7 @@
     "react-dom": "19.2.4",
     "recharts": "^3.9.2",
     "stripe": "^22.3.0",
+    "swr": "^2.4.2",
     "ua-parser-js": "^2.0.10"
   },
   "devDependencies": {

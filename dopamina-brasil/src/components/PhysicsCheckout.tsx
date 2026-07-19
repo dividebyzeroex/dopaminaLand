@@ -3,9 +3,10 @@
 import { useEffect, useRef } from 'react';
 import Matter from 'matter-js';
 import Link from 'next/link';
+import { CartItem } from '@/types';
 
 interface PhysicsCheckoutProps {
-  items: any[];
+  items: CartItem[];
   orderId: string;
 }
 

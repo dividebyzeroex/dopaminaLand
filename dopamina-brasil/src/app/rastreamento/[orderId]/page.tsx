@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import trackingEventsData from '@/data/tracking-events.json';
+import CleitonMinigame from '@/components/CleitonMinigame';
 
 // Pick random comic events for each order
 function getRandomEvents() {
@@ -166,46 +167,9 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
         </div>
       )}
 
-      {/* Real Map (OpenStreetMap iframe) */}
-      <div className="mt-8 rounded-2xl border border-border bg-card overflow-hidden shadow-lg relative">
-        <div className="relative h-72 sm:h-96 w-full pointer-events-none">
-          <iframe 
-            width="100%" 
-            height="100%" 
-            frameBorder="0" 
-            scrolling="no" 
-            marginHeight={0} 
-            marginWidth={0} 
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${currentMapPosition.lng - 0.2}%2C${currentMapPosition.lat - 0.2}%2C${currentMapPosition.lng + 0.2}%2C${currentMapPosition.lat + 0.2}&layer=mapnik`}
-            className="filter grayscale-[50%] invert-[90%] hue-rotate-[200deg]" // Dark mode futuristic map look
-          ></iframe>
-          
-          {/* Centered Cleiton Marker */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
-            <div className="relative h-16 w-16 mb-1 animate-bounce drop-shadow-[0_0_15px_rgba(204,255,0,0.8)]">
-              <img src="/cleiton_nobg.png" alt="Cleiton no Mapa" className="w-full h-full object-contain" />
-            </div>
-            <div className="h-2 w-8 rounded-[100%] bg-black/50 blur-sm"></div>
-          </div>
-
-          {/* Map labels overlay */}
-          <div className="absolute bottom-4 left-4 rounded-lg bg-surface/90 border border-border backdrop-blur px-3 py-2 pointer-events-auto">
-            <p className="text-[10px] font-bold text-neon uppercase">Sinal GPS do Cleiton</p>
-            <p className="text-xs font-bold text-foreground">
-              {currentMapPosition.lat.toFixed(4)}°, {currentMapPosition.lng.toFixed(4)}°
-            </p>
-          </div>
-
-          <div className="absolute top-4 right-4 rounded-lg bg-red-600/90 px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider animate-pulse pointer-events-auto">
-            🔴 Ao Vivo
-          </div>
-
-          {/* Some fake location markers */}
-          <div className="absolute left-[20%] top-[30%] text-xs opacity-30">📍 São Paulo</div>
-          <div className="absolute left-[60%] top-[20%] text-xs opacity-30">📍 Brasília</div>
-          <div className="absolute left-[70%] top-[50%] text-xs opacity-30">📍 Curitiba</div>
-          <div className="absolute left-[40%] top-[60%] text-xs opacity-30">📍 Rio de Janeiro</div>
-        </div>
+      {/* Real Map / Mini-game */}
+      <div className="mt-8">
+        <CleitonMinigame />
       </div>
 
       {/* Timeline */}

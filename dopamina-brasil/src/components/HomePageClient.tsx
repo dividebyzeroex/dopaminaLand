@@ -5,6 +5,8 @@ import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/contexts/CartContext';
 import { trackEvent } from '@/lib/tracking';
 import { supabase } from '@/lib/supabase';
+import useSWRInfinite from 'swr/infinite';
+import { Product } from '@/types';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -13,7 +15,7 @@ const trustBadges = [
   { emoji: '📍', title: 'rastreamento ao vivo', desc: 'a viagem real até sua porta' },
 ];
 
-export default function HomePageClient({ products, flashDeals = [] }: { products: any[], flashDeals?: any[] }) {
+export default function HomePageClient({ products, flashDeals = [] }: { products: Product[], flashDeals?: Product[] }) {
   const categories = [
     { id: 'todos', label: 'Todos', emoji: '🔥' },
     { id: 'games', label: 'Games', emoji: '🎮' },
@@ -26,17 +28,13 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
   const [heroSlide, setHeroSlide] = useState(0);
   const { addItem } = useCart();
 
-  const [displayedProducts, setDisplayedProducts] = useState(products);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(products.length === 25);
-  const [isLoading, setIsLoading] = useState(false);
+  // SWR Infinite Pagination
+  const getKey = (pageIndex: number, previousPageData: Product[] | null) => {
+    if (previousPageData && !previousPageData.length) return null; // Reached the end
+    return ['products', activeCategory, pageIndex];
+  };
 
-  useEffect(() => {
-    trackEvent('view_item', undefined, undefined, { page: 'home' });
-  }, []);
-
-  const fetchProducts = async (category: string, pageIndex: number, append: boolean) => {
-    setIsLoading(true);
+  const fetcher = async ([_, category, pageIndex]: [string, string, number]): Promise<Product[]> => {
     let query = supabase
       .from('products')
       .select('*')
@@ -48,39 +46,31 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
     }
 
     const { data } = await query;
-    const mapped = (data || []).map((p: any) => ({
+    return (data || []).map((p: any) => ({
       ...p,
       localImage: p.image_url,
       shortName: p.short_name,
       salePrice: p.sale_price,
     }));
-
-    if (append) {
-      setDisplayedProducts((prev: any) => {
-        // Prevent duplicates just in case
-        const existingIds = new Set(prev.map((p: any) => p.id));
-        const newItems = mapped.filter((p: any) => !existingIds.has(p.id));
-        return [...prev, ...newItems];
-      });
-    } else {
-      setDisplayedProducts(mapped);
-    }
-    setHasMore(mapped.length === 25);
-    setIsLoading(false);
   };
+
+  const { data, size, setSize, isValidating } = useSWRInfinite(getKey, fetcher, {
+    initialSize: 1,
+    fallbackData: activeCategory === 'todos' ? [products] : undefined,
+  });
+
+  const displayedProducts = data ? data.flat() : [];
+  const isLoading = isValidating;
+  const hasMore = data && data[data.length - 1]?.length === 25;
 
   const handleCategoryChange = (catId: string) => {
     setActiveCategory(catId);
-    setPage(0);
-    // Fetch first page of new category
-    fetchProducts(catId, 0, false);
+    setSize(1);
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchProducts(activeCategory, nextPage, true);
+    setSize(size + 1);
   };
 
 
@@ -363,7 +353,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             </div>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-              {displayedProducts.map((product: any) => (
+              {displayedProducts.map((product: Product) => (
                 <ProductCard key={product.id} {...product} />
               ))}
             </div>

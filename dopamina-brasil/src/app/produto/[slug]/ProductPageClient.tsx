@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { trackEvent } from '@/lib/tracking';
 import { useEffect } from 'react';
+import { Product } from '@/types';
 
 const fakeReviews = [
   { name: 'Maria S.', rating: 5, text: 'Melhor compra que já fiz! Não paguei nada e recebi nada. 10/10 recomendo! ⚡', date: '3 dias atrás' },
@@ -13,7 +14,12 @@ const fakeReviews = [
   { name: 'Fernanda R.', rating: 5, text: 'Comprei 47 unidades. Meu psicólogo está preocupado mas meu cartão imaginário está ileso.', date: '2 meses atrás' },
 ];
 
-export default function ProductPageClient({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
+interface ProductPageClientProps {
+  product: Product;
+  relatedProducts: Product[];
+}
+
+export default function ProductPageClient({ product, relatedProducts }: ProductPageClientProps) {
   const { addItem } = useCart();
 
   useEffect(() => {
