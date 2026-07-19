@@ -49,11 +49,11 @@ export default function ProductCard({
   return (
     <Link
       href={`/produto/${slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition duration-300 hover:-translate-y-1 hover:border-neon/30 hover:shadow-[0_18px_40px_-12px_rgba(255,30,122,0.28)]"
+      className="group card-tilt flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition duration-300 hover:border-neon/20"
     >
       {/* Image Area */}
-      <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-surface-light to-surface">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-3/5 w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon/10 blur-2xl" />
+      <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-surface to-surface-light">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-3/5 w-3/5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon/5 blur-2xl" />
 
         {/* Discount Badge */}
         {discount > 0 && (
@@ -64,7 +64,7 @@ export default function ProductCard({
 
         {/* Custom Badge */}
         {badge && (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-neon px-2.5 py-1 text-[10px] font-black text-white shadow">
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-neon px-2.5 py-1 text-[10px] font-black text-background shadow">
             {badge}
           </span>
         )}
@@ -75,7 +75,7 @@ export default function ProductCard({
             <img 
               src={localImage} 
               alt={shortName}
-              className="max-h-[85%] max-w-[85%] object-contain drop-shadow-[0_10px_18px_rgba(27,16,32,0.18)] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2"
+              className="max-h-[85%] max-w-[85%] object-contain drop-shadow-[0_10px_18px_rgba(204,255,0,0.08)] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2"
             />
           ) : (
             <span className="text-7xl drop-shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2">
@@ -113,7 +113,7 @@ export default function ProductCard({
           {/* CTA */}
           <button
             onClick={handleAddToCart}
-            className="mt-3 w-full rounded-xl bg-neon py-2.5 text-[11px] sm:text-xs lg:text-sm font-extrabold text-white transition hover:bg-neon-light active:scale-95 whitespace-nowrap px-2"
+            className="mt-3 w-full rounded-xl bg-neon py-2.5 text-[11px] sm:text-xs lg:text-sm font-extrabold text-background transition hover:bg-neon-light active:scale-95 whitespace-nowrap px-2"
           >
             <span className="hidden lg:inline">adicionar ao carrinho</span>
             <span className="lg:hidden">adicionar 🛒</span>

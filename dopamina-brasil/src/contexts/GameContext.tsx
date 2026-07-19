@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useState, useEffect, useCallback, type ReactNode } from 'react';
 import gameData from '@/data/achievements.json';
+import { supabase } from '@/lib/supabase';
 
 interface OrderHistory {
   id: string;
@@ -25,6 +26,7 @@ interface GameState {
   toasts: { id: string; title: string; description: string; icon: string }[];
   rewardClaimed?: boolean;
   claimedRewards?: string[];
+  userId?: string;
 }
 
 type GameAction =
@@ -211,7 +213,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'LOAD_STATE':
-      return { ...state, ...action.payload, toasts: [] };
+      return { 
+        ...state, 
+        ...action.payload, 
+        userId: action.payload.userId || state.userId,
+        toasts: [] 
+      };
 
     default:
       return state;
@@ -232,6 +239,7 @@ const initialState: GameState = {
   toasts: [],
   rewardClaimed: false,
   claimedRewards: [],
+  userId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
 };
 
 interface GameContextType extends GameState {
@@ -270,9 +278,47 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!isLoaded) return;
     try {
       const { toasts, ...rest } = state;
+      // Ensure userId exists
+      if (!rest.userId) {
+        rest.userId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+      }
       localStorage.setItem('dopamina-game', JSON.stringify(rest));
     } catch {}
   }, [state, isLoaded]);
+
+  // Sync to Supabase Leaderboard
+  useEffect(() => {
+    if (!isLoaded || !state.userId || state.xp === 0) return;
+
+    const syncToSupabase = async () => {
+      try {
+        await supabase
+          .from('leaderboard')
+          .upsert({
+            user_id: state.userId,
+            nickname: state.nickname,
+            level: state.level,
+            xp: state.xp,
+            total_spent: state.totalSpent,
+            purchase_count: state.purchaseCount,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
+      } catch (err) {
+        console.error('Failed to sync leaderboard:', err);
+      }
+    };
+
+    const debounce = setTimeout(syncToSupabase, 2000);
+    return () => clearTimeout(debounce);
+  }, [
+    state.xp,
+    state.level,
+    state.nickname,
+    state.totalSpent,
+    state.purchaseCount,
+    state.userId,
+    isLoaded
+  ]);
 
   const nextLevel = getNextLevel(state.level);
   const currentLevelXP = gameData.levels.find(l => l.level === state.level)?.xpRequired || 0;

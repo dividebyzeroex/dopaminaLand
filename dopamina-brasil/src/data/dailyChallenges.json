@@ -1,0 +1,32 @@
+{
+  "challenges": [
+    { "id": "buy_3_games", "type": "purchase_category", "category": "games", "target": 3, "description": "Compre 3 itens de Games", "xpReward": 200, "icon": "🎮" },
+    { "id": "buy_2_tech", "type": "purchase_category", "category": "tecnologia", "target": 2, "description": "Compre 2 itens de Tecnologia", "xpReward": 150, "icon": "📱" },
+    { "id": "buy_2_beauty", "type": "purchase_category", "category": "beleza", "target": 2, "description": "Compre 2 itens de Beleza", "xpReward": 150, "icon": "💄" },
+    { "id": "add_5_cart", "type": "cart_count", "target": 5, "description": "Adicione 5 itens ao carrinho", "xpReward": 100, "icon": "🛒" },
+    { "id": "add_10_cart", "type": "cart_count", "target": 10, "description": "Adicione 10 itens ao carrinho", "xpReward": 250, "icon": "🛒" },
+    { "id": "visit_ofertas", "type": "visit_page", "page": "/ofertas", "description": "Visite a página de Ofertas", "xpReward": 50, "icon": "🔥" },
+    { "id": "visit_ranking", "type": "visit_page", "page": "/ranking", "description": "Visite o Ranking", "xpReward": 50, "icon": "🏆" },
+    { "id": "use_coupon", "type": "coupon", "description": "Use um cupom no checkout", "xpReward": 100, "icon": "🎟️" },
+    { "id": "checkout_pix", "type": "payment_method", "method": "pix", "description": "Faça checkout com Pix Fantasma", "xpReward": 150, "icon": "👻" },
+    { "id": "checkout_boleto", "type": "payment_method", "method": "boleto", "description": "Pague com Boleto Imortal", "xpReward": 150, "icon": "📄" },
+    { "id": "spend_50k", "type": "spend_total", "target": 50000, "description": "Gaste R$ 50.000 fictícios hoje", "xpReward": 300, "icon": "💰" },
+    { "id": "spend_100k", "type": "spend_total", "target": 100000, "description": "Gaste R$ 100.000 fictícios hoje", "xpReward": 500, "icon": "🤑" },
+    { "id": "buy_moda", "type": "purchase_category", "category": "moda", "target": 2, "description": "Compre 2 itens de Moda", "xpReward": 150, "icon": "👟" },
+    { "id": "buy_casa", "type": "purchase_category", "category": "casa", "target": 2, "description": "Compre 2 itens de Casa", "xpReward": 150, "icon": "🛋️" },
+    { "id": "open_lootbox", "type": "lootbox", "description": "Abra uma Caixa Misteriosa", "xpReward": 100, "icon": "📦" },
+    { "id": "complete_checkout", "type": "checkout", "description": "Finalize qualquer compra", "xpReward": 80, "icon": "✅" },
+    { "id": "buy_3_items", "type": "purchase_count", "target": 3, "description": "Compre 3 produtos quaisquer", "xpReward": 120, "icon": "🛍️" },
+    { "id": "share_receipt", "type": "share", "description": "Compartilhe um recibo de compra", "xpReward": 200, "icon": "📤" },
+    { "id": "visit_blog", "type": "visit_page", "page": "/blog", "description": "Leia um artigo do Blog", "xpReward": 75, "icon": "📖" },
+    { "id": "night_shopping", "type": "night_purchase", "description": "Faça uma compra entre 0h e 5h", "xpReward": 200, "icon": "🦉" }
+  ],
+  "streakBonuses": [
+    { "days": 1, "multiplier": 1.0, "emoji": "🔥" },
+    { "days": 3, "multiplier": 1.5, "emoji": "🔥🔥" },
+    { "days": 7, "multiplier": 2.0, "emoji": "🔥🔥🔥" },
+    { "days": 14, "multiplier": 2.5, "emoji": "💀🔥" },
+    { "days": 30, "multiplier": 3.0, "emoji": "☠️🔥🔥🔥" }
+  ],
+  "dailyLoginXP": 100
+}

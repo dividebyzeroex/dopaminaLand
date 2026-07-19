@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { supabase } from '@/lib/supabase';
 import localProducts from '@/data/products.json';
-
+import blogData from '@/data/blog-posts.json';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://dopaminado.com.br';
 
@@ -13,6 +13,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/checkout',
     '/ofertas',
     '/ranking',
+    '/blog',
+    '/lootbox',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -37,7 +39,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    return [...routes, ...productRoutes];
+    const blogRoutes = blogData.posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+
+    return [...routes, ...productRoutes, ...blogRoutes];
   } catch (e) {
     const productRoutes = localProducts.map((p: any) => ({
       url: `${baseUrl}/produto/${p.slug}`,
@@ -45,6 +54,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     }));
-    return [...routes, ...productRoutes];
+
+    const blogRoutes = blogData.posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+
+    return [...routes, ...productRoutes, ...blogRoutes];
   }
 }

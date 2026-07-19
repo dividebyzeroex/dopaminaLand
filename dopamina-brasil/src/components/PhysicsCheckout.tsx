@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Matter from 'matter-js';
 import Link from 'next/link';
 import { CartItem } from '@/types';
+import ShareableReceipt from './ShareableReceipt';
 
 interface PhysicsCheckoutProps {
   items: CartItem[];
@@ -12,6 +13,7 @@ interface PhysicsCheckoutProps {
 
 export default function PhysicsCheckout({ items, orderId }: PhysicsCheckoutProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -182,6 +184,9 @@ export default function PhysicsCheckout({ items, orderId }: PhysicsCheckoutProps
           }
         );
         World.add(world, receipt);
+        
+        // Show shareable receipt overlay shortly after
+        setTimeout(() => setShowReceipt(true), 2000);
       }, delayAcc + 1000);
     };
     
@@ -221,10 +226,28 @@ export default function PhysicsCheckout({ items, orderId }: PhysicsCheckoutProps
         </p>
       </div>
 
+      {showReceipt && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="relative w-full max-w-sm">
+            <ShareableReceipt 
+              items={items.map(i => ({ name: i.shortName, price: i.salePrice, quantity: i.quantity }))} 
+              orderId={orderId} 
+              totalFake={items.reduce((s, i) => s + (i.salePrice * i.quantity), 0)} 
+            />
+            <button
+              onClick={() => setShowReceipt(false)}
+              className="absolute -top-12 right-0 text-muted hover:text-foreground text-sm font-bold transition"
+            >
+              Fechar ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="absolute bottom-10 w-full flex flex-col sm:flex-row justify-center gap-4 z-20 px-4">
         <Link
           href={`/rastreamento/${orderId}`}
-          className="rounded-2xl bg-neon px-8 py-4 text-center text-lg font-extrabold text-white shadow-[0_0_30px_rgba(124,58,237,0.5)] transition hover:bg-neon-light hover:scale-105 active:scale-95 pointer-events-auto"
+          className="rounded-2xl bg-neon px-8 py-4 text-center text-lg font-extrabold text-background shadow-[0_0_30px_rgba(204,255,0,0.3)] transition hover:bg-neon-light hover:scale-105 active:scale-95 pointer-events-auto"
         >
           RASTREAR PEDIDO 📍
         </Link>

@@ -120,7 +120,7 @@ export default function FomoToast() {
 
   return (
     <div
-      className={`fixed bottom-6 left-6 z-[100] flex items-center gap-3 rounded-2xl border bg-white/95 px-4 py-3.5 shadow-2xl backdrop-blur-md max-w-xs transition-all duration-500 ${
+      className={`fixed bottom-6 left-6 z-[100] flex items-center gap-3 rounded-2xl border bg-card/95 px-4 py-3.5 shadow-2xl backdrop-blur-md max-w-xs transition-all duration-500 ${
         currentEvent.isReward ? 'border-orange-500/20' : 'border-neon/20'
       } ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'

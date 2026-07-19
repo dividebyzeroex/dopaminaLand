@@ -33,6 +33,8 @@ export default function Footer() {
             <ul className="mt-3 space-y-2">
               <li><Link href="/" className="text-sm text-foreground/60 hover:text-neon transition">Catálogo</Link></li>
               <li><Link href="/ranking" className="text-sm text-foreground/60 hover:text-neon transition">Ranking 🏆</Link></li>
+              <li><Link href="/lootbox" className="text-sm text-foreground/60 hover:text-neon transition">Loot Box 📦</Link></li>
+              <li><Link href="/blog" className="text-sm text-foreground/60 hover:text-neon transition">Blog 📖</Link></li>
               <li><Link href="/carrinho" className="text-sm text-foreground/60 hover:text-neon transition">Carrinho</Link></li>
             </ul>
           </div>

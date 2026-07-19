@@ -1,0 +1,35 @@
+{
+  "items": [
+    { "id": "capa_celular", "name": "Capinha de Celular Genérica", "emoji": "📱", "rarity": "common", "rarityLabel": "Comum", "xpReward": 25 },
+    { "id": "fone_bluetooth", "name": "Fone Bluetooth Xing Ling", "emoji": "🎧", "rarity": "common", "rarityLabel": "Comum", "xpReward": 30 },
+    { "id": "mouse_pad", "name": "Mouse Pad RGB", "emoji": "🖱️", "rarity": "common", "rarityLabel": "Comum", "xpReward": 20 },
+    { "id": "caneca", "name": "Caneca do Programador", "emoji": "☕", "rarity": "common", "rarityLabel": "Comum", "xpReward": 15 },
+    { "id": "cabo_usb", "name": "Cabo USB de 3 Metros", "emoji": "🔌", "rarity": "common", "rarityLabel": "Comum", "xpReward": 10 },
+    { "id": "teclado_mecanico", "name": "Teclado Mecânico RGB", "emoji": "⌨️", "rarity": "rare", "rarityLabel": "Raro", "xpReward": 75 },
+    { "id": "smartwatch", "name": "Smartwatch Futurista", "emoji": "⌚", "rarity": "rare", "rarityLabel": "Raro", "xpReward": 80 },
+    { "id": "webcam_4k", "name": "Webcam 4K Ultra HD", "emoji": "📹", "rarity": "rare", "rarityLabel": "Raro", "xpReward": 60 },
+    { "id": "kindle", "name": "E-Reader Infinito", "emoji": "📚", "rarity": "rare", "rarityLabel": "Raro", "xpReward": 70 },
+    { "id": "drone", "name": "Drone Mini Pro", "emoji": "🚁", "rarity": "rare", "rarityLabel": "Raro", "xpReward": 85 },
+    { "id": "ps5", "name": "PlayStation 5 Pro", "emoji": "🎮", "rarity": "epic", "rarityLabel": "Épico", "xpReward": 200 },
+    { "id": "iphone", "name": "iPhone 17 Pro Max", "emoji": "📱", "rarity": "epic", "rarityLabel": "Épico", "xpReward": 250 },
+    { "id": "rtx4090", "name": "RTX 4090 Ti Super", "emoji": "💻", "rarity": "epic", "rarityLabel": "Épico", "xpReward": 300 },
+    { "id": "macbook", "name": "MacBook Pro M5 Ultra", "emoji": "💻", "rarity": "epic", "rarityLabel": "Épico", "xpReward": 280 },
+    { "id": "celta_rebaixado", "name": "Celta Rebaixado com Escada", "emoji": "🚗", "rarity": "legendary", "rarityLabel": "Lendário", "xpReward": 1000 },
+    { "id": "vasco", "name": "Vasco da Gama (O Clube Inteiro)", "emoji": "⚽", "rarity": "legendary", "rarityLabel": "Lendário", "xpReward": 1500 },
+    { "id": "ilha", "name": "Ilha Privada no Caribe", "emoji": "🏝️", "rarity": "legendary", "rarityLabel": "Lendário", "xpReward": 2000 },
+    { "id": "foguete", "name": "Foguete SpaceX Particular", "emoji": "🚀", "rarity": "legendary", "rarityLabel": "Lendário", "xpReward": 2500 }
+  ],
+  "rarityWeights": {
+    "common": 50,
+    "rare": 30,
+    "epic": 15,
+    "legendary": 5
+  },
+  "rarityColors": {
+    "common": "#a1a1aa",
+    "rare": "#3b82f6",
+    "epic": "#a855f7",
+    "legendary": "#f59e0b"
+  },
+  "cooldownMs": 14400000
+}

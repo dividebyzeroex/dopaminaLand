@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useGame } from '@/contexts/GameContext';
+import { useDaily } from '@/contexts/DailyContext';
 import { supabase } from '@/lib/supabase';
 import { trackEvent } from '@/lib/tracking';
 
@@ -13,6 +14,7 @@ export default function Header() {
   const router = useRouter();
   const { totalItems, toggleCart } = useCart();
   const { level, levelEmoji, levelTitle, xp } = useGame();
+  const { streak, streakEmoji } = useDaily();
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
@@ -60,17 +62,17 @@ export default function Header() {
 
   return (
     <header className="fixed left-1/2 top-4 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2">
-      <div className="rounded-full border border-border bg-surface/80 backdrop-blur-2xl shadow-xl">
+      <div className="rounded-full border border-border bg-card/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
         <div className="mx-auto flex items-center gap-4 px-4 py-2.5 sm:px-6">
           {/* Logo */}
           <Link href="/" className="group flex shrink-0 items-center gap-2">
             <span className="text-3xl transition-transform group-hover:rotate-12 group-hover:scale-110">⚡</span>
-            <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground">dopaminado</span>
+            <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-foreground animate-neon-flicker">dopaminado</span>
           </Link>
 
           {/* Search */}
           <div ref={searchRef} className="relative ml-2 hidden flex-1 md:block">
-            <div className="flex items-center gap-2 rounded-full border border-border bg-surface-light px-4 py-2.5 transition focus-within:border-neon">
+            <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 transition focus-within:border-neon/50 focus-within:shadow-[0_0_15px_rgba(204,255,0,0.05)]">
               <span className="text-muted">🔍</span>
               <input
                 type="text"
@@ -90,7 +92,7 @@ export default function Header() {
 
             {/* Dropdown Results */}
             {showDropdown && (query.trim().length > 0) && (
-              <div className="absolute left-0 top-full mt-2 w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+              <div className="absolute left-0 top-full mt-2 w-full overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
                 {results.length > 0 ? (
                   <div className="flex flex-col">
                     {results.map((product) => (
@@ -101,9 +103,9 @@ export default function Header() {
                           setQuery('');
                           router.push(`/produto/${product.slug}`);
                         }}
-                        className="flex items-center gap-3 border-b border-border p-3 text-left transition hover:bg-surface-light last:border-0"
+                        className="flex items-center gap-3 border-b border-border p-3 text-left transition hover:bg-surface last:border-0"
                       >
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-surface-light">
                           <img src={product.image_url} alt={product.short_name} className="h-full w-full object-cover" />
                         </div>
                         <div className="flex-1 overflow-hidden">
@@ -125,34 +127,41 @@ export default function Header() {
           {/* Nav */}
           <nav className="ml-auto flex items-center gap-1">
             <Link
-              href="/"
-              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface-light hover:text-foreground lg:block"
+              href="/lootbox"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-neon lg:block"
             >
-              Catálogo
+              📦 Caixa
             </Link>
             <Link
               href="/ranking"
-              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface-light hover:text-foreground lg:block"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-foreground lg:block"
             >
               Ranking 🏆
             </Link>
             <Link
+              href="/blog"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-foreground lg:block"
+            >
+              Blog
+            </Link>
+            <Link
               href="/minha-conta"
-              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface-light hover:text-foreground lg:block"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-foreground lg:block"
             >
               Minha conta 👤
             </Link>
 
-            {/* XP Badge */}
-            <div className="hidden items-center gap-1.5 rounded-full bg-surface-light px-3 py-2 text-xs font-bold text-muted lg:flex">
+            {/* Streak + XP Badge */}
+            <div className="hidden items-center gap-1.5 rounded-full bg-surface px-3 py-2 text-xs font-bold text-muted lg:flex">
+              {streak > 0 && <span className="animate-fire">{streakEmoji}</span>}
               <span>{levelEmoji}</span>
-              <span className="text-pop">{xp} XP</span>
+              <span className="text-neon">{xp} XP</span>
             </div>
 
             {/* Cart */}
             <button
               onClick={toggleCart}
-              className="relative flex items-center gap-2 rounded-full bg-neon px-4 py-2.5 text-sm font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-95"
+              className="relative flex items-center gap-2 rounded-full bg-neon px-4 py-2.5 text-sm font-extrabold text-background shadow-lg transition hover:bg-neon-light active:scale-95 animate-pulse-glow"
             >
               🛒 <span className="hidden sm:inline">Carrinho</span>
               {totalItems > 0 && (

@@ -3,6 +3,8 @@
 import { useGame } from '@/contexts/GameContext';
 import Link from 'next/link';
 import gameData from '@/data/achievements.json';
+import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 
 // Fake leaderboard data
 const fakeLeaderboard = [
@@ -21,11 +23,52 @@ const fakeLeaderboard = [
 const rankEmojis = ['🥇', '🥈', '🥉'];
 
 export default function RankingPage() {
-  const { nickname, xp, level, levelTitle, levelEmoji, totalSpent, purchaseCount, achievements, orders } = useGame();
+  const { nickname, xp, level, levelTitle, levelEmoji, totalSpent, purchaseCount, achievements, orders, userId } = useGame();
+  
+  const [leaderboard, setLeaderboard] = useState<any[]>(fakeLeaderboard);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Find player rank
-  const playerRank = fakeLeaderboard.findIndex(l => totalSpent > l.totalSpent);
-  const displayRank = playerRank === -1 ? fakeLeaderboard.length + 1 : playerRank + 1;
+  useEffect(() => {
+    async function fetchLeaderboard() {
+      try {
+        const { data, error } = await supabase
+          .from('leaderboard')
+          .select('*')
+          .order('total_spent', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const formatted = data.map((d, index) => ({
+            rank: index + 1,
+            name: d.nickname,
+            level: d.level,
+            totalSpent: Number(d.total_spent),
+            purchases: d.purchase_count,
+            userId: d.user_id,
+          }));
+          setLeaderboard(formatted);
+        }
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+        // Fallback to fake data
+        setLeaderboard(fakeLeaderboard);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLeaderboard();
+  }, []);
+
+  // Find player rank in the current leaderboard
+  const playerRank = leaderboard.findIndex(l => l.userId === userId || totalSpent > l.totalSpent);
+  let displayRank = playerRank === -1 ? leaderboard.length + 1 : playerRank + 1;
+  if (playerRank !== -1 && leaderboard[playerRank].userId !== userId && totalSpent > leaderboard[playerRank].totalSpent) {
+    // We are beating them but not in the list (e.g. sync hasn't happened)
+    displayRank = playerRank + 1;
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -89,8 +132,16 @@ export default function RankingPage() {
           Top Compradores Fictícios 🔥
         </h2>
         <div className="mt-4 space-y-2">
-          {fakeLeaderboard.map((entry, i) => {
-            const isBeforePlayer = displayRank === i + 1;
+          {isLoading && (
+            <div className="text-center py-8 text-muted">
+              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-neon border-t-transparent mb-2"></span>
+              <p className="text-sm">Buscando os maiores esbanjadores...</p>
+            </div>
+          )}
+          
+          {!isLoading && leaderboard.map((entry, i) => {
+            const isPlayer = entry.userId === userId;
+            const isBeforePlayer = !isPlayer && (displayRank === i + 1);
 
             return (
               <div key={entry.rank}>
@@ -113,20 +164,26 @@ export default function RankingPage() {
                   </div>
                 )}
 
-                <div className={`flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition hover:border-neon/20 ${
-                  i < 3 ? 'bg-gradient-to-r from-card to-surface-light' : ''
+                <div className={`flex items-center gap-4 rounded-xl border p-4 transition ${
+                  isPlayer 
+                    ? 'border-neon/50 bg-neon/10 neon-border' 
+                    : i < 3 
+                      ? 'border-border bg-gradient-to-r from-card to-surface-light hover:border-neon/20' 
+                      : 'border-border bg-card hover:border-neon/20'
                 }`}>
-                  <span className="w-8 text-center text-lg font-extrabold text-muted">
+                  <span className={`w-8 text-center text-lg font-extrabold ${isPlayer ? 'text-neon' : 'text-muted'}`}>
                     {i < 3 ? rankEmojis[i] : `#${entry.rank}`}
                   </span>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-light text-lg">
-                    {gameData.levels.find(l => l.level === entry.level)?.emoji || '👀'}
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full text-lg ${isPlayer ? 'bg-neon/20' : 'bg-surface-light'}`}>
+                    {isPlayer ? levelEmoji : (gameData.levels.find(l => l.level === entry.level)?.emoji || '👀')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-extrabold text-foreground truncate">{entry.name}</p>
+                    <p className="text-sm font-extrabold text-foreground truncate">
+                      {entry.name} {isPlayer && <span className="text-neon">(VOCÊ!)</span>}
+                    </p>
                     <p className="text-xs text-muted">Nível {entry.level} • {entry.purchases} compras</p>
                   </div>
-                  <p className={`text-sm font-extrabold ${i < 3 ? 'text-pop' : 'text-muted'}`}>
+                  <p className={`text-sm font-extrabold ${isPlayer ? 'text-neon' : i < 3 ? 'text-pop' : 'text-muted'}`}>
                     R$ {entry.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -134,8 +191,8 @@ export default function RankingPage() {
             );
           })}
 
-          {/* Player at bottom if not in top 10 */}
-          {displayRank > fakeLeaderboard.length && totalSpent > 0 && (
+          {/* Player at bottom if not in top list and not already rendered */}
+          {!isLoading && displayRank > leaderboard.length && totalSpent > 0 && !leaderboard.some(l => l.userId === userId) && (
             <>
               <div className="text-center text-muted py-2">• • •</div>
               <div className="flex items-center gap-4 rounded-xl border border-neon/50 bg-neon/10 p-4 neon-border">
@@ -234,7 +291,7 @@ export default function RankingPage() {
         <p className="text-muted text-sm">Quer subir no ranking?</p>
         <Link
           href="/"
-          className="mt-3 inline-block rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:bg-neon-light hover:scale-105 active:scale-95"
+          className="mt-3 inline-block rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-background shadow-lg transition hover:bg-neon-light hover:scale-105 active:scale-95 animate-pulse-glow"
         >
           Comprar mais (de mentira) ⚡
         </Link>

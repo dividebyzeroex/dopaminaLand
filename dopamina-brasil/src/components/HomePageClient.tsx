@@ -84,7 +84,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4">
           
           {/* Main Hero Block */}
-          <div className="group relative flex min-h-[480px] flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-surface via-surface-light to-[#ffedd5] px-6 py-10 shadow-sm sm:px-12 lg:items-start lg:justify-between">
+          <div className="group relative flex min-h-[480px] flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-surface via-surface-light to-[#1a1a2e] px-6 py-10 shadow-sm sm:px-12 lg:items-start lg:justify-between">
             <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-neon/30 blur-3xl transition-transform duration-1000 group-hover:scale-110" />
             <div className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-purple/20 blur-3xl transition-transform duration-1000 group-hover:scale-110" />
 
@@ -103,7 +103,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                 <a
                   href="#catalogo"
-                  className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-white shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap glitch-hover"
+                  className="rounded-full bg-neon px-8 py-3.5 text-base font-extrabold text-background shadow-lg transition hover:scale-105 hover:bg-neon-light active:scale-95 whitespace-nowrap glitch-hover animate-pulse-glow"
                   data-text="extravasar minha dopamina 🚀"
                 >
                   extravasar minha dopamina 🚀
@@ -241,7 +241,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
       </section>
 
       {/* ============ MARQUEE DIVIDER ============ */}
-      <div className="mt-12 overflow-hidden bg-foreground py-3 text-[13px] font-bold uppercase tracking-wider text-background">
+      <div className="mt-12 overflow-hidden bg-surface py-3 text-[13px] font-bold uppercase tracking-wider text-foreground border-y border-border">
         <div className="flex w-max animate-marquee gap-12 whitespace-nowrap pr-12">
           {[
             '🛵 ENTREGA POR MOTOBOYS (QUASE) REAIS',
@@ -276,7 +276,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
           {trustBadges.map((badge, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card/70 px-4 py-3 backdrop-blur"
+              className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 backdrop-blur"
             >
               <span className="text-2xl">{badge.emoji}</span>
               <div className="min-w-0">

@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { GameProvider } from "@/contexts/GameContext";
+import { DailyProvider } from "@/contexts/DailyContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -13,7 +14,13 @@ import AchievementToast from "@/components/AchievementToast";
 import FomoToast from "@/components/FomoToast";
 import DopamineMeter from "@/components/DopamineMeter";
 import TrackingProvider from "@/components/TrackingProvider";
+import CustomCursor from "@/components/CustomCursor";
+import ScanLine from "@/components/ScanLine";
+import CinematicIntro from "@/components/CinematicIntro";
+import NicknameSetup from "@/components/NicknameSetup";
+import DailyModal from "@/components/DailyModal";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -27,7 +34,7 @@ const outfit = Outfit({
 });
 
 export const viewport = {
-  themeColor: "#ccff00",
+  themeColor: "#0a0a0f",
 };
 
 export const metadata: Metadata = {
@@ -69,22 +76,29 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${outfit.variable} h-full antialiased`}
+      className={`${inter.variable} ${outfit.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <GameProvider>
           <CartProvider>
-            <TrackingProvider>
-              <CSPostHogProvider>
-                <Header />
-                <main className="flex-1 overflow-x-clip pt-28 pb-8">{children}</main>
-                <Footer />
-                <CartDrawer />
-                <AchievementToast />
-                <FomoToast />
-                <DopamineMeter />
-              </CSPostHogProvider>
-            </TrackingProvider>
+            <DailyProvider>
+              <TrackingProvider>
+                <CSPostHogProvider>
+                  <CinematicIntro />
+                  <NicknameSetup />
+                  <DailyModal />
+                  <CustomCursor />
+                  <ScanLine />
+                  <Header />
+                  <main className="flex-1 overflow-x-clip pt-28 pb-8">{children}</main>
+                  <Footer />
+                  <CartDrawer />
+                  <AchievementToast />
+                  <FomoToast />
+                  <DopamineMeter />
+                </CSPostHogProvider>
+              </TrackingProvider>
+            </DailyProvider>
           </CartProvider>
         </GameProvider>
         <Analytics />

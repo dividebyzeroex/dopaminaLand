@@ -30,7 +30,7 @@ export default function DopamineMeter() {
 
   return (
     <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-sm pointer-events-none">
-      <div className={`bg-card/90 backdrop-blur border ${isLevelingUp ? 'border-neon shadow-[0_0_15px_rgba(255,30,122,0.5)] animate-pulse' : 'border-border'} rounded-full p-1.5 flex items-center gap-3 transition-all duration-300`}>
+      <div className={`bg-card/90 backdrop-blur border ${isLevelingUp ? 'border-neon shadow-[0_0_15px_rgba(204,255,0,0.3)] animate-pulse' : 'border-border'} rounded-full p-1.5 flex items-center gap-3 transition-all duration-300`}>
         <div className="shrink-0 bg-surface-light rounded-full w-8 h-8 flex items-center justify-center text-sm">
           ⚡
         </div>
