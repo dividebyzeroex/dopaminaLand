@@ -1,21 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type CartItem = {
-  id: string;
-  slug: string;
-  name: string;
-  shortName: string;
-  image: string;
-  localImage?: string;
-  gradient?: string;
-  originalPrice: number;
-  salePrice: number;
-  quantity?: number;
-};
+import { CartItem } from '@/types';
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (item: CartItem) => void;
+  addItem: (item: Omit<CartItem, 'quantity'>) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
   isCartOpen: boolean;
@@ -31,7 +20,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Load from Async Storage could be added here in the future
   
-  const addItem = (item: CartItem) => {
+  const addItem = (item: Omit<CartItem, 'quantity'>) => {
     setItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === item.id);
       if (existingItem) {
@@ -39,7 +28,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i
         );
       }
-      return [...prevItems, { ...item, quantity: 1 }];
+      return [...prevItems, { ...item, quantity: 1 } as CartItem];
     });
   };
 

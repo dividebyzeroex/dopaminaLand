@@ -9,7 +9,9 @@ import { useCart } from '@/contexts/CartContext';
 import { useIntentTracker } from '@/hooks/useIntentTracker';
 import { useCartToast } from '@/contexts/CartToastContext';
 import { useSheet } from '@/contexts/SheetContext';
+import { useSheet } from '@/contexts/SheetContext';
 import DopaminaLoading from '@/components/DopaminaLoading';
+import { Product } from '@/types';
 
 const { width } = Dimensions.get('window');
 
@@ -22,14 +24,15 @@ const trustBadges = [
 
 const infiniteBadges = [...trustBadges, ...trustBadges, ...trustBadges, ...trustBadges, ...trustBadges];
 
-function ProductCard({ item, widthOverride }: { item: any, widthOverride?: number }) {
+function ProductCard({ item, widthOverride }: { item: Product, widthOverride?: number }) {
   const router = useRouter();
   const { addItem } = useCart();
   const [imageLoaded, setImageLoaded] = useState(false);
-  const { trackAddToCart } = useIntentTracker(item.id, item.sale_price, { autoTrackView: false });
+  const { trackAddToCart } = useIntentTracker(String(item.id), item.salePrice, { autoTrackView: false });
   const { showCartToast } = useCartToast();
 
-  const imageUrl = item.image_url;
+  const imageUrl = item.localImage;
+  const finalName = item.name || item.shortName;
 
   return (
     <TouchableOpacity 
@@ -55,16 +58,16 @@ function ProductCard({ item, widthOverride }: { item: any, widthOverride?: numbe
           <Text className="text-6xl">{item.image}</Text>
         )}
         
-        {item.discount > 0 && (
+        {(item.discount || 0) > 0 && (
           <View style={{ position: 'absolute', left: 8, top: 8, zIndex: 10, borderRadius: 20, overflow: 'hidden', backgroundColor: 'rgba(245,158,11,0.92)', paddingVertical: 3, paddingHorizontal: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)' }}>
             <Text style={{ color: 'white', fontSize: 10, fontWeight: '900' }}>-{item.discount}%</Text>
           </View>
         )}
       </View>
       <View className="p-3">
-        <Text className="text-foreground font-bold text-sm mb-1 truncate" numberOfLines={2}>{item.short_name || item.name}</Text>
-        <Text className="text-muted text-xs line-through">R$ {item.price?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
-        <Text className="text-neon font-black text-lg">R$ {item.sale_price?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
+        <Text className="text-foreground font-bold text-sm mb-1 truncate" numberOfLines={2}>{finalName}</Text>
+        <Text className="text-muted text-xs line-through">R$ {(item.originalPrice || item.price || item.salePrice * 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
+        <Text className="text-neon font-black text-lg">R$ {item.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>
         <Text className="text-muted text-[10px] mb-3">ou 4x sem juros</Text>
         
         <TouchableOpacity 
@@ -72,14 +75,14 @@ function ProductCard({ item, widthOverride }: { item: any, widthOverride?: numbe
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             addItem({
-              id: item.id,
+              id: String(item.id),
               slug: item.slug,
-              name: item.name,
-              shortName: item.short_name,
-              image: item.image,
-              localImage: item.image_url,
-              originalPrice: item.price,
-              salePrice: item.sale_price,
+              name: finalName,
+              shortName: item.shortName,
+              image: item.image || '',
+              localImage: item.localImage,
+              originalPrice: item.originalPrice || item.price || item.salePrice * 1.5,
+              salePrice: item.salePrice,
             });
             trackAddToCart();
             showCartToast();
@@ -94,8 +97,8 @@ function ProductCard({ item, widthOverride }: { item: any, widthOverride?: numbe
 }
 
 export default function HomeScreen() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [flashDeals, setFlashDeals] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [flashDeals, setFlashDeals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { setTabBarVisible } = useSheet();
   const lastScrollY = useRef(0);
@@ -134,8 +137,19 @@ export default function HomeScreen() {
           supabase.from('products').select('*').gte('discount', 12).order('discount', { ascending: false }).limit(8)
         ]);
 
-        setProducts(productsRes.data || []);
-        setFlashDeals(flashRes.data || []);
+        const mapData = (data: any[] | null): Product[] => {
+          if (!data) return [];
+          return data.map(p => ({
+            ...p,
+            shortName: p.short_name,
+            localImage: p.image_url,
+            salePrice: p.sale_price,
+            originalPrice: p.price,
+          }));
+        };
+
+        setProducts(mapData(productsRes.data));
+        setFlashDeals(mapData(flashRes.data));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -219,6 +233,27 @@ export default function HomeScreen() {
             </View>
           ))}
         </Animated.View>
+      </View>
+
+      {/* PROMO SWAG REAL BANNER */}
+      <View className="mx-4 mb-8 bg-[#1a0e2e] rounded-3xl overflow-hidden border border-[#f97316]/30">
+        <View className="p-6">
+          <View className="bg-[#f97316] self-start px-2 py-1 rounded-full mb-3">
+            <Text className="text-white text-[10px] font-black uppercase">🎁 RECOMPENSA FÍSICA REAL</Text>
+          </View>
+          <Text className="text-white font-black text-2xl tracking-tighter leading-tight mb-2">
+            GANHE BRINDES REAIS DE GRAÇA 📦
+          </Text>
+          <Text className="text-white/80 text-xs leading-relaxed mb-4">
+            Junte XP comprando e ganhe brindes reais na sua casa. Frete grátis sempre!
+          </Text>
+          <TouchableOpacity 
+            className="bg-[#f97316] py-3 px-5 rounded-xl self-start"
+            onPress={() => router.push('/perfil')}
+          >
+            <Text className="text-white font-extrabold text-xs text-center">Ver Meu Swag 🧪</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* FLASH DEALS (OFERTAS RELÂMPAGO) */}

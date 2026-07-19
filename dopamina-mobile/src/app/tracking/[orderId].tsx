@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator, Animated, Image as RNImage } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSheet } from '@/contexts/SheetContext';
-import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // We can just define some basic events directly here for mobile
 const trackingEventsData = [
@@ -17,6 +16,7 @@ export default function TrackingScreen() {
   const { orderId } = useLocalSearchParams();
   const router = useRouter();
   const { setTabBarVisible } = useSheet();
+  const scrollY = React.useRef(new Animated.Value(0)).current;
 
   // Hide floating tab bar when focused on this screen, restore on blur
   useFocusEffect(
@@ -159,22 +159,55 @@ export default function TrackingScreen() {
           <Text className="text-muted text-sm mt-1">{currentEvent.description}</Text>
         </View>
 
-        {/* Map */}
-        <View className="flex-1 rounded-2xl overflow-hidden border border-border relative bg-card min-h-[300px]">
-          <WebView
-            source={{ uri: `https://www.openstreetmap.org/export/embed.html?bbox=${currentMapPosition.lng - 0.2}%2C${currentMapPosition.lat - 0.2}%2C${currentMapPosition.lng + 0.2}%2C${currentMapPosition.lat + 0.2}&layer=mapnik` }}
-            className="flex-1 opacity-50"
-            scrollEnabled={false}
-          />
+        {/* Map / Minigame */}
+        <View className="flex-1 rounded-2xl overflow-hidden border-2 border-neon/30 relative bg-[#0a0a1a] min-h-[300px]">
+          <Animated.ScrollView
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
+            contentContainerStyle={{ height: 1000 }}
+            showsVerticalScrollIndicator={false}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+          >
+            <View style={{ height: 1000 }} />
+          </Animated.ScrollView>
+
+          {/* Synthwave Sun */}
+          <View className="absolute top-8 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-pop opacity-90 shadow-lg shadow-pop/50" />
+
+          {/* 3D Grid / Road */}
+          <Animated.View style={{
+            position: 'absolute', bottom: -100, left: '-50%', right: '-50%', height: 400,
+            backgroundColor: '#050510',
+            transform: [
+              { perspective: 300 },
+              { rotateX: '75deg' },
+              { translateY: scrollY }
+            ],
+            borderTopWidth: 2,
+            borderTopColor: '#ccff00'
+          }}>
+            {Array.from({length: 20}).map((_, i) => (
+              <View key={`h-${i}`} style={{position: 'absolute', top: i * 40, left: 0, right: 0, height: 1, backgroundColor: 'rgba(204,255,0,0.3)'}} />
+            ))}
+            {Array.from({length: 40}).map((_, i) => (
+              <View key={`v-${i}`} style={{position: 'absolute', top: 0, bottom: 0, left: i * 40, width: 1, backgroundColor: 'rgba(204,255,0,0.3)'}} />
+            ))}
+          </Animated.View>
+
           {/* Centered Cleiton */}
-          <View className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center justify-center pointer-events-none">
-            <Text className="text-4xl">🏍️</Text>
+          <View className="absolute bottom-8 left-1/2 -translate-x-1/2 items-center justify-center pointer-events-none z-20">
+            <RNImage 
+              source={require('@/assets/images/cleiton_nobg.png')} 
+              style={{ width: 100, height: 100, resizeMode: 'contain' }}
+            />
+            <View className="w-16 h-2 bg-black/60 rounded-full mt-2 blur-sm" />
           </View>
 
-          {/* Coordinate Overlay */}
-          <View className="absolute bottom-4 left-4 bg-background/90 p-2 rounded-lg border border-border">
-            <Text className="text-[10px] text-neon font-bold uppercase">Sinal GPS</Text>
-            <Text className="text-white text-xs font-bold">{currentMapPosition.lat.toFixed(4)}°, {currentMapPosition.lng.toFixed(4)}°</Text>
+          {/* UI Overlay */}
+          <View className="absolute top-4 left-4 bg-background/90 p-3 rounded-xl border border-neon/50 z-30">
+            <Text className="text-[10px] text-pop font-bold uppercase">🎮 Scroll para Acelerar</Text>
+            <Text className="text-neon text-lg font-black mt-1 tracking-tighter">{currentMapPosition.lat.toFixed(4)}°</Text>
+            <Text className="text-neon text-lg font-black tracking-tighter">{currentMapPosition.lng.toFixed(4)}°</Text>
           </View>
         </View>
       </View>
