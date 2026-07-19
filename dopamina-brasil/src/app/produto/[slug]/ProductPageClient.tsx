@@ -123,7 +123,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
               onClick={() => addItem({
                 id: String(product.id),
                 slug: product.slug,
-                name: product.name,
+                name: product.name || product.shortName,
                 shortName: product.shortName,
                 image: product.image || '',
                 localImage: product.localImage,
@@ -140,7 +140,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 addItem({
                   id: String(product.id),
                   slug: product.slug,
-                  name: product.name,
+                  name: product.name || product.shortName,
                   shortName: product.shortName,
                   image: product.image || '',
                   localImage: product.localImage,

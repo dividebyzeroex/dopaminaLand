@@ -7,24 +7,24 @@ import { trackEvent } from '@/lib/tracking';
 interface ProductCardProps {
   id: string | number;
   slug: string;
-  name: string;
+  name?: string;
   shortName: string;
   category?: string;
   image?: string;
   localImage?: string;
   gradient?: string;
-  price: number;
+  price?: number;
   salePrice: number;
-  discount: number;
-  rating: string | number;
-  reviews: number;
+  discount?: number;
+  rating?: string | number;
+  reviews?: number;
   installments?: number;
   badge?: string | null;
 }
 
 export default function ProductCard({
   id, slug, name, shortName, image, localImage, gradient,
-  price, salePrice, discount, rating, reviews,
+  price, salePrice, discount = 0, rating, reviews = 0,
   installments = 4, badge, category
 }: ProductCardProps) {
   const { addItem } = useCart();
@@ -32,14 +32,16 @@ export default function ProductCard({
   const numRating = Number(rating) || 5;
   const stars = '★'.repeat(Math.floor(numRating)) + (numRating % 1 >= 0.5 ? '★' : '');
   const installmentValue = (salePrice / installments).toFixed(2);
+  const finalName = name || shortName;
+  const originalPrice = price || salePrice * 1.5;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addItem({ 
-      id: String(id), slug, name, shortName, 
+      id: String(id), slug, name: finalName, shortName, 
       image: image || '', localImage, gradient: gradient || '', 
-      originalPrice: price, salePrice 
+      originalPrice, salePrice 
     });
     trackEvent('add_to_cart', String(id), salePrice, { source: 'product_card', slug, category });
   };
@@ -99,7 +101,7 @@ export default function ProductCard({
         {/* Price */}
         <div className="mt-auto pt-3">
           <p className="text-xs text-muted line-through">
-            R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            R$ {originalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           <p className="font-[var(--font-display)] text-lg font-extrabold leading-tight tracking-tight tabular-nums text-neon sm:text-xl">
             R$ {salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
