@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useGame } from '@/contexts/GameContext';
 import { trackEvent } from '@/lib/tracking';
+import PhysicsCheckout from '@/components/PhysicsCheckout';
 
 const paymentMethods = [
   { id: 'cartao', label: '💳 Cartão de Crédito Imaginário', desc: 'Limite infinito, fatura inexistente' },
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const [confetti, setConfetti] = useState<{ id: number; color: string; left: number; delay: number }[]>([]);
   const [checkoutStart] = useState(Date.now());
   const [coupon, setCoupon] = useState('');
@@ -49,6 +51,7 @@ export default function CheckoutPage() {
       });
 
       setOrderId(id);
+      setPurchasedItems([...items]);
       clearCart();
       setIsProcessing(false);
       setIsComplete(true);
@@ -71,78 +74,7 @@ export default function CheckoutPage() {
   };
 
   if (isComplete) {
-    return (
-      <div className="relative min-h-screen overflow-hidden">
-        {/* Confetti */}
-        {confetti.map(piece => (
-          <div
-            key={piece.id}
-            className="animate-confetti fixed z-50 h-3 w-3 rounded-sm"
-            style={{
-              backgroundColor: piece.color,
-              left: `${piece.left}%`,
-              animationDelay: `${piece.delay}s`,
-            }}
-          />
-        ))}
-
-        <div className="mx-auto max-w-lg px-4 py-20 text-center relative">
-          <div className="relative mx-auto mb-8 h-48 w-48 overflow-hidden rounded-full border-4 border-neon shadow-[0_0_30px_rgba(204,255,0,0.3)]">
-            <img 
-              src="/cleiton_nobg.png" 
-              alt="Cleiton Mascot" 
-              className="h-full w-full object-cover animate-pulse"
-              style={{ transform: 'scale(1.1) translateY(5%)' }}
-            />
-          </div>
-          <h1 className="font-[var(--font-display)] text-4xl font-extrabold text-foreground">
-            CLEITON LIGOU A MOTO! 🏍️💨
-          </h1>
-          <p className="mt-2 text-xl text-neon font-bold">
-            (Sua compra fake foi um sucesso!)
-          </p>
-          <div className="mt-6 flex flex-col items-center gap-2 text-sm text-muted">
-            <p className="flex items-center gap-2"><span>📦</span> Cleiton está empacotando sua caixa.</p>
-            <p className="flex items-center gap-2"><span>🚀</span> Cleiton ligou a moto e está a caminho!</p>
-            <p className="flex items-center gap-2 font-bold text-foreground"><span>🚨</span> Chegou! Abre o portão que o Cleiton tá buzinando!</p>
-          </div>
-
-          <div className="mt-8 rounded-2xl border border-border bg-card p-6 text-left">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted">Pedido:</span>
-              <span className="text-sm font-bold text-foreground">{orderId}</span>
-            </div>
-            <div className="mt-3 flex items-center justify-between">
-              <span className="text-sm text-muted">Total cobrado:</span>
-              <span className="text-2xl font-extrabold text-neon-green">R$ 0,00</span>
-            </div>
-            <div className="mt-3 flex items-center justify-between">
-              <span className="text-sm text-muted">Status:</span>
-              <span className="text-sm font-bold text-pop">Processando a alegria ⚡</span>
-            </div>
-          </div>
-
-          <div className="mt-8 space-y-3">
-            <Link
-              href={`/rastreamento/${orderId}`}
-              className="block w-full rounded-2xl bg-neon py-4 text-lg font-extrabold text-white shadow-lg transition hover:bg-neon-light whitespace-nowrap overflow-hidden text-ellipsis px-2"
-            >
-              RASTREAR PEDIDO 📍
-            </Link>
-            <Link
-              href="/"
-              className="block w-full rounded-2xl border-2 border-border py-4 text-lg font-extrabold text-foreground transition hover:border-neon hover:text-neon whitespace-nowrap overflow-hidden text-ellipsis px-2"
-            >
-              COMPRAR MAIS 🛒
-            </Link>
-          </div>
-
-          <p className="mt-6 text-xs text-muted">
-            ⚡ Lembre-se: nenhum dinheiro foi gasto, nenhum produto será entregue, e a capivara está salva.
-          </p>
-        </div>
-      </div>
-    );
+    return <PhysicsCheckout items={purchasedItems} orderId={orderId} />;
   }
 
   return (
