@@ -47,12 +47,12 @@ export default function OfertasClient({ flashDeals, todayPicks }: { flashDeals: 
         </div>
 
         {/* Flash Deals Section */}
-        <section className="mt-6 rounded-3xl border border-pop/30 bg-gradient-to-br from-[#fff7fb] to-[#fff1e8] p-5 shadow-sm">
+        <section className="mt-6 rounded-3xl border border-pop/30 bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <h2 className="font-[var(--font-display)] text-xl font-extrabold text-neon">
               ⚡ Ofertas Relâmpago
             </h2>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-xs font-black tabular-nums text-[#faf6f2]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-xs font-black tabular-nums text-background">
               ⏳ termina em <span className="text-pop">{timeLeft}</span>
             </span>
           </div>
@@ -64,10 +64,10 @@ export default function OfertasClient({ flashDeals, todayPicks }: { flashDeals: 
                 <a
                   key={item.id}
                   href={`/produto/${item.slug}`}
-                  className="group flex gap-4 rounded-2xl border border-foreground/8 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+                  className="group flex gap-4 rounded-2xl border border-border bg-surface p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:border-pop/50"
                 >
-                  <div className="relative grid h-24 w-24 shrink-0 place-items-center rounded-xl bg-gradient-to-b from-white to-[#f1ebf2]">
-                    <span className="absolute left-1 top-1 rounded-full bg-pop px-1.5 py-0.5 text-[10px] font-black text-foreground">
+                  <div className="relative grid h-24 w-24 shrink-0 place-items-center rounded-xl bg-white/5">
+                    <span className="absolute left-1 top-1 rounded-full bg-pop px-1.5 py-0.5 text-[10px] font-black text-white">
                       -{item.discount}% OFF
                     </span>
                     <img
