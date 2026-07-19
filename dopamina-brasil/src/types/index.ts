@@ -9,6 +9,13 @@ export interface Product {
   localImage?: string; // Supabase / Web URL
   tag?: string;
   originalPrice?: number;
+  price?: number;
+  rating?: number | string;
+  reviews?: number;
+  badge?: string;
+  discount?: number;
+  description?: string;
+  gradient?: string;
 }
 
 export interface CartItem extends Product {

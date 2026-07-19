@@ -24,11 +24,11 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
 
   useEffect(() => {
     // Track view item
-    trackEvent('view_item', product.id, product.salePrice, { slug: product.slug });
+    trackEvent('view_item', String(product.id), product.salePrice, { slug: product.slug });
 
     // Track dwell time (15 seconds)
     const timer = setTimeout(() => {
-      trackEvent('dwell_time_exceeded', product.id, product.salePrice, { slug: product.slug, time_spent: 15 });
+      trackEvent('dwell_time_exceeded', String(product.id), product.salePrice, { slug: product.slug, time_spent: 15 });
     }, 15000);
 
     return () => clearTimeout(timer);
@@ -60,7 +60,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
               {product.badge}
             </span>
           )}
-          {product.discount > 0 && (
+          {(product.discount || 0) > 0 && (
             <span className="absolute right-4 top-4 z-10 rounded-full bg-pop px-3 py-1.5 text-xs font-black text-background shadow-lg">
               -{product.discount}%
             </span>
@@ -83,7 +83,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
           <div className="flex items-center gap-2 text-sm">
             <span className="text-amber-400 font-bold">{stars}</span>
             <span className="text-neon font-extrabold">{product.rating}</span>
-            <span className="text-muted">({product.reviews.toLocaleString('pt-BR')} avaliações)</span>
+            <span className="text-muted">({(product.reviews || 0).toLocaleString('pt-BR')} avaliações)</span>
           </div>
 
           {/* Title */}
@@ -94,7 +94,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
           {/* Price */}
           <div className="mt-6 rounded-2xl border border-border bg-surface-light p-6">
             <p className="text-sm text-muted">
-              De <span className="line-through">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              De <span className="line-through">R$ {(product.price || product.originalPrice || product.salePrice * 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
             </p>
             <p className="mt-1 font-[var(--font-display)] text-4xl font-extrabold text-neon">
               R$ {product.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -121,14 +121,14 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
             <Link
               href="/checkout"
               onClick={() => addItem({
-                id: product.id,
+                id: String(product.id),
                 slug: product.slug,
                 name: product.name,
                 shortName: product.shortName,
                 image: product.image || '',
                 localImage: product.localImage,
                 gradient: product.gradient || '',
-                originalPrice: product.price,
+                originalPrice: product.price || product.originalPrice || product.salePrice * 1.5,
                 salePrice: product.salePrice,
               })}
               className="order-1 block w-full rounded-2xl bg-neon py-4 text-center text-base sm:text-lg font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-[0.98] animate-pulse-glow whitespace-nowrap overflow-hidden text-ellipsis px-2"
@@ -138,17 +138,17 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
             <button
               onClick={() => {
                 addItem({
-                  id: product.id,
+                  id: String(product.id),
                   slug: product.slug,
                   name: product.name,
                   shortName: product.shortName,
                   image: product.image || '',
                   localImage: product.localImage,
                   gradient: product.gradient || '',
-                  originalPrice: product.price,
+                  originalPrice: product.price || product.originalPrice || product.salePrice * 1.5,
                   salePrice: product.salePrice,
                 });
-                trackEvent('add_to_cart', product.id, product.salePrice, { source: 'product_page', slug: product.slug, category: product.category });
+                trackEvent('add_to_cart', String(product.id), product.salePrice, { source: 'product_page', slug: product.slug, category: product.category });
               }}
               className="order-2 w-full rounded-2xl border-2 border-neon py-4 text-base sm:text-lg font-extrabold text-neon transition hover:bg-neon/10 active:scale-[0.98] whitespace-nowrap overflow-hidden text-ellipsis px-2"
             >
@@ -171,7 +171,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                   navigator.clipboard.writeText(url);
                   alert('🔗 Link copiado! Envie para seus amigos e espalhe a dopamina.');
                 }
-                trackEvent('share_product', product.id, 0, { slug: product.slug });
+                trackEvent('share_product', String(product.id), 0, { slug: product.slug });
               }}
               className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-light py-3 text-sm font-bold text-muted transition hover:border-neon hover:text-neon active:scale-[0.98]"
             >
