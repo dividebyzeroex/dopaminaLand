@@ -165,7 +165,7 @@ export default function ContaClient() {
       </div>
 
       {/* Profile Creation Section */}
-      <div className="mb-12 overflow-hidden rounded-3xl bg-surface-light p-6 shadow-sm md:p-8">
+      <div className="mb-12 overflow-hidden rounded-3xl bg-card border border-border p-6 shadow-sm md:p-8">
         <div className="mb-6">
           <h2 className="font-[var(--font-display)] text-2xl font-extrabold text-foreground">
             Crie um perfil para ver tudo em qualquer lugar
@@ -180,7 +180,7 @@ export default function ContaClient() {
             placeholder="seu nome"
             value={inputName}
             onChange={(e) => setInputName(e.target.value)}
-            className="flex-1 rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
+            className="flex-1 rounded-xl border border-border bg-surface px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
             required
           />
           <input
@@ -188,7 +188,7 @@ export default function ContaClient() {
             placeholder="seu email"
             value={inputEmail}
             onChange={(e) => setInputEmail(e.target.value)}
-            className="flex-1 rounded-xl border border-border bg-white px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
+            className="flex-1 rounded-xl border border-border bg-surface px-5 py-4 font-medium text-foreground outline-none transition focus:border-neon"
             required
           />
           <button
@@ -202,28 +202,28 @@ export default function ContaClient() {
 
       {/* Stats Grid */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-6">
-        <div className="col-span-1 rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="col-span-1 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="text-2xl">🛒</div>
           <div className="mt-2 text-4xl font-black text-foreground">{purchaseCount}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
             Pedidos Feitos
           </div>
         </div>
-        <div className="col-span-1 rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="col-span-1 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="text-2xl">🎉</div>
-          <div className="mt-2 text-4xl font-black text-emerald-500">{delivered}</div>
+          <div className="mt-2 text-4xl font-black text-neon-green">{delivered}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
             Entregues
           </div>
         </div>
-        <div className="col-span-1 rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="col-span-1 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="text-2xl">🐳</div>
-          <div className="mt-2 text-4xl font-black text-rose-500">{lost}</div>
+          <div className="mt-2 text-4xl font-black text-pop">{lost}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
             Perdidos
           </div>
         </div>
-        <div className="col-span-2 rounded-2xl border border-border bg-white p-6 shadow-sm md:col-span-1">
+        <div className="col-span-2 rounded-2xl border border-border bg-card p-6 shadow-sm md:col-span-1">
           <div className="text-2xl">💸</div>
           <div className="mt-2 text-4xl font-black text-neon">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSpent)}
@@ -233,7 +233,7 @@ export default function ContaClient() {
           </div>
           <p className="mt-1 text-[10px] text-muted">que você NÃO gastou</p>
         </div>
-        <div className="col-span-1 rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="col-span-1 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="text-2xl">🌍</div>
           <div className="mt-2 text-4xl font-black text-foreground">
             {new Intl.NumberFormat('pt-BR').format(kmTraveled)} km
@@ -242,9 +242,9 @@ export default function ContaClient() {
             Km Viajados
           </div>
         </div>
-        <div className="col-span-1 rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="col-span-1 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="text-2xl">⚡</div>
-          <div className="mt-2 text-4xl font-black text-purple-600">{xp}</div>
+          <div className="mt-2 text-4xl font-black text-purple">{xp}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">
             Dopamina Ganha
           </div>
@@ -252,7 +252,7 @@ export default function ContaClient() {
       </div>
 
       {/* Hall of Shame */}
-      <div className="mb-12 rounded-2xl border border-border bg-white p-6 shadow-sm">
+      <div className="mb-12 rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted">
           <span>🏆</span> HALL DA VERGONHA
         </div>
@@ -300,7 +300,7 @@ export default function ContaClient() {
       </div>
 
       {/* ═══════════ CATALOGO DE RECOMPENSAS FÍSICAS ═══════════ */}
-      <div className="mb-12 rounded-3xl border border-orange-500/20 bg-white p-6 shadow-sm md:p-8 animate-fade-in">
+      <div className="mb-12 rounded-3xl border border-orange-500/20 bg-card p-6 shadow-sm md:p-8 animate-fade-in">
         {/* Swag Hero Card */}
         <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a0e2e] via-[#2a133d] to-[#4c1256] p-6 text-white shadow-xl border border-purple-500/20 md:p-8">
           {/* Abstract light glow effects */}
@@ -363,25 +363,25 @@ export default function ContaClient() {
                 key={rew.id}
                 className={`relative flex flex-col justify-between rounded-2xl border p-5 transition ${
                   isClaimed
-                    ? 'border-emerald-500/30 bg-emerald-50/20'
+                    ? 'border-emerald-500/30 bg-emerald-500/10'
                     : isUnlocked
-                    ? 'border-orange-500/30 bg-orange-50/5 shadow-sm'
-                    : 'border-transparent bg-surface-light opacity-60'
+                    ? 'border-orange-500/30 bg-orange-500/10 shadow-sm'
+                    : 'border-transparent bg-surface opacity-60'
                 }`}
               >
                 <div>
                   <div className="flex justify-between items-start">
                     <span className="text-4xl mb-3 block">{rew.icon}</span>
                     {!isUnlocked ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-light text-muted border border-border">
                         🔒 Nível {rew.levelRequired}
                       </span>
                     ) : isClaimed ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         ✓ Resgatado
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200 animate-pulse">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 animate-pulse">
                         🎁 Pronto
                       </span>
                     )}
@@ -435,7 +435,7 @@ export default function ContaClient() {
                     placeholder="ex: Tech Lead, Dev, Estudante"
                     value={jobtitle}
                     onChange={(e) => setJobtitle(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -447,7 +447,7 @@ export default function ContaClient() {
                     placeholder="ex: Google, Freelancer, UFSC"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -459,7 +459,7 @@ export default function ContaClient() {
                     placeholder="(48) 99999-9999"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -473,7 +473,7 @@ export default function ContaClient() {
                     placeholder="88000-000"
                     value={cep}
                     onChange={(e) => setCep(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -484,7 +484,7 @@ export default function ContaClient() {
                     placeholder="Av. Beira Mar Norte"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -498,7 +498,7 @@ export default function ContaClient() {
                     placeholder="123"
                     value={number}
                     onChange={(e) => setNumber(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -509,7 +509,7 @@ export default function ContaClient() {
                     placeholder="Centro"
                     value={bairro}
                     onChange={(e) => setBairro(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                   />
                 </div>
                 <div className="space-y-1">
@@ -519,7 +519,7 @@ export default function ContaClient() {
                     placeholder="Florianópolis"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -530,7 +530,7 @@ export default function ContaClient() {
                     placeholder="SC"
                     value={stateName}
                     onChange={(e) => setStateName(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
+                    className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-orange-500"
                     required
                   />
                 </div>
@@ -566,8 +566,8 @@ export default function ContaClient() {
                 key={ach.id}
                 className={`relative flex flex-col items-center justify-center rounded-2xl border p-6 text-center transition ${
                   isUnlocked 
-                    ? 'border-border bg-purple-50/50 shadow-sm' 
-                    : 'border-transparent bg-surface-light opacity-60 grayscale'
+                    ? 'border-neon/30 bg-neon/10 shadow-sm' 
+                    : 'border-border bg-surface-light opacity-60 grayscale'
                 }`}
               >
                 {!isUnlocked && (
@@ -591,7 +591,7 @@ export default function ContaClient() {
       </div>
 
       {/* Leaderboard */}
-      <div className="mb-12 rounded-3xl bg-surface-light p-6 shadow-sm md:p-8">
+      <div className="mb-12 rounded-3xl bg-card border border-border p-6 shadow-sm md:p-8">
         <h2 className="mb-6 flex items-center gap-2 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
           <span>🏆</span> LEADERBOARD — TOP COMPRADORES
         </h2>
@@ -599,7 +599,7 @@ export default function ContaClient() {
           {leaderboard.map((user, index) => (
             <div
               key={index}
-              className="flex items-center justify-between rounded-2xl bg-white px-6 py-4 shadow-sm"
+              className="flex items-center justify-between rounded-2xl bg-surface px-6 py-4 border border-border"
             >
               <div className="flex items-center gap-4">
                 <div className="w-8 text-lg font-black text-muted">

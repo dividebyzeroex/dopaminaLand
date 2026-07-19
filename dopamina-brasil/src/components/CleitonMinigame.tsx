@@ -3,21 +3,43 @@ import { useState, useEffect } from 'react';
 
 export default function CleitonMinigame() {
   const [scrollY, setScrollY] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      // Use window scroll as base, but we will also add manual scrolling
+      setScrollY(prev => Math.max(prev, window.scrollY));
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Initial call
     handleScroll();
-    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleWheel = (e: React.WheelEvent) => {
+    setScrollY(prev => Math.max(0, prev + (e.deltaY > 0 ? 20 : -20)));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const currentY = e.touches[0].clientY;
+    const diff = touchStart - currentY;
+    if (Math.abs(diff) > 5) {
+      setScrollY(prev => Math.max(0, prev + diff));
+      setTouchStart(currentY); // reset for continuous swipe
+    }
+  };
+
   return (
-    <div className="relative h-72 sm:h-96 w-full overflow-hidden rounded-2xl border-2 border-neon/30 bg-[#0a0a1a] shadow-[0_0_30px_rgba(204,255,0,0.1)]">
+    <div 
+      className="relative h-72 sm:h-96 w-full overflow-hidden rounded-2xl border-2 border-neon/30 bg-[#0a0a1a] shadow-[0_0_30px_rgba(204,255,0,0.1)] cursor-ns-resize"
+      onWheel={handleWheel}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+    >
       {/* Sun */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-to-b from-pop via-[#ff00ff] to-[#ffaa00] blur-[2px] shadow-[0_0_60px_rgba(255,0,255,0.6)]" />
 
@@ -41,7 +63,7 @@ export default function CleitonMinigame() {
 
       {/* Speed UI */}
       <div className="absolute top-4 left-4 z-40 bg-background/90 px-4 py-2 rounded-xl border border-neon/50 backdrop-blur-md shadow-lg">
-        <p className="text-[10px] uppercase font-bold text-pop">🎮 Scroll para Acelerar</p>
+        <p className="text-[10px] uppercase font-bold text-pop">🎮 Scroll/Deslize para Acelerar</p>
         <p className="text-xl font-black text-neon font-[var(--font-display)]">
           {Math.min(Math.floor(scrollY / 5), 299)} km/h
         </p>
