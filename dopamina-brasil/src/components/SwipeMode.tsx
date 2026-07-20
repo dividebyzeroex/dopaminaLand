@@ -58,7 +58,7 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
       addItem({
         id: String(currentProduct.id),
         slug: currentProduct.slug,
-        name: currentProduct.name,
+        name: currentProduct.name || currentProduct.shortName,
         shortName: currentProduct.shortName,
         image: currentProduct.image || '',
         localImage: currentProduct.localImage || '',
