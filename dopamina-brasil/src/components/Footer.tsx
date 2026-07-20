@@ -25,6 +25,12 @@ export default function Footer() {
             <p className="mt-2 text-xs text-muted/60">
               100% falso. 200% dopamina. 0% de culpa.
             </p>
+            <div className="mt-6">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted">Contato</h3>
+              <a href="mailto:contato@dopaminado.com.br" className="mt-1 block text-sm text-foreground/60 hover:text-neon transition">
+                contato@dopaminado.com.br
+              </a>
+            </div>
           </div>
 
           {/* Links */}
