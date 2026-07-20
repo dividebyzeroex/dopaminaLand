@@ -61,8 +61,8 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
         shortName: currentProduct.shortName,
         category: currentProduct.category,
         salePrice: currentProduct.salePrice,
-        image: currentProduct.image,
-        localImage: currentProduct.localImage,
+        image: currentProduct.image || '',
+        localImage: currentProduct.localImage || '',
         quantity: 1,
       });
       trackEvent('add_to_cart', String(currentProduct.id), currentProduct.salePrice);
