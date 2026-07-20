@@ -68,21 +68,29 @@ const PURCHASE_ACTIONS = [
 export default function FomoToast() {
   const [currentEvent, setCurrentEvent] = useState<FomoEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [viewerCount, setViewerCount] = useState(0);
 
   useEffect(() => {
+    // Simulated viewer count that fluctuates
+    setViewerCount(Math.floor(Math.random() * 400) + 100);
+    const viewerTick = setInterval(() => {
+      setViewerCount(v => Math.max(50, v + Math.floor(Math.random() * 40) - 18));
+    }, 5000);
+
     // Initial delay before first toast
     const initialTimer = setTimeout(() => {
       triggerRandomToast();
-    }, 8000);
+    }, 5000);
 
-    // Loop interval to trigger toast periodically
+    // Loop interval — AGGRESSIVE: every 10 seconds
     const interval = setInterval(() => {
       triggerRandomToast();
-    }, 28000);
+    }, 10000);
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(interval);
+      clearInterval(viewerTick);
     };
   }, []);
 
@@ -119,35 +127,47 @@ export default function FomoToast() {
   if (!currentEvent) return null;
 
   return (
-    <div
-      className={`fixed bottom-6 left-6 z-[100] flex items-center gap-3 rounded-2xl border bg-card/95 px-4 py-3.5 shadow-2xl backdrop-blur-md max-w-xs transition-all duration-500 ${
-        currentEvent.isReward ? 'border-orange-500/20' : 'border-neon/20'
-      } ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'
-      }`}
-    >
-      <div className={`relative shrink-0 flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${currentEvent.isReward ? 'bg-orange-500/10' : 'bg-neon/10'}`}>
-        {currentEvent.icon}
-        <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+    <>
+      {/* Viewer Count Badge (top-right floating) */}
+      <div className="fixed top-20 right-4 z-[99] flex items-center gap-1.5 rounded-full bg-red-500/10 border border-red-500/20 px-3 py-1.5 backdrop-blur-sm animate-pulse">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
         </span>
+        <span className="text-xs font-bold text-red-400">{viewerCount} pessoas olhando</span>
       </div>
-      <div className="min-w-0 flex-1 leading-tight">
-        <p className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${currentEvent.isReward ? 'text-orange-600' : 'text-neon'}`}>
-          <span>{currentEvent.isReward ? 'Resgate recente' : 'Compra ao vivo'}</span>
-          <span className={`h-1 w-1 rounded-full inline-block ${currentEvent.isReward ? 'bg-orange-500' : 'bg-neon'}`} />
-          <span className="text-[10px] text-muted normal-case font-medium">agora mesmo</span>
-        </p>
-        <p className="text-xs font-black text-foreground truncate mt-0.5">{currentEvent.name}</p>
-        <p className="text-[11px] text-muted leading-snug mt-0.5">{currentEvent.action}</p>
-      </div>
-      <button
-        onClick={() => setIsVisible(false)}
-        className="shrink-0 text-muted hover:text-foreground text-xs self-start"
+
+      {/* Toast */}
+      <div
+        className={`fixed bottom-6 left-6 z-[100] flex items-center gap-3 rounded-2xl border bg-card/95 px-4 py-3.5 shadow-2xl backdrop-blur-md max-w-xs transition-all duration-500 ${
+          currentEvent.isReward ? 'border-orange-500/20' : 'border-neon/20'
+        } ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'
+        }`}
       >
-        ✕
-      </button>
-    </div>
+        <div className={`relative shrink-0 flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${currentEvent.isReward ? 'bg-orange-500/10' : 'bg-neon/10'}`}>
+          {currentEvent.icon}
+          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          </span>
+        </div>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${currentEvent.isReward ? 'text-orange-600' : 'text-neon'}`}>
+            <span>{currentEvent.isReward ? 'Resgate recente' : 'Compra ao vivo'}</span>
+            <span className={`h-1 w-1 rounded-full inline-block ${currentEvent.isReward ? 'bg-orange-500' : 'bg-neon'}`} />
+            <span className="text-[10px] text-muted normal-case font-medium">agora mesmo</span>
+          </p>
+          <p className="text-xs font-black text-foreground truncate mt-0.5">{currentEvent.name}</p>
+          <p className="text-[11px] text-muted leading-snug mt-0.5">{currentEvent.action}</p>
+        </div>
+        <button
+          onClick={() => setIsVisible(false)}
+          className="shrink-0 text-muted hover:text-foreground text-xs self-start"
+        >
+          ✕
+        </button>
+      </div>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { useGame } from '@/contexts/GameContext';
 import gameData from '@/data/achievements.json';
 
 import { initSession } from '@/lib/tracking';
+import GuiltStatement from '@/components/GuiltStatement';
 
 // Leaderboard Mock
 const leaderboard = [
@@ -199,6 +200,11 @@ export default function ContaClient() {
             {isSaved ? 'Salvo! ✓' : 'Entrar'}
           </button>
         </form>
+      </div>
+
+      {/* ========= EXTRATO DA CULPA ========= */}
+      <div className="mb-12">
+        <GuiltStatement />
       </div>
 
       {/* Stats Grid */}

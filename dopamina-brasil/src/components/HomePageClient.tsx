@@ -7,6 +7,9 @@ import { trackEvent } from '@/lib/tracking';
 import { supabase } from '@/lib/supabase';
 import useSWRInfinite from 'swr/infinite';
 import { Product } from '@/types';
+import dynamic from 'next/dynamic';
+
+const SwipeMode = dynamic(() => import('@/components/SwipeMode'), { ssr: false });
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -26,6 +29,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
   ];
   const [activeCategory, setActiveCategory] = useState('todos');
   const [heroSlide, setHeroSlide] = useState(0);
+  const [swipeMode, setSwipeMode] = useState(false);
   const { addItem } = useCart();
 
   // SWR Infinite Pagination
@@ -79,6 +83,23 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
   return (
     <div>
+      {/* SWIPE MODE OVERLAY */}
+      {swipeMode && (
+        <SwipeMode
+          products={displayedProducts.length > 0 ? displayedProducts : products}
+          onClose={() => setSwipeMode(false)}
+        />
+      )}
+
+      {/* Floating Swipe Mode Button */}
+      <button
+        onClick={() => setSwipeMode(true)}
+        className="fixed bottom-6 right-24 z-[90] flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-4 py-2.5 text-xs font-bold text-neon backdrop-blur-sm transition hover:bg-neon/20 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(204,255,0,0.1)]"
+      >
+        <span>🔥</span>
+        <span className="hidden sm:inline">Modo Vício</span>
+      </button>
+
       {/* ============ MARQUEE DIVIDER AT TOP ============ */}
       <div className="overflow-hidden bg-surface py-3 text-[13px] font-bold uppercase tracking-wider text-foreground border-b border-border">
         <div className="flex w-max animate-marquee gap-12 whitespace-nowrap pr-12">

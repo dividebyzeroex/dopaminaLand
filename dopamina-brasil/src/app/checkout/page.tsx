@@ -7,6 +7,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useGame } from '@/contexts/GameContext';
 import { trackEvent } from '@/lib/tracking';
 import PhysicsCheckout from '@/components/PhysicsCheckout';
+import SlotMachineCheckout from '@/components/SlotMachineCheckout';
 
 const paymentMethods = [
   { id: 'cartao', label: '💳 Cartão de Crédito Imaginário', desc: 'Limite infinito, fatura inexistente' },
@@ -31,10 +32,16 @@ export default function CheckoutPage() {
   const [checkoutStart] = useState(Date.now());
   const [coupon, setCoupon] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
+  const [showSlotMachine, setShowSlotMachine] = useState(false);
 
   const handleCheckout = () => {
     if (items.length === 0) return;
+    // Show slot machine instead of directly processing
+    setShowSlotMachine(true);
+  };
 
+  const handleSlotConfirm = () => {
+    setShowSlotMachine(false);
     setIsProcessing(true);
 
     // Fake processing delay
@@ -75,6 +82,14 @@ export default function CheckoutPage() {
 
   if (isComplete) {
     return <PhysicsCheckout items={purchasedItems} orderId={orderId} />;
+  }
+
+  if (showSlotMachine) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+        <SlotMachineCheckout onConfirm={handleSlotConfirm} totalValue={totalFakePrice} />
+      </div>
+    );
   }
 
   return (

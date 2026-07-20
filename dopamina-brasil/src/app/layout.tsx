@@ -18,6 +18,7 @@ import ScanLine from "@/components/ScanLine";
 import CinematicIntro from "@/components/CinematicIntro";
 import NicknameSetup from "@/components/NicknameSetup";
 import DailyModal from "@/components/DailyModal";
+import DetoxMode from "@/components/DetoxMode";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
 
 const inter = Inter({
@@ -94,6 +95,7 @@ export default function RootLayout({
                   <CartDrawer />
                   <AchievementToast />
                   <FomoToast />
+                  <DetoxMode />
                 </CSPostHogProvider>
               </TrackingProvider>
             </DailyProvider>
