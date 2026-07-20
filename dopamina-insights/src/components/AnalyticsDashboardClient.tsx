@@ -7,6 +7,7 @@ import OverviewTab from './dashboard/OverviewTab';
 import IntentRadar from './dashboard/IntentRadar';
 import ProductsInsights from './dashboard/ProductsInsights';
 import SessionDrawer from './dashboard/SessionDrawer';
+import UxTelemetryTab from './dashboard/UxTelemetryTab';
 import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2 } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
@@ -67,7 +68,7 @@ export default function AnalyticsDashboardClient() {
 
   const {
     loading, fetchDashboardData,
-    kpis, funnelData, topProducts, timelineData, ecommerceInsights,
+    kpis, funnelData, topProducts, timelineData, ecommerceInsights, uxMetrics,
     intentData, scoreWeights, setScoreWeights,
     hubspotCrmData,
   } = useInsightsData();
@@ -310,9 +311,7 @@ export default function AnalyticsDashboardClient() {
           )}
 
           {activeTab === 'ux' && (
-            <div className="p-12 text-center text-muted">
-              Módulo de Telemetria UX em desenvolvimento.
-            </div>
+            <UxTelemetryTab uxMetrics={uxMetrics} />
           )}
         </div>
       )}

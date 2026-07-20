@@ -90,7 +90,7 @@ export function useInsightsData() {
   const [demographics, setDemographics] = useState({ gender: [] as any[], os: [] as any[], state: [] as any[] });
   const [hardware, setHardware] = useState({ connection: [] as any[], ram: [] as any[], cores: [] as any[], theme: [] as any[] });
   const [marketing, setMarketing] = useState({ utmSource: [] as any[], utmMedium: [] as any[], referrer: [] as any[] });
-  const [uxMetrics, setUxMetrics] = useState({ avgDwellTime: 0, rageClicksCount: 0, scrollDepthMap: [] as any[] });
+  const [uxMetrics, setUxMetrics] = useState({ avgDwellTime: 0, rageClicksCount: 0, scrollDepthMap: [] as any[], deadClicksCount: 0, frustrationCount: 0, jsErrors: [] as any[], webVitals: { lcp: 0, cls: 0, fid: 0, ttfb: 0, fcp: 0, inp: 0 }, heatmapData: [] as any[], visibilityImpressions: [] as any[] });
   const [ecommerceInsights, setEcommerceInsights] = useState({ searchTerms: [] as any[], abandonedCarts: [] as any[], boughtTogether: [] as any[], topProducts: [] as any[] });
   const [intentData, setIntentData] = useState<IntentData>({ funnelStages: { awareness: 0, consideration: 0, decision: 0 }, topLeads: [] });
 
@@ -259,6 +259,12 @@ export function useInsightsData() {
       const abandonedList: any[] = [];
       const pairMap: Record<string, number> = {};
 
+      let deadClicks = 0, frustrationCount = 0;
+      const jsErrorsList: any[] = [];
+      const vitalsMap: Record<string, { sum: number, count: number }> = {};
+      const heatmapsList: any[] = [];
+      const impressionsMap: Record<string, number> = {};
+
       events?.forEach((ev) => {
         const dateStr = new Date(ev.created_at).toLocaleDateString('pt-BR');
         timelineMap[dateStr] = (timelineMap[dateStr] || 0) + 1;
@@ -272,6 +278,33 @@ export function useInsightsData() {
         if (ev.event_type === 'scroll_depth' && ev.metadata?.depth_percentage) {
           const depth = `${ev.metadata.depth_percentage}%`;
           if (scrollMap[depth] !== undefined) scrollMap[depth]++;
+        }
+        
+        // New Telemetry
+        if (ev.event_type === 'dead_click') deadClicks++;
+        if (ev.event_type === 'cursor_frustration') frustrationCount++;
+        if (ev.event_type === 'js_error') {
+          jsErrorsList.push({ ...ev.metadata, time: ev.created_at });
+        }
+        if (ev.event_type === 'web_vitals' && ev.metadata?.name && ev.metadata?.value) {
+          const name = ev.metadata.name;
+          if (!vitalsMap[name]) vitalsMap[name] = { sum: 0, count: 0 };
+          vitalsMap[name].sum += ev.metadata.value;
+          vitalsMap[name].count++;
+        }
+        if (ev.event_type === 'heatmap_click' || ev.event_type === 'heatmap_move') {
+          if (ev.metadata?.x !== undefined && ev.metadata?.vw) {
+            heatmapsList.push({
+              type: ev.event_type,
+              x: ev.metadata.x, y: ev.metadata.y,
+              vw: ev.metadata.vw, vh: ev.metadata.vh,
+              path: ev.metadata.path
+            });
+          }
+        }
+        if (ev.event_type === 'element_visible') {
+          const id = ev.metadata?.tag || 'Element';
+          impressionsMap[id] = (impressionsMap[id] || 0) + 1;
         }
 
         if (ev.product_id && ['view_item', 'add_to_cart', 'fake_checkout'].includes(ev.event_type)) {
@@ -356,7 +389,27 @@ export function useInsightsData() {
       ]);
 
       setTimelineData(Object.keys(timelineMap).map(date => ({ date, interacoes: timelineMap[date] })));
-      setUxMetrics({ avgDwellTime: dwellEvents > 0 ? Math.floor(totalDwellTime / dwellEvents) : 0, rageClicksCount: rageClicks, scrollDepthMap: Object.keys(scrollMap).map(k => ({ name: k, value: scrollMap[k] })) });
+      
+      const calcVital = (name: string) => vitalsMap[name] ? Math.round(vitalsMap[name].sum / vitalsMap[name].count) : 0;
+      
+      setUxMetrics({ 
+        avgDwellTime: dwellEvents > 0 ? Math.floor(totalDwellTime / dwellEvents) : 0, 
+        rageClicksCount: rageClicks, 
+        scrollDepthMap: Object.keys(scrollMap).map(k => ({ name: k, value: scrollMap[k] })),
+        deadClicksCount: deadClicks,
+        frustrationCount: frustrationCount,
+        jsErrors: jsErrorsList.slice(-20), // Keep last 20 errors
+        webVitals: {
+          lcp: calcVital('LCP'),
+          cls: vitalsMap['CLS'] ? (vitalsMap['CLS'].sum / vitalsMap['CLS'].count) : 0,
+          fid: calcVital('FID'),
+          inp: calcVital('INP'),
+          ttfb: calcVital('TTFB'),
+          fcp: calcVital('FCP')
+        },
+        heatmapData: heatmapsList,
+        visibilityImpressions: Object.keys(impressionsMap).map(k => ({ name: k, count: impressionsMap[k] })).sort((a,b) => b.count - a.count)
+      });
       setEcommerceInsights({
         searchTerms: formatMap(searchMap).slice(0, 10),
         abandonedCarts: abandonedList.sort((a, b) => b.value - a.value).slice(0, 10),
