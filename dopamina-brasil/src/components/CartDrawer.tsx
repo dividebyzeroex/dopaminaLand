@@ -142,7 +142,9 @@ export default function CartDrawer() {
                   trackEvent('fake_checkout', item.id, item.salePrice, { quantity: item.quantity, source: 'cart_drawer' });
                 });
               }}
-              className="block w-full rounded-xl bg-neon py-3.5 text-center text-base font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-95 animate-pulse-glow"
+              className="block w-full rounded-xl bg-neon py-3.5 text-center text-base font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-95 animate-pulse-glow glitch-hover"
+              data-text="FINALIZAR COMPRA 🚀"
+              data-track-visibility="true"
             >
               FINALIZAR COMPRA 🚀
             </Link>

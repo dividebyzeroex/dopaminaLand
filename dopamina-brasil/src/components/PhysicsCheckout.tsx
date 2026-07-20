@@ -247,7 +247,8 @@ export default function PhysicsCheckout({ items, orderId }: PhysicsCheckoutProps
       <div className="absolute bottom-10 w-full flex flex-col sm:flex-row justify-center gap-4 z-20 px-4">
         <Link
           href={`/rastreamento/${orderId}`}
-          className="rounded-2xl bg-neon px-8 py-4 text-center text-lg font-extrabold text-background shadow-[0_0_30px_rgba(204,255,0,0.3)] transition hover:bg-neon-light hover:scale-105 active:scale-95 pointer-events-auto"
+          className="rounded-2xl bg-neon px-8 py-4 text-center text-lg font-extrabold text-background shadow-[0_0_30px_rgba(204,255,0,0.3)] transition hover:bg-neon-light hover:scale-105 active:scale-95 pointer-events-auto glitch-hover"
+          data-text="RASTREAR PEDIDO 📍"
         >
           RASTREAR PEDIDO 📍
         </Link>

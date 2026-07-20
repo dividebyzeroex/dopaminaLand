@@ -120,6 +120,7 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
           <div className="mt-6 space-y-3 flex flex-col">
             <Link
               href="/checkout"
+              data-track-visibility="true"
               onClick={() => addItem({
                 id: String(product.id),
                 slug: product.slug,
@@ -131,7 +132,8 @@ export default function ProductPageClient({ product, relatedProducts }: ProductP
                 originalPrice: product.price || product.originalPrice || product.salePrice * 1.5,
                 salePrice: product.salePrice,
               })}
-              className="order-1 block w-full rounded-2xl bg-neon py-4 text-center text-base sm:text-lg font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-[0.98] animate-pulse-glow whitespace-nowrap overflow-hidden text-ellipsis px-2"
+              className="order-1 glitch-hover block w-full rounded-2xl bg-neon py-4 text-center text-base sm:text-lg font-extrabold text-white shadow-lg transition hover:bg-neon-light active:scale-[0.98] animate-pulse-glow whitespace-nowrap overflow-hidden text-ellipsis px-2"
+              data-text="COMPRAR AGORA ⚡"
             >
               COMPRAR AGORA ⚡
             </Link>

@@ -113,7 +113,9 @@ export default function ProductCard({
           {/* CTA */}
           <button
             onClick={handleAddToCart}
-            className="mt-3 w-full rounded-xl bg-neon py-2.5 text-[11px] sm:text-xs lg:text-sm font-extrabold text-background transition hover:bg-neon-light active:scale-95 whitespace-nowrap px-2"
+            className="mt-3 w-full rounded-xl bg-neon py-2.5 text-[11px] sm:text-xs lg:text-sm font-extrabold text-background transition hover:bg-neon-light active:scale-95 whitespace-nowrap px-2 glitch-hover"
+            data-text="ADICIONAR 🛒"
+            data-track-visibility="true"
           >
             <span className="hidden lg:inline">adicionar ao carrinho</span>
             <span className="lg:hidden">adicionar 🛒</span>

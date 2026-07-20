@@ -193,7 +193,8 @@ export default function ContaClient() {
           />
           <button
             type="submit"
-            className="rounded-xl bg-neon px-8 py-4 font-extrabold text-white transition hover:scale-105 active:scale-95"
+            className="rounded-xl bg-neon px-8 py-4 font-extrabold text-white transition hover:scale-105 active:scale-95 glitch-hover"
+            data-text={isSaved ? 'SALVO! ✓' : 'ENTRAR'}
           >
             {isSaved ? 'Salvo! ✓' : 'Entrar'}
           </button>
@@ -539,7 +540,8 @@ export default function ContaClient() {
               <button
                 type="submit"
                 disabled={submittingClaim}
-                className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 py-4 font-black text-white text-sm tracking-wider uppercase transition active:scale-[0.98]"
+                className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 py-4 font-black text-white text-sm tracking-wider uppercase transition active:scale-[0.98] glitch-hover"
+                data-text={submittingClaim ? 'PROCESSANDO ENVIO...' : 'CONFIRMAR SOLICITAÇÃO 🎁'}
               >
                 {submittingClaim ? 'Processando envio...' : 'Confirmar Solicitação de Recompensa 🎁'}
               </button>
