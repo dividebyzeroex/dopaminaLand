@@ -64,12 +64,12 @@ function TrackingLogic() {
     // Setup Click Tracking (Rage, Dead, Heatmap)
     const handleClick = (e: MouseEvent) => {
       const now = Date.now();
-      const click = { x: e.clientX, y: e.clientY, time: now };
+      const click = { x: e.pageX, y: e.pageY, time: now };
       
       // 1. Heatmap Click
       trackEvent('heatmap_click', undefined, undefined, {
-        x: e.clientX, y: e.clientY,
-        vw: window.innerWidth, vh: window.innerHeight,
+        x: e.pageX, y: e.pageY,
+        vw: window.innerWidth, vh: document.documentElement.scrollHeight,
         path: pathname
       });
 
@@ -104,8 +104,8 @@ function TrackingLogic() {
             tag: target.tagName,
             id: target.id,
             className: target.className,
-            x: e.clientX,
-            y: e.clientY
+            x: e.pageX,
+            y: e.pageY
           });
           // Reset after logging to prevent spam
           clickHistoryRef.current = [];
@@ -120,15 +120,15 @@ function TrackingLogic() {
       // 1. Throttle Heatmap Move to once every 1.5 seconds
       if (now - lastHeatmapMoveRef.current > 1500) {
         trackEvent('heatmap_move', undefined, undefined, {
-          x: e.clientX, y: e.clientY,
-          vw: window.innerWidth, vh: window.innerHeight,
+          x: e.pageX, y: e.pageY,
+          vw: window.innerWidth, vh: document.documentElement.scrollHeight,
           path: pathname
         });
         lastHeatmapMoveRef.current = now;
       }
 
       // 2. Frustration (Jiggle) Detection
-      const move = { x: e.clientX, y: e.clientY, time: now };
+      const move = { x: e.pageX, y: e.pageY, time: now };
       mouseMoveHistoryRef.current.push(move);
       // Keep history for 1 second
       mouseMoveHistoryRef.current = mouseMoveHistoryRef.current.filter(m => now - m.time < 1000);
@@ -145,7 +145,7 @@ function TrackingLogic() {
         if (directionChanges > 5) {
           trackEvent('cursor_frustration', undefined, undefined, {
             path: pathname,
-            x: e.clientX, y: e.clientY
+            x: e.pageX, y: e.pageY
           });
           mouseMoveHistoryRef.current = []; // Reset
         }

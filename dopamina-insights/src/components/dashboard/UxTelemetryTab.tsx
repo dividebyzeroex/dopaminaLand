@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MousePointer2, AlertTriangle, Clock, Target, Activity, Zap, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { MousePointer2, AlertTriangle, Clock, Target, Activity, Zap, ShieldAlert, CheckCircle2, Monitor, Smartphone } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface UxMetrics {
@@ -22,15 +22,36 @@ interface UxMetrics {
 }
 
 export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) {
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   
+  // Extract unique paths for the dropdown
+  const uniquePaths = useMemo(() => {
+    const paths = new Set<string>();
+    uxMetrics.heatmapData.forEach(p => p.path && paths.add(p.path));
+    return Array.from(paths).sort();
+  }, [uxMetrics.heatmapData]);
+  
+  const [selectedPath, setSelectedPath] = useState<string>(uniquePaths.length > 0 ? uniquePaths[0] : '/');
+
+  // Filter heatmap points for the selected path and device
   const heatmapNodes = useMemo(() => {
-    // Filter to limit points for performance
-    return uxMetrics.heatmapData.slice(-1000).map((point, i) => {
-      // Normalize X
-      const left = Math.min(Math.max((point.x / point.vw) * 100, 0), 100);
-      // Normalize Y (assume average page height is 2500px for the visualization)
-      const maxPageHeight = 3000;
-      const top = Math.min(Math.max((point.y / maxPageHeight) * 100, 0), 100);
+    const isDesktop = device === 'desktop';
+    
+    // Desktop: vw > 768. Mobile: vw <= 768
+    const filtered = uxMetrics.heatmapData.filter(p => {
+      if (p.path !== selectedPath) return false;
+      const pointIsDesktop = p.vw > 768;
+      return isDesktop ? pointIsDesktop : !pointIsDesktop;
+    });
+
+    return filtered.slice(-2000).map((point, i) => {
+      // For absolute pageX plotting, we use the original viewport width to scale the X coordinate
+      // to match our container width.
+      // Container width is 1024px for Desktop, 375px for Mobile.
+      const containerWidth = isDesktop ? 1024 : 375;
+      
+      const leftPercent = Math.min(Math.max((point.x / point.vw) * 100, 0), 100);
+      const topPx = point.y;
       
       const isClick = point.type === 'heatmap_click';
       
@@ -38,15 +59,17 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
         <div
           key={i}
           className={`absolute rounded-full mix-blend-screen pointer-events-none ${
-            isClick ? 'bg-red-500 w-4 h-4 blur-[2px] opacity-80' : 'bg-blue-400 w-3 h-3 blur-[4px] opacity-30'
+            isClick ? 'bg-red-500 w-4 h-4 blur-[2px] opacity-80 z-20' : 'bg-blue-400 w-3 h-3 blur-[4px] opacity-40 z-10'
           }`}
-          style={{ left: `${left}%`, top: `${top}%`, transform: 'translate(-50%, -50%)' }}
+          style={{ left: `${leftPercent}%`, top: `${topPx}px`, transform: 'translate(-50%, -50%)' }}
         />
       );
     });
-  }, [uxMetrics.heatmapData]);
+  }, [uxMetrics.heatmapData, selectedPath, device]);
 
   const formatMs = (ms: number) => ms > 0 ? `${ms}ms` : 'N/A';
+
+  const containerWidthClass = device === 'desktop' ? 'w-full max-w-[1024px]' : 'w-full max-w-[375px]';
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -98,7 +121,72 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Web Vitals */}
+        {/* Heatmap Section - Takes full width now */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+              <h3 className="text-lg font-bold text-foreground">Mapa de Calor Real</h3>
+              
+              <div className="flex flex-wrap items-center gap-4">
+                <select 
+                  value={selectedPath} 
+                  onChange={(e) => setSelectedPath(e.target.value)}
+                  className="bg-background border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-neon"
+                >
+                  {uniquePaths.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                  {uniquePaths.length === 0 && <option value="/">/</option>}
+                </select>
+
+                <div className="flex bg-background rounded border border-border overflow-hidden p-1 gap-1">
+                  <button 
+                    onClick={() => setDevice('desktop')}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'desktop' ? 'bg-neon text-black' : 'text-muted hover:text-foreground'}`}
+                  >
+                    <Monitor className="w-4 h-4" /> Desktop
+                  </button>
+                  <button 
+                    onClick={() => setDevice('mobile')}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'mobile' ? 'bg-neon text-black' : 'text-muted hover:text-foreground'}`}
+                  >
+                    <Smartphone className="w-4 h-4" /> Mobile
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-center bg-black/50 p-4 rounded-xl border border-border relative overflow-hidden">
+              {/* This wrapper limits the height so we can scroll the heatmap naturally */}
+              <div className={`relative bg-background overflow-y-auto overflow-x-hidden border border-border/50 rounded shadow-2xl h-[700px] custom-scrollbar ${containerWidthClass}`}>
+                
+                {/* The Iframe of the real site */}
+                <iframe 
+                  src={`https://dopamina-land.vercel.app${selectedPath}`} 
+                  className="w-full pointer-events-none" 
+                  style={{ height: '5000px', border: 'none' }} // Massive height so iframe doesn't scroll internally
+                  title="Heatmap Target"
+                />
+
+                {/* The Overlay where points are plotted */}
+                <div className="absolute top-0 left-0 w-full" style={{ height: '5000px', pointerEvents: 'none' }}>
+                  {heatmapNodes.length > 0 ? heatmapNodes : (
+                    <div className="flex items-center justify-center h-[500px] text-muted text-sm bg-background/80 backdrop-blur-sm">
+                      Nenhum dado capturado para esta tela neste dispositivo.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-center gap-6 mt-4 text-xs font-medium">
+              <span className="flex items-center gap-2 text-red-400"><div className="w-3 h-3 rounded-full bg-red-500 blur-[1px]"></div> Cliques</span>
+              <span className="flex items-center gap-2 text-blue-400"><div className="w-3 h-3 rounded-full bg-blue-500 blur-[2px]"></div> Movimentos / Pausas</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Web Vitals and Others */}
         <div className="lg:col-span-1 space-y-6">
           <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
@@ -142,12 +230,12 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
           <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <ShieldAlert className="h-5 w-5 text-rose-500" />
-              <h3 className="text-lg font-bold text-foreground">JS Errors (Silenciosos)</h3>
+              <h3 className="text-lg font-bold text-foreground">JS Errors</h3>
             </div>
             {uxMetrics.jsErrors.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-muted">
                 <CheckCircle2 className="h-8 w-8 text-emerald-500 mb-2 opacity-50" />
-                <p className="text-sm">Nenhum erro de JS capturado.</p>
+                <p className="text-sm">Nenhum erro reportado.</p>
               </div>
             ) : (
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -163,41 +251,7 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
           </div>
         </div>
 
-        {/* Heatmap & Scroll */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-foreground">Scatter Heatmap (Simulado)</h3>
-              <div className="flex gap-4 text-xs font-medium">
-                <span className="flex items-center gap-1 text-red-400"><div className="w-2 h-2 rounded-full bg-red-500"></div> Cliques</span>
-                <span className="flex items-center gap-1 text-blue-400"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Movimentos</span>
-              </div>
-            </div>
-            
-            <div className="relative w-full h-[500px] bg-background border border-border rounded-lg overflow-hidden flex flex-col">
-              {/* Mock skeleton of a generic page for reference */}
-              <div className="w-full h-12 bg-surface border-b border-border flex items-center px-4 opacity-50">
-                <div className="w-24 h-4 bg-muted rounded"></div>
-                <div className="ml-auto flex gap-2">
-                  <div className="w-12 h-4 bg-muted rounded"></div>
-                  <div className="w-12 h-4 bg-muted rounded"></div>
-                </div>
-              </div>
-              <div className="flex-1 relative overflow-hidden">
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-1/2 h-32 bg-surface opacity-30 rounded-lg"></div>
-                <div className="absolute top-48 left-10 w-1/3 h-48 bg-surface opacity-30 rounded-lg"></div>
-                <div className="absolute top-48 right-10 w-1/3 h-48 bg-surface opacity-30 rounded-lg"></div>
-                
-                {/* The Heatmap Overlay */}
-                {heatmapNodes.length > 0 ? heatmapNodes : (
-                  <div className="absolute inset-0 flex items-center justify-center text-muted text-sm">
-                    Aguardando dados de telemetria...
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
               <h3 className="text-lg font-bold text-foreground mb-4">Profundidade de Scroll</h3>
@@ -218,12 +272,12 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
             </div>
 
             <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-foreground mb-4">Impressões de Botões (Visibilidade)</h3>
-              <div className="space-y-3">
+              <h3 className="text-lg font-bold text-foreground mb-4">Impressões (Visibilidade)</h3>
+              <div className="space-y-3 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
                 {uxMetrics.visibilityImpressions.length === 0 ? (
-                  <p className="text-sm text-muted">Nenhum CTAs monitorado registrado.</p>
+                  <p className="text-sm text-muted">Nenhum CTAs monitorado.</p>
                 ) : (
-                  uxMetrics.visibilityImpressions.slice(0, 5).map((imp, i) => (
+                  uxMetrics.visibilityImpressions.map((imp, i) => (
                     <div key={i} className="flex justify-between items-center p-3 rounded-lg bg-surface-lighter">
                       <span className="text-sm font-medium text-foreground truncate max-w-[70%]">
                         {imp.name}

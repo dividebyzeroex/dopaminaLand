@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.github
+*.log
+agency-site
+landsite
+dopamina-insights
+dopamina-mobile
