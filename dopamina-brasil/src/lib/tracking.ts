@@ -91,7 +91,7 @@ export async function initSession(forceUpdate: boolean = false) {
 }
 
 export async function trackEvent(
-  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals',
+  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals' | 'tracking_update',
   productId?: string,
   priceDisplayed?: number,
   metadata?: any
