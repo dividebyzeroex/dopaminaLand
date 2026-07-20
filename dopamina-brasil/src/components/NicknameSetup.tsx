@@ -30,8 +30,8 @@ export default function NicknameSetup() {
   useEffect(() => {
     try {
       const hasSetup = localStorage.getItem('dopamina-nickname-setup');
-      const isHeatmapIframe = window.location.search.includes('heatmap=true');
-      if (!hasSetup && !isHeatmapIframe) {
+      const isIframe = window.self !== window.top;
+      if (!hasSetup && !isIframe) {
         // Delay to appear after intro
         const timer = setTimeout(() => setShow(true), 1000);
         return () => clearTimeout(timer);
