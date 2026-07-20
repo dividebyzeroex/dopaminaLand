@@ -56,7 +56,7 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
 
     if (direction === 'right' && currentProduct) {
       addItem({
-        id: currentProduct.id,
+        id: String(currentProduct.id),
         slug: currentProduct.slug,
         shortName: currentProduct.shortName,
         category: currentProduct.category,
