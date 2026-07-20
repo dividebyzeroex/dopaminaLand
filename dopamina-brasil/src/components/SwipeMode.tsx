@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Product } from '@/types';
 import { useCart } from '@/contexts/CartContext';
-import { useGame } from '@/contexts/GameContext';
 import { trackEvent } from '@/lib/tracking';
 import Image from 'next/image';
 
@@ -21,7 +20,6 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
   const [stats, setStats] = useState({ added: 0, skipped: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCart();
-  const { addXp } = useGame();
 
   const currentProduct = products[currentIndex];
   const isFinished = currentIndex >= products.length;
@@ -68,7 +66,6 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
         quantity: 1,
       });
       trackEvent('add_to_cart', String(currentProduct.id), currentProduct.salePrice);
-      addXp(25);
       setCoinAnim(true);
       playSound('coin');
       setStats(s => ({ ...s, added: s.added + 1 }));
