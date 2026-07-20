@@ -12,7 +12,6 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import AchievementToast from "@/components/AchievementToast";
 import FomoToast from "@/components/FomoToast";
-import DopamineMeter from "@/components/DopamineMeter";
 import TrackingProvider from "@/components/TrackingProvider";
 import CustomCursor from "@/components/CustomCursor";
 import ScanLine from "@/components/ScanLine";
@@ -95,7 +94,6 @@ export default function RootLayout({
                   <CartDrawer />
                   <AchievementToast />
                   <FomoToast />
-                  <DopamineMeter />
                 </CSPostHogProvider>
               </TrackingProvider>
             </DailyProvider>
