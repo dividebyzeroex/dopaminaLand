@@ -186,8 +186,8 @@ export function useInsightsData() {
   }, [rawSessions, rawEvents, productDict, scoreWeights, recomputeIntentMetrics]);
 
   // ── Fetch All Data ──
-  const fetchDashboardData = useCallback(async (startDate?: string, endDate?: string) => {
-    setLoading(true);
+  const fetchDashboardData = useCallback(async (startDate?: string, endDate?: string, silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const formatMap = (map: Record<string, number>) =>
         Object.keys(map).map(name => ({ name, value: map[name] })).sort((a, b) => b.value - a.value);
@@ -474,13 +474,39 @@ export function useInsightsData() {
     }
   }, []);
 
+  // ── Supabase Realtime Subscription ──
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'sessions' },
+        () => {
+          // Re-fetch silently when a new session arrives
+          fetchDashboardData(undefined, undefined, true);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'intent_events' },
+        () => {
+          // Re-fetch silently when a new event arrives
+          fetchDashboardData(undefined, undefined, true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchDashboardData]);
+
   return {
-    loading, fetchDashboardData,
-    // Supabase data
-    kpis, funnelData, topProducts, timelineData, demographics, hardware, marketing, uxMetrics, ecommerceInsights,
-    // Intent data
-    intentData, scoreWeights, setScoreWeights,
-    // External
+    loading,
+    scoreWeights, setScoreWeights,
+    kpis, funnelData, topProducts, timelineData, demographics, hardware, marketing,
+    uxMetrics, ecommerceInsights, intentData,
     ga4Data, posthogData, posthogError, hubspotCrmData, hubspotError,
+    fetchDashboardData
   };
 }

@@ -1,9 +1,10 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import trackingEventsData from '@/data/tracking-events.json';
 import CleitonMinigame from '@/components/CleitonMinigame';
+import { trackEvent } from '@/lib/tracking';
 
 // Pick random comic events for each order
 function getRandomEvents() {
@@ -70,6 +71,21 @@ export default function TrackingPage({ params }: { params: Promise<{ orderId: st
     Math.floor(progress * events.length),
     events.length - 1
   );
+
+  const prevIndexRef = useRef(-1);
+
+  useEffect(() => {
+    if (events.length > 0 && currentEventIndex !== prevIndexRef.current) {
+      prevIndexRef.current = currentEventIndex;
+      const ev = events[currentEventIndex];
+      trackEvent('tracking_update', undefined, undefined, {
+        orderId,
+        status: ev.status,
+        title: ev.title,
+        description: ev.description
+      });
+    }
+  }, [currentEventIndex, events, orderId]);
 
   // Map Position based only on the event index to avoid 1-second flicker
   const eventProgress = events.length > 0 ? currentEventIndex / (events.length - 1) : 0;
