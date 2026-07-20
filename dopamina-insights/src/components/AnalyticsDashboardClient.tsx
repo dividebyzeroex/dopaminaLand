@@ -129,6 +129,14 @@ export default function AnalyticsDashboardClient() {
     if (isAuthenticated && timeRange !== 'custom') {
       const { startDate, endDate } = getTimeFilterDates(timeRange);
       fetchDashboardData(startDate, endDate);
+
+      // Fallback Polling para garantir "Ao Vivo" mesmo se WebSockets falharem
+      const interval = setInterval(() => {
+        const { startDate: s, endDate: e } = getTimeFilterDates(timeRange);
+        fetchDashboardData(s, e, true); // silent = true
+      }, 3000);
+
+      return () => clearInterval(interval);
     }
   }, [timeRange, isAuthenticated, fetchDashboardData, getTimeFilterDates]);
 
