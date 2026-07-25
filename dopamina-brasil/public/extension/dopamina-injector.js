@@ -98,7 +98,7 @@
     isXray = !isXray;
     btnXray.textContent = isXray ? '🔬 Raio-X ON' : '🔬 Raio-X OFF';
     document.querySelectorAll('.dopamina-badge').forEach(b => {
-      (b as HTMLElement).style.display = isXray ? 'inline-block' : 'none';
+      b.style.display = isXray ? 'inline-block' : 'none';
     });
   };
 
@@ -152,9 +152,9 @@
 
   function scanDOM() {
     let count = 0;
-    const counts: Record<string, number> = { ancoragem: 0, enquadramento: 0, escassez: 0, fomo: 0, social: 0, dor: 0 };
+    const counts = { ancoragem: 0, enquadramento: 0, escassez: 0, fomo: 0, social: 0, dor: 0 };
 
-    function addBadge(el: Element, label: string, desc: string, bg: string, border: string, color: string, key: string) {
+    function addBadge(el, label, desc, bg, border, color, key) {
       if (seen.has(el) || count >= 12) return;
       seen.add(el);
       count++;
