@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/h53/ScrollReveal";
 import MagneticButton from "@/components/h53/MagneticButton";
