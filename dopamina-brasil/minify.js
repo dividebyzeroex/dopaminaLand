@@ -4,8 +4,8 @@ const codePath = 'public/extension/dopamina-injector.js';
 const pagePath = 'src/app/extensao/page.tsx';
 
 let code = fs.readFileSync(codePath, 'utf8');
-// Remove single line comments
-code = code.replace(/\/\/.*$/gm, '');
+// Remove single line comments, but preserve http:// and https:// URLs
+code = code.replace(/(?<!https?:)\/\/.*$/gm, '');
 // Remove multi line comments
 code = code.replace(/\/\*[\s\S]*?\*\//g, '');
 // Remove newlines and compress spaces
