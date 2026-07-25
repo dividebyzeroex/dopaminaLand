@@ -11,6 +11,7 @@
   else if (host.includes('amazon')) storeName = 'AMAZON BRASIL';
   else if (host.includes('shopee')) storeName = 'SHOPEE';
   else if (host.includes('magazineluiza') || host.includes('magalu')) storeName = 'MAGALU';
+  else if (host.includes('fastshop')) storeName = 'FAST SHOP';
   else if (host.includes('kabum')) storeName = 'KABUM!';
   else if (host.includes('aliexpress')) storeName = 'ALIEXPRESS';
   else if (host.includes('americanas')) storeName = 'AMERICANAS';
@@ -255,7 +256,7 @@
       window.__dopamina_price_widget_injected = true;
       let productName = document.querySelector('h1')?.textContent?.trim() || document.title.split('-')[0];
       let currentPriceNum = null;
-      const priceSelectors = ['.ui-pdp-price__second-line .andes-money-amount__fraction', '.a-price-whole', '.price-template-price-block .price', '[data-testid="price-value"]'];
+      const priceSelectors = ['.ui-pdp-price__second-line .andes-money-amount__fraction', '.a-price-whole', '.price-template-price-block .price', '[data-testid="price-value"]', '[class*="OfferLabel"] [class*="price"]'];
       for(let sel of priceSelectors) {
         let el = document.querySelector(sel);
         if (el) {
@@ -272,7 +273,8 @@
         '.ui-pdp-actions', '.ui-pdp-actions__container', 
         '#addToCart_feature_div', '#desktop_buybox', '#buybox',
         '.shopee-button-solid--primary', '.pdp-action-area',
-        '.buy-box', '.buy-button', '[data-testid="buy-btn"]', 'button.button-buy'
+        '.buy-box', '.buy-button', '[data-testid="buy-btn"]', 'button.button-buy',
+        '[class*="BuyButton"]', '[class*="OfferBox"]', '[class*="ProductAction"]'
       ];
       let buyBox = null;
       for(let sel of buyBoxSelectors) {
