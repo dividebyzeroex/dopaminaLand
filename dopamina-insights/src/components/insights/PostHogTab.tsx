@@ -44,8 +44,8 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
     );
   }
 
-  const totalDevices = data.deviceTypes.reduce((sum, d) => sum + d.count, 0) || 1;
-  const totalReferrers = data.topReferrers.reduce((sum, r) => sum + r.count, 0) || 1;
+  const totalDevices = data.deviceTypes?.reduce((sum, d) => sum + d.count, 0) || 1;
+  const totalReferrers = data.topReferrers?.reduce((sum, r) => sum + r.count, 0) || 1;
 
   return (
     <div className="animate-fade-in space-y-8 pb-12">

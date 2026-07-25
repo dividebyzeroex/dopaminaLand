@@ -44,6 +44,7 @@ export default function ProductCard({
       originalPrice, salePrice 
     });
     trackEvent('add_to_cart', String(id), salePrice, { source: 'product_card', slug, category });
+    try { window.dispatchEvent(new CustomEvent('dopamina:narrate', { detail: { trigger: 'add_to_cart' } })); } catch {}
   };
 
   return (

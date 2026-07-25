@@ -71,6 +71,8 @@ export default function FomoToast() {
   const [viewerCount, setViewerCount] = useState(0);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.self !== window.top) return;
+
     // Simulated viewer count that fluctuates
     setViewerCount(Math.floor(Math.random() * 400) + 100);
     const viewerTick = setInterval(() => {

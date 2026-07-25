@@ -3,178 +3,302 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
-// ────── Types ──────
-export interface KpiData {
-  totalSessions: number;
-  identifiedLeads: number;
-  identificationRate: number;
-  highIntentLeads: number;
-  frictionIndex: number;
+export interface PostHogData {
+  kpis: any;
+  pageviewsByDay: any[];
+  deviceTypes: any[];
+  topReferrers: any[];
+  topPages: any[];
+  topEvents: any[];
+  topBrowsers: any[];
+  topCities: any[];
+  eventsOverview?: any[];
+  dailyTrends?: any[];
+  funnel?: any[];
+  trends?: any[];
+  retention?: any[];
+}
+
+export interface HubSpotCrmData {
+  kpis: {
+    totalContacts: number;
+    totalDeals: number;
+    pipelineValue: number;
+    closedWonCount: number;
+    closedWonValue: number;
+    closedLostCount: number;
+    winRate: number;
+    avgDealSize: number;
+    totalCompanies: number;
+    totalTickets: number;
+  };
+  pipelineFunnel: Array<{ stageId: string; name: string; icon: string; count: number; amount: number }>;
+  lifecycleStages: Array<{ stageKey: string; label: string; count: number }>;
+  topDeals: Array<{ id: string; name: string; amount: number; stage: string; closeDate: string }>;
+  recentContacts: Array<{ id: string; name: string; email: string; title: string; status: string; stage: string; createdDate: string }>;
+  topCompanies?: Array<{ id: string; name: string; domain: string; industry: string; revenue: number }>;
+}
+
+export interface KPI {
+  title: string;
+  value: string | number;
+  change: string;
+  isPositive: boolean;
+}
+
+export interface FunnelStep {
+  name: string;
+  value: number;
+  conversion: string;
+}
+
+export interface TopProduct {
+  id: string;
+  name: string;
+  short_name?: string;
+  image_url?: string;
+  metrics: {
+    views: number;
+    carts: number;
+    checkouts: number;
+    rev: number;
+  };
+}
+
+export interface TimelineData {
+  date: string;
+  sessions: number;
+  conversions: number;
 }
 
 export interface IntentLead {
   id: string;
-  deviceLocal: string;
-  source: string;
   score: number;
-  stage: string;
-  events: number;
-  fakeRev: number;
+  stage: 'CONCLUÍDO' | 'ALTA INTENÇÃO' | 'EM EXPLORAÇÃO' | 'FRIO';
+  views: any[];
+  carts: any[];
+  checkouts: any[];
+  events: any[];
+  sessionsCount: number;
   lastActive: string;
-  views: string[];
-  carts: string[];
-  timeline: any[];
-  email?: string;
+  deviceLocal: string;
+  gender: string;
   nickname?: string;
+  email?: string;
+  fakeRev: number;
+  triggersDetected?: number;
+  darkPatterns?: string[];
 }
 
-export interface IntentData {
-  funnelStages: { awareness: number; consideration: number; decision: number };
-  topLeads: IntentLead[];
-}
-
-export interface ScoreWeights {
-  fake_checkout: number;
-  share_product: number;
-  add_to_cart: number;
-  dwell_time_exceeded: number;
-  view_item: number;
-  rage_click: number;
-  search: number;
-  cart_abandoned: number;
-}
-
-export interface PostHogData {
-  kpis: { pageviews30d: number; sessions30d: number; pageviews7d: number; sessions7d: number };
-  pageviewsByDay: { date: string; pageviews: number }[];
-  topEvents: { name: string; count: number }[];
-  topPages: { url: string; views: number }[];
-  topCities: { city: string; country: string; count: number }[];
-  topReferrers: { domain: string; count: number }[];
-  topBrowsers: { name: string; count: number }[];
-  deviceTypes: { type: string; count: number }[];
-}
-
-export interface HubSpotCrmData {
-  kpis: { totalContacts: number; totalDeals: number; pipelineValue: number; closedWon: number };
-  pipelineFunnel: { stageId: string; name: string; value: number }[];
-  recentContacts: { id: string; name: string; email: string; status: string; createdDate: string }[];
-}
-
-export const DEFAULT_WEIGHTS: ScoreWeights = {
-  fake_checkout: 50,
-  share_product: 30,
-  add_to_cart: 20,
-  dwell_time_exceeded: 10,
-  view_item: 5,
-  rage_click: 15,
-  search: 10,
-  cart_abandoned: -5,
-};
-
-// ────── Hook ──────
 export function useInsightsData() {
-  const [loading, setLoading] = useState(false);
-  const [scoreWeights, setScoreWeights] = useState<ScoreWeights>(DEFAULT_WEIGHTS);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(new Date());
 
-  // Supabase raw data
+  // Core Aggregations
+  const [kpis, setKpis] = useState<KPI[]>([]);
+  const [funnelData, setFunnelData] = useState<FunnelStep[]>([]);
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+  const [timelineData, setTimelineData] = useState<TimelineData[]>([]);
+  const [demographics, setDemographics] = useState<{ gender: any[]; os: any[]; state: any[] }>({ gender: [], os: [], state: [] });
+  const [marketing, setMarketing] = useState<{ utmSource: any[]; utmMedium: any[]; referrer: any[] }>({ utmSource: [], utmMedium: [], referrer: [] });
+  const [hardware, setHardware] = useState<{ connection: any[]; ram: any[]; cores: any[]; theme: any[] }>({ connection: [], ram: [], cores: [], theme: [] });
+  const [uxMetrics, setUxMetrics] = useState<any>({
+    avgDwellTime: 0,
+    rageClicksCount: 0,
+    scrollDepthMap: [],
+    deadClicksCount: 0,
+    frustrationCount: 0,
+    jsErrors: [],
+    webVitals: { lcp: 0, cls: 0, fid: 0, inp: 0, ttfb: 0, fcp: 0 },
+    heatmapData: [],
+    visibilityImpressions: []
+  });
+
+  const [ecommerceInsights, setEcommerceInsights] = useState<any>({
+    searchTerms: [],
+    abandonedCarts: [],
+    boughtTogether: [],
+    topProducts: [],
+  });
+
+  // Weights for intent score computation
+  const [scoreWeights, setScoreWeights] = useState({
+    viewItem: 10,
+    addToCart: 35,
+    checkoutBasket: 50,
+    dwell60s: 20,
+    rageClick: -10, // Frustration signal
+    triggersExposed: 15,
+  });
+
+  // Raw fetched arrays for real-time local re-calculations
   const [rawSessions, setRawSessions] = useState<any[]>([]);
   const [rawEvents, setRawEvents] = useState<any[]>([]);
   const [productDict, setProductDict] = useState<Record<string, any>>({});
 
-  // Computed data
-  const [kpis, setKpis] = useState<KpiData>({ totalSessions: 0, identifiedLeads: 0, identificationRate: 0, highIntentLeads: 0, frictionIndex: 0 });
-  const [funnelData, setFunnelData] = useState<any[]>([]);
-  const [topProducts, setTopProducts] = useState<any[]>([]);
-  const [timelineData, setTimelineData] = useState<any[]>([]);
-  const [demographics, setDemographics] = useState({ gender: [] as any[], os: [] as any[], state: [] as any[] });
-  const [hardware, setHardware] = useState({ connection: [] as any[], ram: [] as any[], cores: [] as any[], theme: [] as any[] });
-  const [marketing, setMarketing] = useState({ utmSource: [] as any[], utmMedium: [] as any[], referrer: [] as any[] });
-  const [uxMetrics, setUxMetrics] = useState({ avgDwellTime: 0, rageClicksCount: 0, scrollDepthMap: [] as any[], deadClicksCount: 0, frustrationCount: 0, jsErrors: [] as any[], webVitals: { lcp: 0, cls: 0, fid: 0, ttfb: 0, fcp: 0, inp: 0 }, heatmapData: [] as any[], visibilityImpressions: [] as any[] });
-  const [ecommerceInsights, setEcommerceInsights] = useState({ searchTerms: [] as any[], abandonedCarts: [] as any[], boughtTogether: [] as any[], topProducts: [] as any[] });
-  const [intentData, setIntentData] = useState<IntentData>({ funnelStages: { awareness: 0, consideration: 0, decision: 0 }, topLeads: [] });
+  const [intentData, setIntentData] = useState<{
+    avgScore: number;
+    leadsByStage: { stage: string; count: number; percentage: number }[];
+    topLeads: IntentLead[];
+    scoreDistribution: { range: string; count: number }[];
+    triggersExposedCount: number;
+  }>({
+    avgScore: 0,
+    leadsByStage: [],
+    topLeads: [],
+    scoreDistribution: [],
+    triggersExposedCount: 0
+  });
 
   // External APIs
   const [ga4Data, setGa4Data] = useState<any>(null);
-  const [posthogData, setPosthogData] = useState<PostHogData | null>(null);
+  const [posthogData, setPosthogData] = useState<any>(null);
   const [posthogError, setPosthogError] = useState<string | null>(null);
-  const [hubspotCrmData, setHubspotCrmData] = useState<HubSpotCrmData | null>(null);
+  const [hubspotCrmData, setHubspotCrmData] = useState<any>(null);
   const [hubspotError, setHubspotError] = useState<string | null>(null);
 
-  // ── Intent Metrics Computation ──
-  const recomputeIntentMetrics = useCallback((
-    sessionsList: any[],
-    eventsList: any[],
-    pDict: Record<string, any>,
-    weights: ScoreWeights,
-  ): IntentData => {
-    let awareness = 0, consideration = 0, decision = 0;
-
-    const sessionScores: Record<string, {
-      score: number; events: number; fakeRev: number; lastActive: string;
-      productsViewed: Set<string>; productsCarted: Set<string>; eventTimeline: any[];
+  // Pure mathematical score calculator
+  const recomputeIntentMetrics = useCallback((sessions: any[], events: any[], pDict: Record<string, any>, weights: typeof scoreWeights) => {
+    const sessionMap: Record<string, {
+      id: string;
+      events: any[];
+      deviceLocal: string;
+      gender: string;
+      lastActive: string;
     }> = {};
 
-    eventsList.forEach((ev) => {
-      const sid = ev.session_id;
-      if (sid) {
-        if (!sessionScores[sid]) {
-          sessionScores[sid] = { score: 0, events: 0, fakeRev: 0, lastActive: ev.created_at, productsViewed: new Set(), productsCarted: new Set(), eventTimeline: [] };
-        }
-        const weight = weights[ev.event_type as keyof ScoreWeights] || 0;
-        sessionScores[sid].score += weight;
-        sessionScores[sid].events += 1;
-        if (ev.created_at > sessionScores[sid].lastActive) sessionScores[sid].lastActive = ev.created_at;
-        if (ev.event_type === 'fake_checkout') sessionScores[sid].fakeRev += ev.price_displayed || 0;
+    sessions.forEach(s => {
+      const info = s.device_info || {};
+      const city = info.city && info.city !== 'Desconhecido' ? info.city : '';
+      const state = info.state && info.state !== 'Desconhecido' ? info.state : '';
+      const os = info.os_name || '';
+      const local = [city, state, os].filter(Boolean).join(', ') || 'Navegador Anônimo';
 
-        const product = pDict[ev.product_id || ''];
-        const pName = product ? product.short_name : ev.product_id;
-        if (ev.product_id) {
-          if (ev.event_type === 'view_item') sessionScores[sid].productsViewed.add(pName);
-          if (ev.event_type === 'add_to_cart') sessionScores[sid].productsCarted.add(pName);
-        }
-        sessionScores[sid].eventTimeline.push({
-          id: ev.id, event_type: ev.event_type, price_displayed: ev.price_displayed,
-          created_at: ev.created_at, product_name: product ? product.name : ev.product_id, metadata: ev.metadata,
-        });
+      sessionMap[s.session_id] = {
+        id: s.session_id,
+        events: [],
+        deviceLocal: local,
+        gender: info.mock_gender || 'Não Informado',
+        lastActive: s.created_at
+      };
+    });
+
+    events.forEach(e => {
+      if (!sessionMap[e.session_id]) {
+        sessionMap[e.session_id] = {
+          id: e.session_id,
+          events: [],
+          deviceLocal: e.metadata?.store_name ? `Loja (${e.metadata.store_name})` : 'Visitante Externo',
+          gender: 'Não Informado',
+          lastActive: e.created_at
+        };
+      }
+      sessionMap[e.session_id].events.push(e);
+      if (new Date(e.created_at) > new Date(sessionMap[e.session_id].lastActive)) {
+        sessionMap[e.session_id].lastActive = e.created_at;
       }
     });
 
-    let finalSessionData = sessionsList || [];
-    if (finalSessionData.length === 0 && eventsList.length > 0) {
-      const uniqueSids = Array.from(new Set(eventsList.map(e => e.session_id).filter(Boolean)));
-      finalSessionData = uniqueSids.map(sid => ({ session_id: sid, created_at: new Date().toISOString(), device_info: { city: 'Desconhecido', os_name: 'Desconhecido', browser_name: 'N/A' } }));
-    }
+    let totalScore = 0;
+    let triggersCount = 0;
+    const leads: IntentLead[] = [];
 
-    const leads = finalSessionData.map(sess => {
-      const sid = sess.session_id;
-      const stats = sessionScores[sid] || { score: 0, events: 0, fakeRev: 0, lastActive: sess.created_at, productsViewed: new Set(), productsCarted: new Set(), eventTimeline: [] };
-      const score = stats.score;
-      let stage = 'Awareness';
-      if (score > 50) { stage = 'Decision'; decision++; }
-      else if (score > 20) { stage = 'Consideration'; consideration++; }
-      else { awareness++; }
+    Object.values(sessionMap).forEach(sess => {
+      let score = 0;
+      const views: any[] = [];
+      const carts: any[] = [];
+      const checkouts: any[] = [];
+      let fakeRev = 0;
+      let sessTriggers = 0;
+      const darkPatternsSet = new Set<string>();
 
-      const city = sess.device_info?.city || 'Desconhecido';
-      const os = sess.device_info?.os_name || 'Desconhecido';
-      const source = sess.device_info?.utm_source || sess.device_info?.referrer || 'Tráfego Direto/Orgânico';
-      const isMobile = sess.device_info?.is_mobile ? '📱' : '💻';
-      const email = sess.device_info?.email || '';
-      const nickname = sess.device_info?.nickname || '';
-      const sortedTimeline = [...stats.eventTimeline].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      sess.events.forEach(ev => {
+        const type = ev.event_type;
+        const pName = pDict[ev.product_id]?.name || ev.metadata?.store_name || `Item ${ev.product_id?.split('-')[0] || ''}`;
 
-      return {
-        id: sid, deviceLocal: `${isMobile} ${os} - ${city}`, source, score, stage,
-        events: stats.events, fakeRev: stats.fakeRev,
-        lastActive: new Date(stats.lastActive).toLocaleString('pt-BR'),
-        views: Array.from(stats.productsViewed), carts: Array.from(stats.productsCarted),
-        timeline: sortedTimeline,
-        email,
-        nickname,
-      };
-    }).filter(lead => lead.events > 0);
+        if (type === 'view_item') {
+          score += weights.viewItem;
+          views.push({ name: pName, time: ev.created_at });
+        } else if (type === 'add_to_cart') {
+          score += weights.addToCart;
+          carts.push({ name: pName, time: ev.created_at });
+        } else if (type === 'fake_checkout' || type === 'checkout_basket') {
+          score += weights.checkoutBasket;
+          checkouts.push({ name: pName, time: ev.created_at });
+          fakeRev += ev.price_displayed || 0;
+        } else if (type === 'page_leave' && ev.metadata?.dwell_time_seconds >= 60) {
+          score += weights.dwell60s;
+        } else if (type === 'rage_click') {
+          score += weights.rageClick;
+        } else if (type === 'dark_pattern_audit') {
+          sessTriggers += ev.metadata?.triggers_count || 1;
+          triggersCount += ev.metadata?.triggers_count || 1;
+          score += (ev.metadata?.triggers_count || 1) * weights.triggersExposed;
+          if (ev.metadata?.counts) {
+            Object.keys(ev.metadata.counts).forEach(k => {
+              if (ev.metadata.counts[k] > 0) darkPatternsSet.add(k);
+            });
+          }
+        }
+      });
 
-    return { funnelStages: { awareness, consideration, decision }, topLeads: leads };
+      score = Math.max(0, Math.min(100, score));
+      totalScore += score;
+
+      let stage: IntentLead['stage'] = 'FRIO';
+      if (checkouts.length > 0) stage = 'CONCLUÍDO';
+      else if (score >= 70) stage = 'ALTA INTENÇÃO';
+      else if (score >= 35) stage = 'EM EXPLORAÇÃO';
+
+      leads.push({
+        id: sess.id,
+        score,
+        stage,
+        views,
+        carts,
+        checkouts,
+        events: sess.events,
+        sessionsCount: 1,
+        lastActive: sess.lastActive,
+        deviceLocal: sess.deviceLocal,
+        gender: sess.gender,
+        fakeRev,
+        triggersDetected: sessTriggers,
+        darkPatterns: Array.from(darkPatternsSet)
+      });
+    });
+
+    leads.sort((a, b) => b.score - a.score);
+
+    const totalLeads = leads.length || 1;
+    const stageCounts = { 'CONCLUÍDO': 0, 'ALTA INTENÇÃO': 0, 'EM EXPLORAÇÃO': 0, 'FRIO': 0 };
+    leads.forEach(l => stageCounts[l.stage]++);
+
+    const leadsByStage = [
+      { stage: 'CONCLUÍDO', count: stageCounts['CONCLUÍDO'], percentage: Math.round((stageCounts['CONCLUÍDO'] / totalLeads) * 100) },
+      { stage: 'ALTA INTENÇÃO', count: stageCounts['ALTA INTENÇÃO'], percentage: Math.round((stageCounts['ALTA INTENÇÃO'] / totalLeads) * 100) },
+      { stage: 'EM EXPLORAÇÃO', count: stageCounts['EM EXPLORAÇÃO'], percentage: Math.round((stageCounts['EM EXPLORAÇÃO'] / totalLeads) * 100) },
+      { stage: 'FRIO', count: stageCounts['FRIO'], percentage: Math.round((stageCounts['FRIO'] / totalLeads) * 100) },
+    ];
+
+    const distMap: Record<string, number> = { '0-20': 0, '21-40': 0, '41-60': 0, '61-80': 0, '81-100': 0 };
+    leads.forEach(l => {
+      if (l.score <= 20) distMap['0-20']++;
+      else if (l.score <= 40) distMap['21-40']++;
+      else if (l.score <= 60) distMap['41-60']++;
+      else if (l.score <= 80) distMap['61-80']++;
+      else distMap['81-100']++;
+    });
+
+    const scoreDistribution = Object.keys(distMap).map(range => ({ range, count: distMap[range] }));
+
+    return {
+      avgScore: Math.round(totalScore / totalLeads),
+      leadsByStage,
+      topLeads: leads,
+      scoreDistribution,
+      triggersExposedCount: triggersCount
+    };
   }, []);
 
   // Recompute intent metrics when weights change
@@ -185,18 +309,17 @@ export function useInsightsData() {
     }
   }, [rawSessions, rawEvents, productDict, scoreWeights, recomputeIntentMetrics]);
 
-  // ── Fetch All Data ──
-  const fetchDashboardData = useCallback(async (startDate?: string, endDate?: string, silent = false) => {
+  // ── Fetch Data ──
+  const fetchDashboardData = useCallback(async (startDate?: string, endDate?: string, silent = false, targetTab?: string) => {
     if (!silent) setLoading(true);
     try {
       const formatMap = (map: Record<string, number>) =>
         Object.keys(map).map(name => ({ name, value: map[name] })).sort((a, b) => b.value - a.value);
 
-      // 1. Fetch Sessions
-      let sessionQuery = supabase.from('sessions').select('*', { count: 'exact' });
-      if (startDate) sessionQuery = sessionQuery.gte('created_at', startDate);
-      if (endDate) sessionQuery = sessionQuery.lte('created_at', endDate);
-      const { data: sessionData, count: sessionCount } = await sessionQuery;
+      // 1. Fetch Sessions (sessions table has session_id, device_info)
+      const sessionQuery = supabase.from('sessions').select('*', { count: 'exact' });
+      const { data: sessionData, count: sessionCount, error: sessionError } = await sessionQuery;
+      if (sessionError) console.warn('Sessions fetch warning:', sessionError.message);
 
       const genderMap: Record<string, number> = {};
       const osMap: Record<string, number> = {};
@@ -239,8 +362,7 @@ export function useInsightsData() {
       setHardware({ connection: formatMap(connMap).slice(0, 5), ram: formatMap(ramMap).slice(0, 5), cores: formatMap(coresMap).slice(0, 5), theme: formatMap(themeMap).slice(0, 3) });
 
       // 2. Fetch Events
-      let eventQuery = supabase.from('intent_events')
-        .select('id, session_id, event_type, price_displayed, created_at, product_id, metadata');
+      let eventQuery = supabase.from('intent_events').select('*').order('created_at', { ascending: false });
       if (startDate) eventQuery = eventQuery.gte('created_at', startDate);
       if (endDate) eventQuery = eventQuery.lte('created_at', endDate);
       const { data: events, error: eventsError } = await eventQuery;
@@ -254,7 +376,7 @@ export function useInsightsData() {
       let totalDwellTime = 0, dwellEvents = 0, rageClicks = 0;
       const scrollMap: Record<string, number> = { '25%': 0, '50%': 0, '75%': 0, '100%': 0 };
       const timelineMap: Record<string, number> = {};
-      const productInteractions: Record<string, { views: number; carts: number; rev: number }> = {};
+      const productInteractions: Record<string, { views: number; carts: number; checkouts: number; rev: number }> = {};
       const searchMap: Record<string, number> = {};
       const abandonedList: any[] = [];
       const pairMap: Record<string, number> = {};
@@ -271,7 +393,7 @@ export function useInsightsData() {
 
         if (ev.event_type === 'view_item') viewCount++;
         if (ev.event_type === 'add_to_cart') cartCount++;
-        if (ev.event_type === 'fake_checkout') { checkoutCount++; fakeRev += ev.price_displayed || 0; }
+        if (ev.event_type === 'fake_checkout' || ev.event_type === 'checkout_basket') { checkoutCount++; fakeRev += ev.price_displayed || 0; }
 
         if (ev.event_type === 'page_leave' && ev.metadata?.dwell_time_seconds) { totalDwellTime += ev.metadata.dwell_time_seconds; dwellEvents++; }
         if (ev.event_type === 'rage_click') rageClicks++;
@@ -280,7 +402,7 @@ export function useInsightsData() {
           if (scrollMap[depth] !== undefined) scrollMap[depth]++;
         }
         
-        // New Telemetry
+        // UX Telemetry
         if (ev.event_type === 'dead_click') deadClicks++;
         if (ev.event_type === 'cursor_frustration') frustrationCount++;
         if (ev.event_type === 'js_error') {
@@ -296,109 +418,88 @@ export function useInsightsData() {
           if (ev.metadata?.x !== undefined && ev.metadata?.vw) {
             heatmapsList.push({
               type: ev.event_type,
-              x: ev.metadata.x, y: ev.metadata.y,
-              vw: ev.metadata.vw, vh: ev.metadata.vh,
-              path: ev.metadata.path
+              x: (ev.metadata.x / ev.metadata.vw) * 100,
+              y: (ev.metadata.y / (ev.metadata.vh || 800)) * 100
             });
           }
         }
-        if (ev.event_type === 'element_visible') {
-          const id = ev.metadata?.tag || 'Element';
-          impressionsMap[id] = (impressionsMap[id] || 0) + 1;
+        if (ev.event_type === 'visibility_impression' && ev.metadata?.element_id) {
+          const name = ev.metadata.element_id;
+          impressionsMap[name] = (impressionsMap[name] || 0) + 1;
         }
 
-        if (ev.product_id && ['view_item', 'add_to_cart', 'fake_checkout'].includes(ev.event_type)) {
-          if (!productInteractions[ev.product_id]) productInteractions[ev.product_id] = { views: 0, carts: 0, rev: 0 };
+        // Product level stats
+        if (ev.product_id) {
+          if (!productInteractions[ev.product_id]) {
+            productInteractions[ev.product_id] = { views: 0, carts: 0, checkouts: 0, rev: 0 };
+          }
           if (ev.event_type === 'view_item') productInteractions[ev.product_id].views++;
           if (ev.event_type === 'add_to_cart') productInteractions[ev.product_id].carts++;
-          if (ev.event_type === 'fake_checkout') productInteractions[ev.product_id].rev += ev.price_displayed || 0;
-        }
-
-        if (ev.event_type === 'search' && ev.metadata?.query) {
-          const q = ev.metadata.query.toLowerCase().trim();
-          if (q.length > 2) searchMap[q] = (searchMap[q] || 0) + 1;
-        }
-
-        if (ev.event_type === 'cart_abandoned' && ev.metadata?.items) {
-          const sid = ev.session_id;
-          const existingIdx = abandonedList.findIndex(a => a.sid === sid);
-          const val = ev.price_displayed || 0;
-          const cartItem = { id: ev.id, sid, date: new Date(ev.created_at).toLocaleString('pt-BR'), value: val, items: ev.metadata.items };
-          if (existingIdx >= 0) abandonedList[existingIdx] = cartItem;
-          else abandonedList.push(cartItem);
-        }
-
-        if (ev.event_type === 'checkout_basket' && ev.metadata?.items) {
-          const items = ev.metadata.items as any[];
-          if (items.length > 1) {
-            for (let i = 0; i < items.length; i++) {
-              for (let j = i + 1; j < items.length; j++) {
-                const pair = [items[i].name || items[i].id, items[j].name || items[j].id].sort().join(' + ');
-                pairMap[pair] = (pairMap[pair] || 0) + 1;
-              }
-            }
+          if (ev.event_type === 'fake_checkout' || ev.event_type === 'checkout_basket') {
+            productInteractions[ev.product_id].checkouts++;
+            productInteractions[ev.product_id].rev += ev.price_displayed || 0;
           }
+        }
+
+        // E-commerce Intelligence
+        if (ev.event_type === 'search_query' && ev.metadata?.query) {
+          const q = ev.metadata.query.toLowerCase().trim();
+          searchMap[q] = (searchMap[q] || 0) + 1;
+        }
+        if (ev.event_type === 'cart_abandonment' && ev.metadata?.items) {
+          abandonedList.push({
+            session_id: ev.session_id,
+            items: ev.metadata.items,
+            value: ev.price_displayed || 0,
+            time: ev.created_at
+          });
+        }
+        if (ev.event_type === 'bought_together' && ev.metadata?.pair) {
+          const pair = ev.metadata.pair;
+          pairMap[pair] = (pairMap[pair] || 0) + 1;
         }
       });
 
-      // Store raw data for intent recomputation
-      let finalSessionData = safeSessionData;
-      if (finalSessionData.length === 0 && events && events.length > 0) {
-        const uniqueSids = Array.from(new Set(events.map(e => e.session_id).filter(Boolean)));
-        finalSessionData = uniqueSids.map(sid => ({ session_id: sid, created_at: new Date().toISOString(), device_info: { city: 'Fantasma', os_name: 'Desconhecido', browser_name: 'N/A' } }));
-      }
-      setRawSessions(finalSessionData);
+      setRawSessions(safeSessionData);
       setRawEvents(events || []);
       setProductDict(pDict);
 
-      // Calculate identified count
-      let identifiedCount = 0;
-      finalSessionData.forEach((sess) => {
-        const info = sess.device_info;
-        if (info && (info.email || info.nickname)) {
-          identifiedCount++;
-        }
-      });
+      // Compute intent leads
+      const computedIntent = recomputeIntentMetrics(safeSessionData, events || [], pDict, scoreWeights);
+      setIntentData(computedIntent);
 
-      // Calculate sessions with rage clicks
-      const sessionsWithRage = new Set<string>();
-      events?.forEach((ev) => {
-        if (ev.event_type === 'rage_click' && ev.session_id) {
-          sessionsWithRage.add(ev.session_id);
-        }
-      });
+      const totalSess = sessionCount || safeSessionData.length || 0;
+      const totalEvs = events?.length || 0;
+      const convRate = totalSess > 0 ? ((checkoutCount / totalSess) * 100).toFixed(1) : '0';
 
-      const computedIntent = recomputeIntentMetrics(finalSessionData, events || [], pDict, scoreWeights);
-      const highIntentCount = computedIntent.funnelStages.decision;
-
-      const totalSess = sessionCount || finalSessionData.length || 0;
-
-      setKpis({
-        totalSessions: totalSess,
-        identifiedLeads: identifiedCount,
-        identificationRate: totalSess > 0 ? (identifiedCount / totalSess) * 100 : 0,
-        highIntentLeads: highIntentCount,
-        frictionIndex: totalSess > 0 ? (sessionsWithRage.size / totalSess) * 100 : 0,
-      });
-
-      setFunnelData([
-        { name: 'Sessões Iniciais', value: sessionCount || 0 },
-        { name: 'Visualizações', value: viewCount },
-        { name: 'Adições ao Carrinho', value: cartCount },
-        { name: 'Checkouts Falsos', value: checkoutCount },
+      setKpis([
+        { title: 'Sessões Únicas', value: totalSess.toLocaleString('pt-BR'), change: 'Tempo Real', isPositive: true },
+        { title: 'Eventos Capturados', value: totalEvs.toLocaleString('pt-BR'), change: 'Tempo Real', isPositive: true },
+        { title: 'Taxa de Conversão Sim', value: `${convRate}%`, change: 'Tempo Real', isPositive: parseFloat(convRate) > 2 },
+        { title: 'Receita Induzida Sim', value: `R$ ${fakeRev.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, change: 'Tempo Real', isPositive: fakeRev > 0 },
       ]);
 
-      setTimelineData(Object.keys(timelineMap).map(date => ({ date, interacoes: timelineMap[date] })));
-      
+      const cartConv = viewCount > 0 ? ((cartCount / viewCount) * 100).toFixed(0) : '0';
+      const checkoutConv = cartCount > 0 ? ((checkoutCount / cartCount) * 100).toFixed(0) : '0';
+
+      setFunnelData([
+        { name: 'Sessões', value: totalSess, conversion: '100%' },
+        { name: 'Visualizou Produto', value: viewCount, conversion: totalSess > 0 ? `${Math.round((viewCount/totalSess)*100)}%` : '0%' },
+        { name: 'Adicionou ao Carrinho', value: cartCount, conversion: `${cartConv}%` },
+        { name: 'Iniciou Checkout', value: checkoutCount, conversion: `${checkoutConv}%` },
+      ]);
+
+      setTimelineData(Object.keys(timelineMap).map(date => ({ date, sessions: timelineMap[date], conversions: Math.floor(timelineMap[date] * 0.1) })));
+
       const calcVital = (name: string) => vitalsMap[name] ? Math.round(vitalsMap[name].sum / vitalsMap[name].count) : 0;
-      
+
       setUxMetrics({ 
         avgDwellTime: dwellEvents > 0 ? Math.floor(totalDwellTime / dwellEvents) : 0, 
         rageClicksCount: rageClicks, 
         scrollDepthMap: Object.keys(scrollMap).map(k => ({ name: k, value: scrollMap[k] })),
         deadClicksCount: deadClicks,
         frustrationCount: frustrationCount,
-        jsErrors: jsErrorsList.slice(-20), // Keep last 20 errors
+        jsErrors: jsErrorsList.slice(-20),
         webVitals: {
           lcp: calcVital('LCP'),
           cls: vitalsMap['CLS'] ? (vitalsMap['CLS'].sum / vitalsMap['CLS'].count) : 0,
@@ -410,6 +511,7 @@ export function useInsightsData() {
         heatmapData: heatmapsList,
         visibilityImpressions: Object.keys(impressionsMap).map(k => ({ name: k, count: impressionsMap[k] })).sort((a,b) => b.count - a.count)
       });
+
       setEcommerceInsights({
         searchTerms: formatMap(searchMap).slice(0, 10),
         abandonedCarts: abandonedList.sort((a, b) => b.value - a.value).slice(0, 10),
@@ -429,7 +531,7 @@ export function useInsightsData() {
         setTopProducts(formattedTopProducts);
       }
 
-      // GA4 Data
+      // External APIs (only fetched if targetTab is overview, hubspot, or initial load)
       let queryParams = '';
       if (startDate || endDate) {
         const p = new URLSearchParams();
@@ -438,41 +540,47 @@ export function useInsightsData() {
         queryParams = `?${p.toString()}`;
       }
 
-      try {
-        const ga4Res = await fetch(`/api/analytics/ga4${queryParams}`);
-        if (ga4Res.ok) {
-          const ga4Json = await ga4Res.json();
-          if (ga4Json.data) setGa4Data(ga4Json.data);
-          else if (ga4Json.data === null) setGa4Data('empty');
-        }
-      } catch (err) { console.error('Failed to fetch GA4 data:', err); }
+      if (!targetTab || targetTab === 'overview') {
+        // GA4 Data
+        try {
+          const ga4Res = await fetch(`/api/analytics/ga4${queryParams}`);
+          if (ga4Res.ok) {
+            const ga4Json = await ga4Res.json();
+            if (ga4Json.data) setGa4Data(ga4Json.data);
+            else if (ga4Json.data === null) setGa4Data('empty');
+          }
+        } catch (err) { console.error('Failed to fetch GA4 data:', err); }
 
-      // PostHog Data
-      try {
-        const phRes = await fetch(`/api/analytics/posthog${queryParams}`);
-        if (phRes.ok) {
-          const phJson = await phRes.json();
-          if (phJson.data) { setPosthogData(phJson.data); setPosthogError(null); }
-          else if (phJson.error) setPosthogError(phJson.error);
-        }
-      } catch (err) { console.error('Failed to fetch PostHog data:', err); }
+        // PostHog Data
+        try {
+          const phRes = await fetch(`/api/analytics/posthog${queryParams}`);
+          if (phRes.ok) {
+            const phJson = await phRes.json();
+            if (phJson.data) { setPosthogData(phJson.data); setPosthogError(null); }
+            else if (phJson.error) setPosthogError(phJson.error);
+          }
+        } catch (err) { console.error('Failed to fetch PostHog data:', err); }
+      }
 
-      // HubSpot Data
-      try {
-        const hsRes = await fetch(`/api/analytics/hubspot${queryParams}`);
-        if (hsRes.ok) {
-          const hsJson = await hsRes.json();
-          if (hsJson.data) { setHubspotCrmData(hsJson.data); setHubspotError(null); }
-          else if (hsJson.error) setHubspotError(hsJson.error);
-        }
-      } catch (err) { console.error('Failed to fetch HubSpot CRM data:', err); }
+      if (!targetTab || targetTab === 'hubspot') {
+        // HubSpot Data
+        try {
+          const hsRes = await fetch(`/api/analytics/hubspot${queryParams}`);
+          if (hsRes.ok) {
+            const hsJson = await hsRes.json();
+            if (hsJson.data) { setHubspotCrmData(hsJson.data); setHubspotError(null); }
+            else if (hsJson.error) setHubspotError(hsJson.error);
+          }
+        } catch (err) { console.error('Failed to fetch HubSpot CRM data:', err); }
+      }
 
+      setLastUpdated(new Date());
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [recomputeIntentMetrics, scoreWeights]);
 
   // ── Supabase Realtime Subscription ──
   useEffect(() => {
@@ -482,7 +590,7 @@ export function useInsightsData() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'sessions' },
         () => {
-          // Re-fetch silently when a new session arrives
+          // Re-fetch silently via WebSocket when a new session arrives
           fetchDashboardData(undefined, undefined, true);
         }
       )
@@ -490,7 +598,7 @@ export function useInsightsData() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'intent_events' },
         () => {
-          // Re-fetch silently when a new event arrives
+          // Re-fetch silently via WebSocket when a new event arrives
           fetchDashboardData(undefined, undefined, true);
         }
       )
@@ -503,10 +611,12 @@ export function useInsightsData() {
 
   return {
     loading,
+    lastUpdated,
     scoreWeights, setScoreWeights,
     kpis, funnelData, topProducts, timelineData, demographics, hardware, marketing,
     uxMetrics, ecommerceInsights, intentData,
     ga4Data, posthogData, posthogError, hubspotCrmData, hubspotError,
+    rawSessions, rawEvents,
     fetchDashboardData
   };
 }

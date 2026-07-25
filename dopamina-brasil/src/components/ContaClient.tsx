@@ -7,6 +7,7 @@ import gameData from '@/data/achievements.json';
 import { initSession } from '@/lib/tracking';
 import GuiltStatement from '@/components/GuiltStatement';
 import DigitalDnaScanner from '@/components/DigitalDnaScanner';
+import DopaminaWrapped from '@/components/DopaminaWrapped';
 
 // Leaderboard Mock
 const leaderboard = [
@@ -206,6 +207,11 @@ export default function ContaClient() {
       {/* ========= EXTRATO DA CULPA ========= */}
       <div className="mb-12">
         <GuiltStatement />
+      </div>
+
+      {/* ========= DOPAMINA WRAPPED ========= */}
+      <div className="mb-12">
+        <DopaminaWrapped />
       </div>
 
       {/* ========= SCANNER DE DNA DIGITAL ========= */}

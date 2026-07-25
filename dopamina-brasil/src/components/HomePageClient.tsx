@@ -94,7 +94,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
       {/* Floating Swipe Mode Button */}
       <button
         onClick={() => setSwipeMode(true)}
-        className="fixed bottom-6 right-24 z-[90] flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-4 py-2.5 text-xs font-bold text-neon backdrop-blur-sm transition hover:bg-neon/20 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(204,255,0,0.1)]"
+        className="fixed bottom-[72px] right-6 z-[90] flex items-center gap-2 rounded-full border border-neon/30 bg-neon/10 px-4 py-2.5 text-xs font-bold text-neon backdrop-blur-sm transition hover:bg-neon/20 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(204,255,0,0.1)]"
       >
         <span>🔥</span>
         <span className="hidden sm:inline">Modo Vício</span>

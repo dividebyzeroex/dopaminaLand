@@ -24,6 +24,12 @@ export default function OverviewTab({ kpis, funnelData, topProducts, timelineDat
   topProducts: any[];
   timelineData: any[];
 }) {
+  const totalSessions = kpis?.totalSessions ?? (Array.isArray(kpis) ? (kpis.find((k: any) => k.title?.includes('Sessões'))?.value || 0) : 0);
+  const identifiedLeads = kpis?.identifiedLeads ?? 0;
+  const identificationRate = typeof kpis?.identificationRate === 'number' ? kpis.identificationRate.toFixed(1) : '0';
+  const highIntentLeads = kpis?.highIntentLeads ?? 0;
+  const frictionIndex = typeof kpis?.frictionIndex === 'number' ? kpis.frictionIndex.toFixed(1) : '0';
+
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
@@ -40,11 +46,11 @@ export default function OverviewTab({ kpis, funnelData, topProducts, timelineDat
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {[
-          { label: 'Sessões Totais', value: kpis.totalSessions, icon: Users, color: 'text-foreground' },
-          { label: 'Leads Identificados', value: kpis.identifiedLeads, icon: Mail, color: 'text-indigo-500' },
-          { label: 'Taxa de Identificação', value: `${kpis.identificationRate.toFixed(1)}%`, icon: TrendingUp, color: 'text-blue-500' },
-          { label: 'Alta Intenção', value: kpis.highIntentLeads, icon: Flame, color: 'text-rose-500' },
-          { label: 'Índice de Fricção', value: `${kpis.frictionIndex.toFixed(1)}%`, icon: AlertCircle, color: 'text-amber-500' }
+          { label: 'Sessões Totais', value: totalSessions, icon: Users, color: 'text-foreground' },
+          { label: 'Leads Identificados', value: identifiedLeads, icon: Mail, color: 'text-indigo-500' },
+          { label: 'Taxa de Identificação', value: `${identificationRate}%`, icon: TrendingUp, color: 'text-blue-500' },
+          { label: 'Alta Intenção', value: highIntentLeads, icon: Flame, color: 'text-rose-500' },
+          { label: 'Índice de Fricção', value: `${frictionIndex}%`, icon: AlertCircle, color: 'text-amber-500' }
         ].map((kpi, idx) => {
           const Icon = kpi.icon;
           return (

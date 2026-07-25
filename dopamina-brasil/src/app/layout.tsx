@@ -20,6 +20,10 @@ import NicknameSetup from "@/components/NicknameSetup";
 import DailyModal from "@/components/DailyModal";
 import DetoxMode from "@/components/DetoxMode";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
+import ManipulationNarrator from "@/components/ManipulationNarrator";
+import LivePresence from "@/components/LivePresence";
+import NeuroXRay from "@/components/NeuroXRay";
+import ResistanceTraining from "@/components/ResistanceTraining";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -96,6 +100,10 @@ export default function RootLayout({
                   <AchievementToast />
                   <FomoToast />
                   <DetoxMode />
+                  <ManipulationNarrator />
+                  <LivePresence />
+                  <NeuroXRay />
+                  <ResistanceTraining />
                 </CSPostHogProvider>
               </TrackingProvider>
             </DailyProvider>

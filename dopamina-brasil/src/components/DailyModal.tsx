@@ -16,10 +16,11 @@ export default function DailyModal() {
     // Delay after intro/nickname
     const timer = setTimeout(() => {
       try {
+        if (window.self !== window.top) return; // Hide in iframes (e.g., Insights heatmap)
         const introSeen = localStorage.getItem('dopamina-intro-seen');
         if (introSeen) setShow(true);
       } catch {
-        setShow(true);
+        if (window.self === window.top) setShow(true);
       }
     }, 2500);
     return () => clearTimeout(timer);

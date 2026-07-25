@@ -65,7 +65,6 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
         gradient: currentProduct.gradient || 'from-surface to-surface',
         originalPrice: currentProduct.originalPrice || currentProduct.salePrice,
         salePrice: currentProduct.salePrice,
-        quantity: 1,
       });
       trackEvent('add_to_cart', String(currentProduct.id), currentProduct.salePrice);
       setCoinAnim(true);
@@ -82,7 +81,7 @@ export default function SwipeMode({ products, onClose }: SwipeModeProps) {
       setTouchDelta(0);
       setCurrentIndex(i => i + 1);
     }, 350);
-  }, [currentProduct, isFinished, addItem, addXp, playSound]);
+  }, [currentProduct, isFinished, addItem, playSound]);
 
   // Keyboard support
   useEffect(() => {

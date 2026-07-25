@@ -78,6 +78,13 @@
       "description": "Fez uma compra entre meia-noite e 5h da manhã",
       "xpReward": 30,
       "icon": "🦉"
+    },
+    {
+      "id": "dopamine_immune",
+      "title": "Imune à Dopamina 🛡️",
+      "description": "Completou os 5 níveis do Treinamento de Resistência",
+      "xpReward": 500,
+      "icon": "🛡️"
     }
   ],
   "xpPerPurchase": 5,

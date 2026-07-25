@@ -133,6 +133,12 @@ export default function Header() {
               📦 Caixa
             </Link>
             <Link
+              href="/extensao"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-neon bg-neon/10 border border-neon/30 transition hover:bg-neon hover:text-background lg:block"
+            >
+              🛡️ Extensão
+            </Link>
+            <Link
               href="/ranking"
               className="hidden rounded-full px-4 py-2 text-sm font-bold text-muted transition hover:bg-surface hover:text-foreground lg:block"
             >

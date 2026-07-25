@@ -10,54 +10,79 @@ export async function GET() {
     });
   }
 
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+
   try {
-    // 1. Fetch total contacts count (limit 0 is fast and returns total count)
-    const contactsRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ limit: 0 }),
-    });
+    // Execute all HubSpot API queries in parallel for high speed
+    const [contactsRes, dealsRes, recentContactsRes, companiesRes, ticketsRes] = await Promise.all([
+      // 1. Total Contacts & Lifecycle breakdown
+      fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          limit: 100,
+          properties: ['firstname', 'lastname', 'email', 'hs_lead_status', 'lifecyclestage', 'createdate', 'company'],
+        }),
+      }).catch(() => null),
 
-    const contactsData = contactsRes.ok ? await contactsRes.json() : { total: 0 };
+      // 2. Deals for pipeline, amount, stages
+      fetch('https://api.hubapi.com/crm/v3/objects/deals/search', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          limit: 100,
+          properties: ['dealname', 'dealstage', 'amount', 'closedate', 'createdate'],
+          sorts: [{ propertyName: 'amount', direction: 'DESCENDING' }]
+        }),
+      }).catch(() => null),
 
-    // 2. Fetch deals to calculate total count, total pipeline value, and stages breakdown
-    const dealsRes = await fetch('https://api.hubapi.com/crm/v3/objects/deals/search', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        properties: ['dealstage', 'amount'],
-        limit: 100, // Fetch up to 100 deals to aggregate pipeline values
-      }),
-    });
+      // 3. Recent Contacts (sorted by creation date)
+      fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          sorts: [{ propertyName: 'createdate', direction: 'DESCENDING' }],
+          properties: ['firstname', 'lastname', 'email', 'hs_lead_status', 'lifecyclestage', 'createdate', 'jobtitle'],
+          limit: 8,
+        }),
+      }).catch(() => null),
 
-    const dealsData = dealsRes.ok ? await dealsRes.json() : { total: 0, results: [] };
+      // 4. Companies
+      fetch('https://api.hubapi.com/crm/v3/objects/companies/search', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          limit: 20,
+          properties: ['name', 'domain', 'industry', 'annualrevenue', 'numberofemployees'],
+        }),
+      }).catch(() => null),
 
-    // 3. Fetch recent contacts (top 5 sorted by creation date descending)
-    const recentRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts/search', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        sorts: [{ propertyName: 'createdate', direction: 'DESCENDING' }],
-        properties: ['firstname', 'lastname', 'email', 'hs_lead_status', 'createdate'],
-        limit: 5,
-      }),
-    });
+      // 5. Tickets
+      fetch('https://api.hubapi.com/crm/v3/objects/tickets/search', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          limit: 50,
+          properties: ['subject', 'hs_ticket_priority', 'hs_pipeline_stage', 'createdate'],
+        }),
+      }).catch(() => null),
+    ]);
 
-    const recentData = recentRes.ok ? await recentRes.json() : { results: [] };
+    const contactsData = contactsRes?.ok ? await contactsRes.json() : { total: 0, results: [] };
+    const dealsData = dealsRes?.ok ? await dealsRes.json() : { total: 0, results: [] };
+    const recentContactsData = recentContactsRes?.ok ? await recentContactsRes.json() : { results: [] };
+    const companiesData = companiesRes?.ok ? await companiesRes.json() : { total: 0, results: [] };
+    const ticketsData = ticketsRes?.ok ? await ticketsRes.json() : { total: 0, results: [] };
 
-    // Aggregate deal values and stages
+    // Process Deals
     let totalPipelineValue = 0;
     let closedWonCount = 0;
-    const stageCounts: Record<string, number> = {};
+    let closedWonValue = 0;
+    let closedLostCount = 0;
+    const stageMap: Record<string, { count: number; totalAmount: number }> = {};
 
     const dealsList = dealsData.results || [];
     dealsList.forEach((deal: any) => {
@@ -66,58 +91,124 @@ export async function GET() {
 
       totalPipelineValue += amount;
 
+      if (!stageMap[stage]) {
+        stageMap[stage] = { count: 0, totalAmount: 0 };
+      }
+      stageMap[stage].count += 1;
+      stageMap[stage].totalAmount += amount;
+
       if (stage === 'closedwon') {
         closedWonCount++;
+        closedWonValue += amount;
+      } else if (stage === 'closedlost') {
+        closedLostCount++;
       }
-
-      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
     });
 
-    // Translate standard HubSpot deal stages
-    const STAGE_TRANSLATIONS: Record<string, string> = {
-      appointmentscheduled: 'Reunião Agendada 📅',
-      qualifiedtobuy: 'Qualificado para Compra 🎯',
-      presentationscheduled: 'Apresentação Agendada 🖥️',
-      decisionmakerboughtin: 'Decisor Engajado 🤝',
-      contractsent: 'Contrato Enviado 📄',
-      closedwon: 'Fechado Ganho 🎉',
-      closedlost: 'Fechado Perdido ❌',
-      unknown: 'Desconhecido',
+    const totalFinishedDeals = closedWonCount + closedLostCount;
+    const winRate = totalFinishedDeals > 0 ? (closedWonCount / totalFinishedDeals) * 100 : 0;
+    const avgDealSize = dealsList.length > 0 ? totalPipelineValue / dealsList.length : 0;
+
+    // Standard HubSpot Deal Stages Map
+    const STAGE_TRANSLATIONS: Record<string, { label: string; icon: string }> = {
+      appointmentscheduled: { label: 'Reunião Agendada', icon: '📅' },
+      qualifiedtobuy: { label: 'Qualificado p/ Compra', icon: '🎯' },
+      presentationscheduled: { label: 'Apresentação Agendada', icon: '🖥️' },
+      decisionmakerboughtin: { label: 'Decisor Engajado', icon: '🤝' },
+      contractsent: { label: 'Contrato Enviado', icon: '📄' },
+      closedwon: { label: 'Fechado Ganho', icon: '🎉' },
+      closedlost: { label: 'Fechado Perdido', icon: '❌' },
+      unknown: { label: 'Outros Estágios', icon: '💼' }
     };
 
-    const pipelineFunnel = Object.keys(stageCounts).map(stage => ({
+    const pipelineFunnel = Object.entries(stageMap).map(([stage, info]) => ({
       stageId: stage,
-      name: STAGE_TRANSLATIONS[stage] || stage,
-      value: stageCounts[stage],
-    })).sort((a, b) => b.value - a.value);
+      name: STAGE_TRANSLATIONS[stage]?.label || stage,
+      icon: STAGE_TRANSLATIONS[stage]?.icon || '📌',
+      count: info.count,
+      amount: info.totalAmount,
+    })).sort((a, b) => b.amount - a.amount);
 
-    // Format recent contacts list
-    const recentContacts = (recentData.results || []).map((c: any) => ({
+    // Process Contacts Lifecycle Stages
+    const lifecycleMap: Record<string, number> = {};
+    const contactsList = contactsData.results || [];
+    contactsList.forEach((c: any) => {
+      const stage = c.properties?.lifecyclestage || 'lead';
+      lifecycleMap[stage] = (lifecycleMap[stage] || 0) + 1;
+    });
+
+    const LIFECYCLE_TRANSLATIONS: Record<string, string> = {
+      subscriber: 'Assinantes / Visitantes',
+      lead: 'Leads Não Qualificados',
+      marketingqualifiedlead: 'MQL (Marketing)',
+      salesqualifiedlead: 'SQL (Vendas)',
+      opportunity: 'Oportunidade Ativa',
+      customer: 'Clientes Fechados',
+      evangelist: 'Promotores / Evangelistas',
+      other: 'Outros'
+    };
+
+    const lifecycleStages = Object.entries(lifecycleMap).map(([stage, count]) => ({
+      stageKey: stage,
+      label: LIFECYCLE_TRANSLATIONS[stage] || stage,
+      count,
+    })).sort((a, b) => b.count - a.count);
+
+    // Top 5 High-Value Deals
+    const topDeals = dealsList.slice(0, 5).map((d: any) => ({
+      id: d.id,
+      name: d.properties?.dealname || 'Negócio sem nome',
+      amount: parseFloat(d.properties?.amount || '0'),
+      stage: STAGE_TRANSLATIONS[d.properties?.dealstage]?.label || d.properties?.dealstage || 'Em Aberto',
+      closeDate: d.properties?.closedate ? new Date(d.properties.closedate).toLocaleDateString('pt-BR') : 'Sem data'
+    }));
+
+    // Recent Contacts
+    const recentContacts = (recentContactsData.results || []).map((c: any) => ({
       id: c.id,
       name: `${c.properties?.firstname || ''} ${c.properties?.lastname || ''}`.trim() || 'Lead Sem Nome',
-      email: c.properties?.email || 'N/A',
-      status: c.properties?.hs_lead_status || 'OPEN',
-      createdDate: c.properties?.createdate
-        ? new Date(c.properties.createdate).toLocaleString('pt-BR')
-        : 'N/A',
+      email: c.properties?.email || 'Sem E-mail',
+      title: c.properties?.jobtitle || 'Cargo N/D',
+      status: c.properties?.hs_lead_status || 'NOVO',
+      stage: LIFECYCLE_TRANSLATIONS[c.properties?.lifecyclestage] || 'Lead',
+      createdDate: c.properties?.createdate ? new Date(c.properties.createdate).toLocaleDateString('pt-BR') : 'Recente'
+    }));
+
+    // Companies List
+    const topCompanies = (companiesData.results || []).map((comp: any) => ({
+      id: comp.id,
+      name: comp.properties?.name || 'Empresa Sem Nome',
+      domain: comp.properties?.domain || 'n/a',
+      industry: comp.properties?.industry || 'Geral',
+      revenue: parseFloat(comp.properties?.annualrevenue || '0')
     }));
 
     return NextResponse.json({
       data: {
         kpis: {
-          totalContacts: contactsData.total || 0,
+          totalContacts: contactsData.total || contactsList.length,
           totalDeals: dealsData.total || dealsList.length,
           pipelineValue: totalPipelineValue,
-          closedWon: closedWonCount,
+          closedWonCount,
+          closedWonValue,
+          closedLostCount,
+          winRate: Math.round(winRate * 10) / 10,
+          avgDealSize: Math.round(avgDealSize),
+          totalCompanies: companiesData.total || topCompanies.length,
+          totalTickets: ticketsData.total || 0,
         },
         pipelineFunnel,
+        lifecycleStages,
+        topDeals,
         recentContacts,
+        topCompanies,
       },
     });
+
   } catch (error: any) {
-    console.error('HubSpot Analytics API Error:', error);
+    console.error('Erro ao buscar dados do HubSpot:', error);
     return NextResponse.json(
-      { error: error.message, data: null },
+      { error: 'Falha ao conectar à API do HubSpot.', details: error.message },
       { status: 500 }
     );
   }

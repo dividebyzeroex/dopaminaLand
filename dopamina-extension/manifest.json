@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Dopamina — Auditor Anti-Manipulação de E-Commerce",
+  "version": "1.0.0",
+  "description": "Identifica truques psicológicos, ancoragem de preço, escassez falsa e dark patterns em qualquer loja online real.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Dopamina Anti-Truque"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
