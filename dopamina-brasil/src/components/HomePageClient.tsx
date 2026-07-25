@@ -100,6 +100,127 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         <span className="hidden sm:inline">Modo Vício</span>
       </button>
 
+      {/* ============ DOPAMINA BAR HERO ============ */}
+      <section className="relative w-full overflow-hidden bg-[#09090b] border-b border-border">
+        {/* Animated Background Gradients */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-[#f97316]/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[120%] bg-[#22c55e]/10 blur-[100px] rounded-full pointer-events-none mix-blend-screen" />
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-20 pointer-events-none" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-32 flex flex-col lg:flex-row items-center gap-12">
+          
+          {/* Left Text Content */}
+          <div className="flex-1 text-center lg:text-left z-10">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#f97316]/30 bg-[#f97316]/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-[#f97316] mb-6 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+              🚀 Novo Anti-FOMO Liberado
+            </span>
+            <h1 className="font-[var(--font-display)] text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight text-white mb-6">
+              Vença os e-commerces no<br className="hidden lg:block"/>
+              <span className="bg-gradient-to-r from-[#22c55e] to-[#f97316] bg-clip-text text-transparent drop-shadow-sm"> próprio jogo deles.</span>
+            </h1>
+            <p className="text-base sm:text-lg text-[#a1a1aa] mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+              Conheça a <strong className="text-white">Dopamina Bar</strong>. Um plugin ultraleve que intercepta gatilhos de Escassez Falsa na Amazon e Mercado Livre, revelando se o desconto é real ou pura manipulação psicológica.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <a 
+                href="/extensao" 
+                className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black px-8 py-4 text-sm font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.15)] overflow-hidden"
+              >
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:animate-shine" />
+                <span className="relative z-10 flex items-center gap-2">
+                  <span className="text-lg">⚡</span> Instalar Anti-FOMO Grátis
+                </span>
+              </a>
+              <a 
+                href="#catalogo" 
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/10"
+              >
+                Testar Simulador ↓
+              </a>
+            </div>
+            
+            <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-xs font-bold text-[#71717a]">
+              <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona na Amazon</span>
+              <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona no Mercado Livre</span>
+            </div>
+          </div>
+
+          {/* Right Visual / Mockup */}
+          <div className="flex-1 w-full max-w-[500px] lg:max-w-none relative z-10">
+            {/* Main Mockup Card */}
+            <div 
+              className="group relative transition-all duration-700 ease-out"
+              style={{ perspective: '1000px' }}
+            >
+              <div 
+                className="transition-transform duration-700 ease-out"
+                style={{ transform: 'rotateY(-10deg) rotateX(5deg)' }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'rotateY(0deg) rotateX(0deg)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'rotateY(-10deg) rotateX(5deg)'}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#22c55e]/20 to-[#f97316]/20 blur-2xl rounded-[2rem] -z-10 animate-pulse" />
+                
+                <div className="bg-[#18181b] border border-[#27272a] rounded-[1.5rem] p-6 shadow-2xl relative overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#27272a]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#f97316]/20 flex items-center justify-center border border-[#f97316]/50 shadow-[0_0_10px_rgba(249,115,22,0.3)]">
+                        <span className="text-xl">🚨</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-[#f97316] uppercase tracking-wide">Falsa Escassez</h3>
+                        <p className="text-[10px] text-[#a1a1aa] font-bold">Bondfaro Sync Actived</p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 rounded bg-[#27272a] border border-[#3f3f46]">
+                      <span className="text-[10px] font-bold text-[#e4e4e7]">ON</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="space-y-4">
+                    <p className="text-xs text-[#e4e4e7] font-medium leading-relaxed">
+                      Cuidado! Este produto está 54.2% mais barato no mercado. Não caia no FOMO!
+                    </p>
+                    
+                    <div className="bg-black/50 border border-white/5 rounded-xl p-4">
+                      <div className="flex justify-between text-xs mb-2">
+                        <span className="text-[#a1a1aa]">Preço detectado aqui:</span>
+                        <span className="text-[#f87171] font-bold">R$ 4.360,50</span>
+                      </div>
+                      <div className="flex justify-between text-xs mb-4">
+                        <span className="text-[#a1a1aa]">Piso do mercado:</span>
+                        <span className="text-[#4ade80] font-bold">R$ 1.999,00</span>
+                      </div>
+                      <div className="pt-4 border-t border-dashed border-[#3f3f46]">
+                        <button className="w-full bg-[#f97316] text-white py-2.5 rounded-lg text-xs font-black tracking-wide shadow-lg hover:bg-[#ea580c] transition-colors">
+                          VER LOJA MAIS BARATA ➔
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Floating Element 1 */}
+                <div className="absolute -right-12 -top-12 bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-2xl p-4 backdrop-blur-md shadow-xl hidden sm:block pointer-events-none" style={{ animation: 'float 6s ease-in-out infinite' }}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">✅</span>
+                    <div>
+                      <p className="text-[10px] text-[#22c55e] font-black uppercase">Piso do Mercado</p>
+                      <p className="text-white text-sm font-bold">R$ 1.999,00</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </section>
+
       {/* ============ MARQUEE DIVIDER AT TOP ============ */}
       <div className="overflow-hidden bg-surface py-3 text-[13px] font-bold uppercase tracking-wider text-foreground border-b border-border">
         <div className="flex w-max animate-marquee gap-12 whitespace-nowrap pr-12">

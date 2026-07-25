@@ -78,7 +78,7 @@ export default function AnalyticsDashboardClient() {
     loading, lastUpdated, fetchDashboardData,
     kpis, funnelData, topProducts, timelineData, ecommerceInsights, uxMetrics,
     intentData, scoreWeights, setScoreWeights,
-    hubspotCrmData, rawSessions, rawEvents,
+    hubspotCrmData, rawSessions, rawEvents, exactCounts,
   } = useInsightsData();
 
   const handleCrmSync = async (leadId: string, type: 'hubspot' | 'salesforce' | 'slack') => {
@@ -348,7 +348,9 @@ export default function AnalyticsDashboardClient() {
                   identifiedLeads: intentData.topLeads.length,
                   identificationRate: rawSessions.length > 0 ? (intentData.topLeads.length / rawSessions.length) * 100 : 0,
                   highIntentLeads: intentData.topLeads.filter(l => l.stage === 'ALTA INTENÇÃO' || l.stage === 'CONCLUÍDO').length,
-                  frictionIndex: uxMetrics.rageClicksCount || 0
+                  frictionIndex: uxMetrics.rageClicksCount || 0,
+                  barrasInstaladas: exactCounts.bookmarklets,
+                  lojasAuditadas: exactCounts.audits
                 }}
                 funnelData={funnelData}
                 topProducts={topProducts}

@@ -94,13 +94,13 @@ export default function LivePresence() {
       }, 6000);
     };
 
-    // First event after 8s
-    const initialTimer = setTimeout(spawnEvent, 8000);
+    // First event after 15s
+    const initialTimer = setTimeout(spawnEvent, 15000);
 
-    // Then every 12-20s
+    // Then every 30s
     const interval = setInterval(() => {
-      if (Math.random() > 0.3) spawnEvent(); // 70% chance each tick
-    }, 14000);
+      if (Math.random() > 0.6) spawnEvent(); // 40% chance each tick
+    }, 30000);
 
     return () => { clearTimeout(initialTimer); clearInterval(interval); };
   }, [inIframe]);
@@ -142,11 +142,11 @@ export default function LivePresence() {
 
     // Spawn ghost cursors periodically
     const interval = setInterval(() => {
-      if (Math.random() > 0.5) spawnCursor();
-    }, 18000);
+      if (Math.random() > 0.8) spawnCursor();
+    }, 45000);
 
-    // First cursor after 12s
-    const timer = setTimeout(spawnCursor, 12000);
+    // First cursor after 20s
+    const timer = setTimeout(spawnCursor, 20000);
 
     return () => { clearInterval(interval); clearTimeout(timer); };
   }, [inIframe]);

@@ -134,6 +134,7 @@ export function useInsightsData() {
   // Raw fetched arrays for real-time local re-calculations
   const [rawSessions, setRawSessions] = useState<any[]>([]);
   const [rawEvents, setRawEvents] = useState<any[]>([]);
+  const [exactCounts, setExactCounts] = useState({ bookmarklets: 0, audits: 0 });
   const [productDict, setProductDict] = useState<Record<string, any>>({});
 
   const [intentData, setIntentData] = useState<{
@@ -368,9 +369,22 @@ export function useInsightsData() {
       const { data: events, error: eventsError } = await eventQuery;
       if (eventsError) throw eventsError;
 
-      // 3. Fetch Product Dictionary
+      // 3. Fetch Exact Counts for Specific Events (ignoring 1000 row limit)
+      let bookmarkletQuery = supabase.from('intent_events').select('id', { count: 'exact', head: true }).eq('event_type', 'bookmarklet_installed');
+      if (startDate) bookmarkletQuery = bookmarkletQuery.gte('created_at', startDate);
+      if (endDate) bookmarkletQuery = bookmarkletQuery.lte('created_at', endDate);
+      const { count: bookmarkletInstallsCount } = await bookmarkletQuery;
+
+      let auditQuery = supabase.from('intent_events').select('id', { count: 'exact', head: true }).eq('event_type', 'dark_pattern_audit');
+      if (startDate) auditQuery = auditQuery.gte('created_at', startDate);
+      if (endDate) auditQuery = auditQuery.lte('created_at', endDate);
+      const { count: storeAuditsCount } = await auditQuery;
+
+      // 4. Fetch Product Dictionary
       const { data: allProducts } = await supabase.from('products').select('id, name, short_name');
       const pDict = (allProducts || []).reduce((acc: any, p: any) => { acc[p.id] = p; return acc; }, {});
+
+      setExactCounts({ bookmarklets: bookmarkletInstallsCount || 0, audits: storeAuditsCount || 0 });
 
       let viewCount = 0, cartCount = 0, checkoutCount = 0, fakeRev = 0;
       let totalDwellTime = 0, dwellEvents = 0, rageClicks = 0;
@@ -475,6 +489,8 @@ export function useInsightsData() {
       setKpis([
         { title: 'Sessões Únicas', value: totalSess.toLocaleString('pt-BR'), change: 'Tempo Real', isPositive: true },
         { title: 'Eventos Capturados', value: totalEvs.toLocaleString('pt-BR'), change: 'Tempo Real', isPositive: true },
+        { title: 'Barras Instaladas', value: (bookmarkletInstallsCount || 0).toLocaleString('pt-BR'), change: 'Extensão', isPositive: (bookmarkletInstallsCount || 0) > 0 },
+        { title: 'Lojas Auditadas', value: (storeAuditsCount || 0).toLocaleString('pt-BR'), change: 'Anti-Truque', isPositive: (storeAuditsCount || 0) > 0 },
         { title: 'Taxa de Conversão Sim', value: `${convRate}%`, change: 'Tempo Real', isPositive: parseFloat(convRate) > 2 },
         { title: 'Receita Induzida Sim', value: `R$ ${fakeRev.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, change: 'Tempo Real', isPositive: fakeRev > 0 },
       ]);
@@ -617,6 +633,7 @@ export function useInsightsData() {
     uxMetrics, ecommerceInsights, intentData,
     ga4Data, posthogData, posthogError, hubspotCrmData, hubspotError,
     rawSessions, rawEvents,
+    exactCounts,
     fetchDashboardData
   };
 }

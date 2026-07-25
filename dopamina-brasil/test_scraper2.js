@@ -14,20 +14,29 @@ async function scrapeBuscape(query) {
     const html = await res.text();
     const $ = cheerio.load(html);
     
-    const firstPriceStr = $('[data-testid="product-card::price"]').first().text();
-    const firstName = $('[data-testid="product-card::name"]').first().text();
+    const firstCard = $('[data-testid="product-card::card"]').first();
+    const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
+    const firstName = firstCard.find('[data-testid="product-card::name"]').text();
+    const firstUrl = firstCard.attr('href');
+    const firstImage = firstCard.find('[data-testid="product-card::image"]').attr('src');
+    
+    // Sometimes the link is an absolute URL, sometimes relative
+    let productUrl = firstUrl;
+    if (productUrl && !productUrl.startsWith('http')) {
+      productUrl = `https://www.buscape.com.br${productUrl}`;
+    }
     
     if (!firstPriceStr) return null;
     
-    // Extract numeric value from "R$ 2.888,88"
     const numericMatch = firstPriceStr.replace(/[^0-9,]/g, '').replace(',', '.');
     const price = parseFloat(numericMatch);
     
-    console.log("Scraped:", firstName, "Price:", price);
-    return { name: firstName, price: price };
+    console.log("Scraped:", firstName, "Price:", price, "URL:", productUrl);
+    return { name: firstName, price: price, url: productUrl };
   } catch (err) {
+    console.error(err);
     return null;
   }
 }
 
-scrapeBuscape("Iphone 13 128gb");
+scrapeBuscape("Iphone 13 128gb").then(console.log);

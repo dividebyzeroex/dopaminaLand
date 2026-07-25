@@ -29,6 +29,8 @@ export default function OverviewTab({ kpis, funnelData, topProducts, timelineDat
   const identificationRate = typeof kpis?.identificationRate === 'number' ? kpis.identificationRate.toFixed(1) : '0';
   const highIntentLeads = kpis?.highIntentLeads ?? 0;
   const frictionIndex = typeof kpis?.frictionIndex === 'number' ? kpis.frictionIndex.toFixed(1) : '0';
+  const barrasInstaladas = kpis?.barrasInstaladas ?? (Array.isArray(kpis) ? (kpis.find((k: any) => k.title?.includes('Barras Instaladas'))?.value || 0) : 0);
+  const lojasAuditadas = kpis?.lojasAuditadas ?? (Array.isArray(kpis) ? (kpis.find((k: any) => k.title?.includes('Lojas Auditadas'))?.value || 0) : 0);
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -44,20 +46,24 @@ export default function OverviewTab({ kpis, funnelData, topProducts, timelineDat
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         {[
           { label: 'Sessões Totais', value: totalSessions, icon: Users, color: 'text-foreground' },
-          { label: 'Leads Identificados', value: identifiedLeads, icon: Mail, color: 'text-indigo-500' },
-          { label: 'Taxa de Identificação', value: `${identificationRate}%`, icon: TrendingUp, color: 'text-blue-500' },
+          { label: 'Dopamina Bars', value: barrasInstaladas, icon: TrendingUp, color: 'text-neon' },
+          { label: 'Lojas Auditadas', value: lojasAuditadas, icon: AlertCircle, color: 'text-emerald-500' },
+          { label: 'Leads (Intent)', value: identifiedLeads, icon: Mail, color: 'text-indigo-500' },
+          { label: 'Conversão', value: `${identificationRate}%`, icon: TrendingUp, color: 'text-blue-500' },
           { label: 'Alta Intenção', value: highIntentLeads, icon: Flame, color: 'text-rose-500' },
-          { label: 'Índice de Fricção', value: `${frictionIndex}%`, icon: AlertCircle, color: 'text-amber-500' }
+          { label: 'Fricção UX', value: `${frictionIndex}%`, icon: AlertCircle, color: 'text-amber-500' }
         ].map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
-            <div key={idx} className="rounded-xl border border-border bg-surface-light p-6 shadow-sm hover:border-white/20 transition-colors">
-              <Icon className="h-6 w-6 text-muted mb-4" />
-              <div className={`text-3xl font-semibold tracking-tight ${kpi.color}`}>{kpi.value}</div>
-              <div className="mt-1 text-xs font-medium text-muted">{kpi.label}</div>
+            <div key={idx} className="rounded-xl border border-border bg-surface-light p-5 shadow-sm hover:border-white/20 transition-colors flex flex-col justify-between">
+              <Icon className="h-5 w-5 text-muted mb-3" />
+              <div>
+                <div className={`text-2xl font-semibold tracking-tight ${kpi.color}`}>{kpi.value}</div>
+                <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-muted">{kpi.label}</div>
+              </div>
             </div>
           );
         })}

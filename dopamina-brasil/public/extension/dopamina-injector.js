@@ -294,36 +294,49 @@
         fetch(`https://www.dopaminado.com.br/api/price-history?q=${encodeURIComponent(productName)}&current_price=${currentPriceNum || ''}`)
           .then(r => r.json())
           .then(data => {
-            if (data.success && data.history) {
-              const minPrice = Math.min(...data.history) * 0.95;
-              const maxPrice = Math.max(...data.history) * 1.05;
-              
-              const barsHtml = data.history.map(p => {
-                const heightPct = ((p - minPrice) / (maxPrice - minPrice)) * 100;
-                return `<div style="flex:1; display:flex; align-items:flex-end; justify-content:center; group relative;">
-                  <div style="width:100%; max-width:6px; background:${data.is_fomo_alert ? '#f97316' : '#22c55e'}; height:${Math.max(10, heightPct)}%; border-radius:2px; opacity:0.8; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="R$ ${p.toFixed(2)}"></div>
-                </div>`;
-              }).join('');
-
+            if (data.success) {
               widget.style.borderColor = data.is_fomo_alert ? '#f97316' : '#22c55e';
+              
+              const formatBRL = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+              
               widget.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                   <div style="display:flex; align-items:center; gap:6px;">
                     <span style="font-size:16px;">${data.is_fomo_alert ? '🚨' : '✅'}</span>
                     <span style="font-size:12px; font-weight:900; color:${data.is_fomo_alert ? '#f97316' : '#22c55e'}; text-transform:uppercase;">
-                      ${data.is_fomo_alert ? 'Alerta de Falsa Escassez' : 'Preço de Mercado Justo'}
+                      ${data.is_fomo_alert ? 'ALERTA DE PREÇO ALTO' : 'PREÇO DE MERCADO JUSTO'}
                     </span>
                   </div>
                   <span style="font-size:10px; font-weight:bold; color:#71717a; background:#18181b; padding:2px 6px; border-radius:4px; border:1px solid #27272a;">Bondfaro Sync</span>
                 </div>
-                <div style="font-size:12px; color:#e4e4e7; line-height:1.4; margin-bottom:16px; font-weight:500;">
+                <div style="font-size:12px; color:#e4e4e7; line-height:1.4; margin-bottom:12px; font-weight:500;">
                   ${data.message}
                 </div>
-                <div style="display:flex; flex-direction:column; gap:4px;">
-                  <div style="font-size:10px; color:#71717a; font-weight:bold;">HISTÓRICO (ÚLTIMOS 30 DIAS)</div>
-                  <div style="height:48px; display:flex; align-items:flex-end; gap:2px; background:rgba(0,0,0,0.2); padding:4px; border-radius:6px; border:1px solid #27272a;">
-                    ${barsHtml}
+                
+                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px; margin-bottom:12px;">
+                  <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px;">
+                    <span style="color:#a1a1aa;">Preço detectado aqui:</span>
+                    <strong style="color:${data.is_fomo_alert ? '#f87171' : '#e4e4e7'}">${data.current_price ? formatBRL(data.current_price) : 'N/A'}</strong>
                   </div>
+                  <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:12px;">
+                    <span style="color:#a1a1aa;">Piso do mercado (Buscapé):</span>
+                    <strong style="color:#4ade80">${formatBRL(data.scraped_price)}</strong>
+                  </div>
+                  
+                  ${data.is_fomo_alert ? `
+                  <div style="margin-top:8px; padding-top:12px; border-top:1px dashed #3f3f46; display:flex; flex-direction:column; gap:8px;">
+                    <span style="font-size:10px; color:#a1a1aa;">Oferta mais barata detectada: <strong style="color:#fff;">${data.scraped_name}</strong></span>
+                    <a href="${data.url}" target="_blank" rel="noopener noreferrer" style="display:block; text-align:center; background:#f97316; color:#fff; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:bold; text-decoration:none; transition:0.2s; box-shadow:0 2px 10px rgba(0,0,0,0.5);">
+                      VER LOJA MAIS BARATA ➔
+                    </a>
+                  </div>
+                  ` : `
+                  <div style="margin-top:8px; padding-top:12px; border-top:1px dashed #3f3f46; display:flex; flex-direction:column; gap:4px; align-items:center;">
+                    <span style="font-size:16px;">🏆</span>
+                    <strong style="color:#22c55e; font-size:12px;">Você já está na melhor oferta!</strong>
+                    <span style="font-size:10px; color:#a1a1aa; text-align:center;">Não encontramos nenhum preço menor que o atual no Buscapé.</span>
+                  </div>
+                  `}
                 </div>
               `;
             } else {

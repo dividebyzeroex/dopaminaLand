@@ -41,8 +41,14 @@ export async function GET(req: NextRequest) {
     const html = await res.text();
     const $ = cheerio.load(html);
 
-    const firstPriceStr = $('[data-testid="product-card::price"]').first().text();
-    const firstName = $('[data-testid="product-card::name"]').first().text();
+    const firstCard = $('[data-testid="product-card::card"]').first();
+    const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
+    const firstName = firstCard.find('[data-testid="product-card::name"]').text();
+    let firstUrl = firstCard.attr('href');
+    
+    if (firstUrl && !firstUrl.startsWith('http')) {
+      firstUrl = `https://www.buscape.com.br${firstUrl}`;
+    }
 
     let scrapedPrice = currentPrice || 100; // fallback
     if (firstPriceStr) {
@@ -52,32 +58,15 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 2. Gerar histórico de 30 dias para o Gráfico (Tendência Realista)
-    // Se o preço raspado for menor que o preço atual, mostramos uma tendência de queda no mercado (provando que comprar agora por impulso é furada)
-    const history = [];
-    const basePrice = scrapedPrice;
-    
-    // Gerar 30 dias de variação (do dia 30 atrás até hoje)
-    for (let i = 29; i >= 0; i--) {
-      // Adiciona ruído de +- 5% no passado, convergindo para o basePrice
-      const noise = 1 + ((Math.random() * 0.1) - 0.05);
-      const pastPrice = basePrice * noise * (1 + (i * 0.002)); 
-      history.push(parseFloat(pastPrice.toFixed(2)));
-    }
-    
-    // O último dia é exatamente o preço real raspado no Buscapé agora
-    history[29] = basePrice;
-
-    // Calcular variação vs preço atual da loja (se fornecido)
-    let message = `O preço real de mercado está em ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(scrapedPrice)}.`;
+    let message = `Encontramos uma oferta mais em conta no mercado.`;
     let isFomoAlert = false;
     
     if (currentPrice && currentPrice > scrapedPrice) {
       const diff = ((currentPrice - scrapedPrice) / currentPrice) * 100;
-      message = `🚨 Cuidado! Este produto está ${diff.toFixed(1)}% mais barato no mercado (${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(scrapedPrice)}). Não caia no FOMO!`;
+      message = `🚨 Cuidado! Este produto está ${diff.toFixed(1)}% mais barato no mercado. Não caia no FOMO!`;
       isFomoAlert = true;
     } else if (currentPrice && currentPrice <= scrapedPrice) {
-      message = `✅ Preço Justo. O valor está alinhado com o piso do mercado (${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(scrapedPrice)}).`;
+      message = `✅ Preço Justo. O valor está alinhado com o piso do mercado.`;
     }
 
     return NextResponse.json({
@@ -85,9 +74,9 @@ export async function GET(req: NextRequest) {
       scraped_name: firstName || query,
       scraped_price: scrapedPrice,
       current_price: currentPrice,
+      url: firstUrl || url, // If we couldn't parse the card, fallback to search url
       is_fomo_alert: isFomoAlert,
-      message,
-      history
+      message
     }, { headers: corsHeaders });
 
   } catch (error: any) {

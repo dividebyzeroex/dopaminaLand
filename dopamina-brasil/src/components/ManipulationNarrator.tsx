@@ -113,7 +113,7 @@ const NARRATOR_LINES: NarratorLine[] = [
 // ─── Component ───
 export default function ManipulationNarrator() {
   const [messages, setMessages] = useState<{ id: number; text: string; technique: string }[]>([]);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState('');
@@ -201,7 +201,7 @@ export default function ManipulationNarrator() {
     let idleTimer: ReturnType<typeof setTimeout>;
     const resetIdle = () => {
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => queueNarration('idle'), 45000);
+      idleTimer = setTimeout(() => queueNarration('idle'), 120000);
     };
 
     window.addEventListener('mousemove', resetIdle);

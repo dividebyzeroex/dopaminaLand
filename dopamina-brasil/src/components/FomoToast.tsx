@@ -82,12 +82,12 @@ export default function FomoToast() {
     // Initial delay before first toast
     const initialTimer = setTimeout(() => {
       triggerRandomToast();
-    }, 5000);
+    }, 15000);
 
-    // Loop interval — AGGRESSIVE: every 10 seconds
+    // Loop interval — Less aggressive: every 45 seconds
     const interval = setInterval(() => {
       triggerRandomToast();
-    }, 10000);
+    }, 45000);
 
     return () => {
       clearTimeout(initialTimer);
