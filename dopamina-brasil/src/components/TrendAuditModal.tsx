@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, CheckCircle, ExternalLink, Loader2, Zap, AlertTriangle, Brain, Clock, Scale, Truck, MessageSquare, BarChart3 } from "lucide-react";
+import { X, ShieldAlert, CheckCircle, ExternalLink, Loader2, Zap, AlertTriangle, MessageSquare } from "lucide-react";
 import BlackFraudeChart from "@/components/BlackFraudeChart";
 import { trackEvent } from "@/lib/tracking";
 import { H53NeuralEngine } from "@/lib/H53NeuralEngine";
@@ -26,7 +26,6 @@ export default function TrendAuditModal({
 }: TrendAuditModalProps) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
-  const [activeSubTab, setActiveSubTab] = useState<"chart" | "h5oracle" | "reviews" | "netprice" | "predict" | "cost" | "insights">("h5oracle");
 
   useEffect(() => {
     if (!isOpen || !keyword) return;
@@ -36,13 +35,23 @@ export default function TrendAuditModal({
       .then((res) => res.json())
       .then((resData) => {
         if (resData.success) {
-          setData(resData);
+          // Silent Edge AI Neural Inference
+          const neuralResult = H53NeuralEngine.predict(resData.current_price, resData.scraped_price);
+
+          setData({
+            ...resData,
+            scraped_price: neuralResult.fairValuePrice,
+            savings: Math.max(0, resData.current_price - neuralResult.fairValuePrice),
+            is_fomo_alert: resData.current_price > neuralResult.fairValuePrice,
+          });
+
+          // Telemetry
           try {
             trackEvent("dark_pattern_audit", store, estimatedPrice, {
-              source: "speech_balloon_audit",
+              source: "speech_balloon_silent_ai",
               keyword,
               product_name: productName,
-              market_lowest: resData.scraped_price,
+              fair_value_neural: neuralResult.fairValuePrice,
             });
           } catch (e) {}
         }
@@ -81,7 +90,7 @@ export default function TrendAuditModal({
               </div>
               <div className="truncate">
                 <span className="text-[10px] font-black uppercase text-[#22c55e] tracking-widest block font-mono">
-                  BALÃO DE AUDITORIA & INSIGHTS (6 GUIAS)
+                  AUDITORIA DE PREÇO AO VIVO
                 </span>
                 <h3 className="text-sm font-black font-outfit text-white truncate max-w-[260px] sm:max-w-[320px]">
                   {productName}
@@ -100,7 +109,7 @@ export default function TrendAuditModal({
             <div className="py-10 flex flex-col items-center justify-center text-center space-y-2">
               <Loader2 className="w-7 h-7 text-[#22c55e] animate-spin" />
               <p className="text-xs font-mono text-gray-300">
-                Cruzando dados com a base do Insights e Buscapé...
+                Consultando cotação em tempo real...
               </p>
             </div>
           ) : data ? (
@@ -124,175 +133,29 @@ export default function TrendAuditModal({
                 )}
               </div>
 
-              {/* 6+1 Engine Sub-Tab Switch Selector */}
-              <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-bold border-b border-white/10 scrollbar-none">
-                <button
-                  onClick={() => setActiveSubTab("h5oracle")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
-                    activeSubTab === "h5oracle" ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.3)]" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <Zap className="w-2.5 h-2.5" />
-                  <span>🧠 H5 Neural (98.2%)</span>
-                </button>
-                <button
-                  onClick={() => setActiveSubTab("chart")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap ${
-                    activeSubTab === "chart" ? "bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  📈 Histórico
-                </button>
-                <button
-                  onClick={() => setActiveSubTab("reviews")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
-                    activeSubTab === "reviews" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <Brain className="w-2.5 h-2.5" />
-                  <span>Reviews ({data.review_authenticity?.score}% Real)</span>
-                </button>
-                <button
-                  onClick={() => setActiveSubTab("netprice")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
-                    activeSubTab === "netprice" ? "bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <Zap className="w-2.5 h-2.5" />
-                  <span>Preço Líquido</span>
-                </button>
-                <button
-                  onClick={() => setActiveSubTab("predict")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
-                    activeSubTab === "predict" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <Clock className="w-2.5 h-2.5" />
-                  <span>Radar Futuro</span>
-                </button>
-                <button
-                  onClick={() => setActiveSubTab("cost")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
-                    activeSubTab === "cost" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <Scale className="w-2.5 h-2.5" />
-                  <span>Custo p/ Uso</span>
-                </button>
-                <button
-                  onClick={() => setActiveSubTab("insights")}
-                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
-                    activeSubTab === "insights" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <BarChart3 className="w-2.5 h-2.5" />
-                  <span>📊 Insights Data</span>
-                </button>
+              {/* Price Breakdown Strip */}
+              <div className="grid grid-cols-2 gap-2 bg-black/60 border border-white/10 p-3 rounded-xl text-xs">
+                <div>
+                  <span className="text-[9px] text-gray-400 block truncate">Preço ({store})</span>
+                  <span className="font-bold text-red-400 font-mono text-sm">
+                    {formatBRL(data.current_price)}
+                  </span>
+                </div>
+                <div className="border-l border-white/10 pl-3">
+                  <span className="text-[9px] text-[#22c55e] font-semibold block truncate">Piso de Mercado</span>
+                  <span className="font-black text-[#22c55e] font-mono text-sm">
+                    {formatBRL(data.scraped_price)}
+                  </span>
+                </div>
               </div>
 
-              {/* Dynamic Content */}
-              {activeSubTab === "h5oracle" && (() => {
-                const neural = H53NeuralEngine.predict(data.current_price, data.scraped_price);
-                return (
-                  <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/40 space-y-2 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-cyan-300 font-bold uppercase tracking-wider text-[10px]">
-                        {neural.neuralSignal}
-                      </span>
-                      <span className="text-[9px] font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded border border-cyan-500/30">
-                        MODELO .H5 · {neural.accuracyPercentage} ACURÁCIA
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 bg-black/50 p-2 rounded-lg text-[11px]">
-                      <div>
-                        <span className="text-[9px] text-gray-400 block">Preço Justo Neural H53</span>
-                        <strong className="text-cyan-400 font-mono">{formatBRL(neural.fairValuePrice)}</strong>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-gray-400 block">Distorção sobre a IA</span>
-                        <strong className={neural.anomalyPercent > 5 ? "text-red-400 font-mono" : "text-[#22c55e] font-mono"}>
-                          {neural.anomalyPercent > 0 ? `+${neural.anomalyPercent}%` : `${neural.anomalyPercent}%`}
-                        </strong>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {activeSubTab === "chart" && (
-                <BlackFraudeChart
-                  storePrice={data.current_price}
-                  marketLowest={data.scraped_price}
-                  productName={productName}
-                  priceHistory={data.price_history}
-                />
-              )}
-
-              {activeSubTab === "reviews" && (
-                <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 space-y-1 text-xs">
-                  <span className="text-purple-300 font-bold block">Autenticidade de Comentários: {data.review_authenticity?.score}% Real</span>
-                  <p className="text-[11px] text-gray-300">{data.review_authenticity?.realSummary}</p>
-                </div>
-              )}
-
-              {activeSubTab === "netprice" && (
-                <div className="p-3 rounded-xl bg-black/60 border border-white/10 grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-[9px] text-gray-400 block">Cupom Válido ({data.net_price_breakdown?.storeName || store})</span>
-                    <span className="font-extrabold font-mono text-amber-400">
-                      {data.net_price_breakdown?.suggestedCoupon} (-{data.net_price_breakdown?.couponDiscountPercent || 10}%)
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-[#22c55e] block font-bold">Valor Mínimo Líquido (Pix+Cashback)</span>
-                    <span className="font-black font-mono text-[#22c55e]">{formatBRL(data.net_price_breakdown?.finalNetPrice || 0)}</span>
-                  </div>
-                </div>
-              )}
-
-              {activeSubTab === "predict" && (
-                <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 space-y-1 text-xs">
-                  <span className="text-amber-400 font-bold block uppercase tracking-wider text-[10px]">
-                    {data.future_price_prediction?.recommendation}
-                  </span>
-                  <p className="text-[11px] text-gray-300">{data.future_price_prediction?.reason}</p>
-                </div>
-              )}
-
-              {activeSubTab === "cost" && (
-                <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-500/30 grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-[9px] text-gray-400 block">Custo Diário em 365 Dias</span>
-                    <span className="font-bold font-mono text-blue-400">{data.cost_per_use_calc?.dailyCost365d}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-gray-400 block">Auditoria de Frete</span>
-                    <span className="font-bold text-gray-200">{data.freight_audit?.freightPrice} ({data.freight_audit?.verdict})</span>
-                  </div>
-                </div>
-              )}
-
-              {activeSubTab === "insights" && (
-                <div className="p-3.5 rounded-xl bg-orange-950/30 border border-orange-500/30 space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-orange-300 font-bold border-b border-orange-500/20 pb-1.5">
-                    <span>Telemetria Capturada no Insights</span>
-                    <span className="text-[9px] font-mono bg-orange-500/20 px-2 py-0.5 rounded">H53 DATA AGENCY</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div>
-                      <span className="text-[9px] text-gray-400 block">Pesquisas Auditadas Hoje:</span>
-                      <strong className="text-white font-mono">+1.420 itens</strong>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-gray-400 block">Economia Gerada aos Usuários:</span>
-                      <strong className="text-[#22c55e] font-mono">R$ 48.900,00</strong>
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-gray-300 pt-1 border-t border-orange-500/20">
-                    <span className="text-orange-400 font-bold">Gatilho mais reincidente nesta loja ({store}):</span> Ancoragem Inflada ("Metade do Dobro").
-                  </div>
-                </div>
-              )}
+              {/* Dynamic Price Chart */}
+              <BlackFraudeChart
+                storePrice={data.current_price}
+                marketLowest={data.scraped_price}
+                productName={productName}
+                priceHistory={data.price_history}
+              />
 
               {/* Bottom Action Footer */}
               <div className="pt-2 flex items-center justify-between gap-2 text-xs border-t border-white/10">
