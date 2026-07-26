@@ -15,6 +15,7 @@ import H53StickerPlayground from "@/components/h53/H53StickerPlayground";
 import LamaLamaHeroHeader from "@/components/h53/LamaLamaHeroHeader";
 import H53ModeSwitcher from "@/components/h53/H53ModeSwitcher";
 import CapabilitiesDraggableSlider from "@/components/h53/CapabilitiesDraggableSlider";
+import H53MobileAppShell from "@/components/h53/mobile/H53MobileAppShell";
 import { h53Audio } from "@/lib/h53AudioEngine";
 import { ArrowRight, Target, Activity, Lock } from "lucide-react";
 import Image from "next/image";
@@ -37,7 +38,12 @@ export default function H53LandingPage() {
   };
 
   return (
-    <div className={`fixed inset-0 overflow-y-auto bg-[#050505] z-[9900] text-white selection:bg-[#ccff00] selection:text-black font-inter scroll-smooth transition-all duration-700 ${getModeStyles()}`}>
+    <div>
+      {/* EXCLUSIVE H53 MOBILE EXECUTIVE APP SHELL (< 768px) */}
+      <H53MobileAppShell />
+
+      {/* DESKTOP LAYOUT (>= 768px) */}
+      <div className={`fixed inset-0 overflow-y-auto bg-[#050505] z-[9900] text-white selection:bg-[#ccff00] selection:text-black font-inter scroll-smooth transition-all duration-700 hidden md:block ${getModeStyles()}`}>
       {/* Interactive Floating Mode Switcher */}
       <H53ModeSwitcher currentMode={currentMode} onModeChange={setCurrentMode} />
 
@@ -346,6 +352,7 @@ export default function H53LandingPage() {
         onClose={() => setIsFormOpen(false)}
         initialUrl={prefilledUrl}
       />
+      </div>
     </div>
   );
 }
