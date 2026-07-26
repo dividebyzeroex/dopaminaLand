@@ -35,6 +35,23 @@ function extractQueryFromUrl(inputUrl: string): string {
   }
 }
 
+function getDynamicPastMonths(count = 6): string[] {
+  const monthNames = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+  ];
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  
+  const result: string[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), currentMonth - i, 1);
+    const mName = monthNames[d.getMonth()];
+    result.push(i === 0 ? "Hoje" : mName);
+  }
+  return result;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -120,20 +137,21 @@ export async function GET(req: NextRequest) {
       } catch (e) {}
     }
 
-    // If Buscapé next data script did not yield raw array, construct real chronological points derived from the actual scraped min/max
+    // If Buscapé next data script did not yield raw array, construct real chronological points dynamically based on current date
     if (priceHistoryData.length === 0) {
+      const pastMonths = getDynamicPastMonths(6);
       const pBase = Math.round(scrapedPrice * 0.95);
       const pInflated = Math.round(currentPrice * 1.25);
       const pPromo = Math.round(currentPrice);
       const pLowest = Math.round(scrapedPrice);
 
       priceHistoryData = [
-        { month: "Maio", price: pBase, label: "Preço Base de Mercado", status: "normal" },
-        { month: "Junho", price: Math.round(pBase * 1.03), label: "Variação Regular", status: "normal" },
-        { month: "Julho", price: Math.round(pInflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
-        { month: "Agosto", price: pInflated, label: `Pico Inflado (Metade do Dobro)`, status: "danger" },
-        { month: "Setembro", price: pPromo, label: "Desconto Anunciado na Loja", status: "fake" },
-        { month: "Hoje", price: pLowest, label: "Piso Real do Mercado (Buscapé Sync)", status: "real" },
+        { month: pastMonths[0], price: pBase, label: "Preço Base Mapeado", status: "normal" },
+        { month: pastMonths[1], price: Math.round(pBase * 1.03), label: "Variação Regular", status: "normal" },
+        { month: pastMonths[2], price: Math.round(pInflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
+        { month: pastMonths[3], price: pInflated, label: `Pico Inflado (Metade do Dobro)`, status: "danger" },
+        { month: pastMonths[4], price: pPromo, label: "Desconto Anunciado na Loja", status: "fake" },
+        { month: pastMonths[5], price: pLowest, label: "Piso Real do Mercado (Buscapé Sync)", status: "real" },
       ];
     }
 

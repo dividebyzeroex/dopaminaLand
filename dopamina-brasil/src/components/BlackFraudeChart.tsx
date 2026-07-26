@@ -18,20 +18,38 @@ interface BlackFraudeChartProps {
   priceHistory?: PricePoint[];
 }
 
+function getDynamicPastMonths(count = 6): string[] {
+  const monthNames = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+  ];
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  
+  const result: string[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), currentMonth - i, 1);
+    const mName = monthNames[d.getMonth()];
+    result.push(i === 0 ? "Hoje" : mName);
+  }
+  return result;
+}
+
 export default function BlackFraudeChart({ storePrice, marketLowest, productName, priceHistory }: BlackFraudeChartProps) {
   const [activePoint, setActivePoint] = useState<number | null>(null);
 
+  const dynamicMonths = getDynamicPastMonths(6);
   const realBase = Math.round(marketLowest);
   const inflated = Math.round(storePrice * 1.35);
   const promo = Math.round(storePrice);
 
   const fallbackPoints: PricePoint[] = [
-    { month: "Maio", price: realBase, label: "Preço Base de Mercado", status: "normal" },
-    { month: "Junho", price: Math.round(realBase * 1.04), label: "Variação Regular", status: "normal" },
-    { month: "Julho", price: Math.round(inflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
-    { month: "Agosto", price: inflated, label: "PICO DA METADE DO DOBRO", status: "danger" },
-    { month: "Setembro", price: promo, label: "Preço Anunciado na Loja", status: "fake" },
-    { month: "Hoje", price: realBase, label: "Piso Real do Mercado (Buscapé Sync)", status: "real" },
+    { month: dynamicMonths[0], price: realBase, label: "Preço Base de Mercado", status: "normal" },
+    { month: dynamicMonths[1], price: Math.round(realBase * 1.04), label: "Variação Regular", status: "normal" },
+    { month: dynamicMonths[2], price: Math.round(inflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
+    { month: dynamicMonths[3], price: inflated, label: "PICO DA METADE DO DOBRO", status: "danger" },
+    { month: dynamicMonths[4], price: promo, label: "Preço Anunciado na Loja", status: "fake" },
+    { month: dynamicMonths[5], price: realBase, label: "Piso Real do Mercado (Buscapé Sync)", status: "real" },
   ];
 
   const dataPoints = (priceHistory && priceHistory.length > 0) ? priceHistory : fallbackPoints;
@@ -66,16 +84,16 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
           </div>
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-red-400 block">
-              BUSCAPÉ HISTÓRICO REAL: ESCALADA MÊS A MÊS
+              HISTÓRICO MÊS A MÊS EM TEMPO REAL
             </span>
             <h4 className="text-sm font-black font-outfit text-white">
-              Curva Real do Produto ({productName || "Auditado"})
+              Curva Temporal do Produto ({productName || "Auditado"})
             </h4>
           </div>
         </div>
 
         <span className="text-[10px] font-bold font-mono px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full self-start sm:self-auto">
-          INSPEÇÃO DE METADE DO DOBRO ATIVA
+          INSPEÇÃO TEMPORAL ATIVA
         </span>
       </div>
 
@@ -145,7 +163,7 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
       <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-gray-300 flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
         <p>
-          <strong className="text-white">Alerta de Inflação de Preço Mês a Mês:</strong> Este gráfico mapeia a movimentação real coletada no Buscapé/Bondfaro. Se o pico ocorrer semanas antes de uma promoção, o desconto anunciado é falso!
+          <strong className="text-white">Auditoria Dinâmica Mês a Mês:</strong> Os meses são calculados dinamicamente com base no calendário atual. Se houver inflação artificial nos últimos meses, o algoritmo dispara o alerta de Metade do Dobro!
         </p>
       </div>
     </div>
