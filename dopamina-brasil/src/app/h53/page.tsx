@@ -10,15 +10,19 @@ import CaseStudiesSection from "@/components/h53/CaseStudiesSection";
 import InsideTheLabSection from "@/components/h53/InsideTheLabSection";
 import ParticleCanvasBg from "@/components/h53/ParticleCanvasBg";
 import AwwwardsBadge from "@/components/h53/AwwwardsBadge";
-import KineticTextReveal from "@/components/h53/KineticTextReveal";
 import NeuromarketingRoiCalculator from "@/components/h53/NeuromarketingRoiCalculator";
+import H53StickerPlayground from "@/components/h53/H53StickerPlayground";
+import LamaLamaHeroHeader from "@/components/h53/LamaLamaHeroHeader";
+import H53ModeSwitcher from "@/components/h53/H53ModeSwitcher";
+import CapabilitiesDraggableSlider from "@/components/h53/CapabilitiesDraggableSlider";
 import { h53Audio } from "@/lib/h53AudioEngine";
-import { ArrowRight, BrainCircuit, Activity, Eye, Zap, Target, LineChart, Lock } from "lucide-react";
+import { ArrowRight, Target, Activity, Lock } from "lucide-react";
 import Image from "next/image";
 
 export default function H53LandingPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [prefilledUrl, setPrefilledUrl] = useState("");
+  const [currentMode, setCurrentMode] = useState<"standard" | "cyber" | "chaos">("standard");
 
   const handleOpenForm = (url: string = "") => {
     h53Audio.playClick();
@@ -26,8 +30,17 @@ export default function H53LandingPage() {
     setIsFormOpen(true);
   };
 
+  const getModeStyles = () => {
+    if (currentMode === "cyber") return "hue-rotate-90 saturate-150";
+    if (currentMode === "chaos") return "contrast-125 saturate-200";
+    return "";
+  };
+
   return (
-    <div className="fixed inset-0 overflow-y-auto bg-[#050505] z-[9900] text-white selection:bg-[#ccff00] selection:text-black font-inter scroll-smooth">
+    <div className={`fixed inset-0 overflow-y-auto bg-[#050505] z-[9900] text-white selection:bg-[#ccff00] selection:text-black font-inter scroll-smooth transition-all duration-700 ${getModeStyles()}`}>
+      {/* Interactive Floating Mode Switcher */}
+      <H53ModeSwitcher currentMode={currentMode} onModeChange={setCurrentMode} />
+
       {/* Interactive 2D/3D Particle Mesh Background */}
       <ParticleCanvasBg />
 
@@ -41,9 +54,12 @@ export default function H53LandingPage() {
         <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[60%] rounded-full bg-blue-900/10 blur-[150px]" />
       </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden px-6 pt-20 pb-12">
-        <div className="absolute inset-0 z-0">
+      {/* Hero Section with Lama Lama Style interactive Header & Draggable Playground */}
+      <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden px-6 pt-24 pb-12">
+        {/* Interactive Physics Drag & Drop Stickers */}
+        <H53StickerPlayground />
+
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <Image 
             src="/h53/hero-bg.png" 
             alt="Data Intent Abstract" 
@@ -60,17 +76,15 @@ export default function H53LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="text-[#ccff00] font-bold tracking-[0.3em] text-xs md:text-sm uppercase mb-6 flex items-center gap-3">
+            <h2 className="text-[#ccff00] font-bold tracking-[0.3em] text-xs md:text-sm uppercase mb-4 flex items-center gap-3">
               <span className="w-8 h-[1px] bg-[#ccff00]"></span>
               H53 Data Intent Agency
               <span className="w-8 h-[1px] bg-[#ccff00]"></span>
             </h2>
           </motion.div>
 
-          <KineticTextReveal
-            text="WE DECODE HUMAN INTENT."
-            className="text-5xl md:text-[7.5rem] font-black font-outfit tracking-tighter leading-[0.85] mb-8 text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-300 to-gray-600"
-          />
+          {/* Lama Lama 3D Tilt Header */}
+          <LamaLamaHeroHeader />
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -222,91 +236,11 @@ export default function H53LandingPage() {
         </div>
       </section>
 
+      {/* Draggable Capabilities Slider (Lama Lama Style) */}
+      <CapabilitiesDraggableSlider />
+
       {/* Case Studies Section */}
       <CaseStudiesSection />
-
-      {/* Capabilities Section */}
-      <section className="relative py-32 px-6">
-        <div className="absolute inset-0 z-0">
-          <Image 
-            src="/h53/services-bg.png" 
-            alt="Glassmorphism Texture" 
-            fill 
-            className="object-cover opacity-[0.15]"
-          />
-        </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <ScrollReveal>
-            <div className="flex items-center gap-4 mb-16">
-              <div className="w-12 h-[1px] bg-white/20"></div>
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400">Core Capabilities</h2>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1 */}
-            <ScrollReveal delay={0.1}>
-              <div
-                onMouseEnter={() => h53Audio.playHover()}
-                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#ccff00]/0 to-[#ccff00]/0 group-hover:from-[#ccff00]/5 transition-colors duration-500" />
-                <BrainCircuit className="w-10 h-10 text-gray-500 group-hover:text-[#ccff00] transition-colors duration-500 mb-8" />
-                <div>
-                  <h3 className="text-2xl font-bold font-outfit mb-3">Neuromarketing <br/> Architecture</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">Desenho de jornadas baseadas em picos de dopamina e heurísticas de decisão irracional.</p>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Card 2 */}
-            <ScrollReveal delay={0.2}>
-              <div
-                onMouseEnter={() => h53Audio.playHover()}
-                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#a855f7]/0 to-[#a855f7]/0 group-hover:from-[#a855f7]/5 transition-colors duration-500" />
-                <LineChart className="w-10 h-10 text-gray-500 group-hover:text-[#a855f7] transition-colors duration-500 mb-8" />
-                <div>
-                  <h3 className="text-2xl font-bold font-outfit mb-3">Predictive <br/> Data Intent</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">Previsão algorítmica de churn e probabilidade de conversão cruzando 40+ variáveis de navegação.</p>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Card 3 */}
-            <ScrollReveal delay={0.3}>
-              <div
-                onMouseEnter={() => h53Audio.playHover()}
-                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 transition-colors duration-500" />
-                <Eye className="w-10 h-10 text-gray-500 group-hover:text-blue-500 transition-colors duration-500 mb-8" />
-                <div>
-                  <h3 className="text-2xl font-bold font-outfit mb-3">Dark Pattern <br/> Auditing</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">Engenharia reversa das táticas de manipulação psicológica utilizadas por grandes corporações.</p>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Card 4 */}
-            <ScrollReveal delay={0.4}>
-              <div
-                onMouseEnter={() => h53Audio.playHover()}
-                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/0 group-hover:from-red-500/5 transition-colors duration-500" />
-                <Zap className="w-10 h-10 text-gray-500 group-hover:text-red-500 transition-colors duration-500 mb-8" />
-                <div>
-                  <h3 className="text-2xl font-bold font-outfit mb-3">Zero-Friction <br/> Checkout</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">Otimização impiedosa de formulários e pagamentos para destruir o abandono de carrinho.</p>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
 
       {/* Social Proof / Authority Section */}
       <section className="py-24 border-y border-white/10 bg-[#050505] relative overflow-hidden">
@@ -376,7 +310,7 @@ export default function H53LandingPage() {
 
           <ScrollReveal delay={0.1}>
             <h2 className="text-5xl md:text-8xl font-black font-outfit tracking-tighter mb-8 leading-[0.9]">
-              NÃO DEIXE A CONCORRÊNCIA <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">HACKEAR SEU CLIENTE ANTES DE VOCÊ.</span>
+              NÃO DEIXE A CONCORRÊNCIA <br/> <span className="text-transparent bg-clip-text bg-[#ccff00]">HACKEAR SEU CLIENTE ANTES DE VOCÊ.</span>
             </h2>
           </ScrollReveal>
           
