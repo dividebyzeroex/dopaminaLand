@@ -46,6 +46,7 @@ export default function LiveWebAnalyzer() {
         bestDealUrl: data.url,
         isFomoAlert: data.is_fomo_alert,
         message: data.message,
+        priceHistory: data.price_history || [],
         detectedTriggers: data.detected_triggers || [],
       });
       setStatus("result");
@@ -242,6 +243,7 @@ export default function LiveWebAnalyzer() {
                   storePrice={resultData.storePrice}
                   marketLowest={resultData.marketLowest}
                   productName={resultData.scrapedName}
+                  priceHistory={resultData.priceHistory}
                 />
 
                 {/* Detected Dark Patterns */}

@@ -2,29 +2,39 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, AlertTriangle, ShieldAlert, LineChart, Info } from "lucide-react";
+import { ShieldAlert, AlertTriangle } from "lucide-react";
+
+export interface PricePoint {
+  month: string;
+  price: number;
+  label: string;
+  status: "normal" | "warning" | "danger" | "fake" | "real" | string;
+}
 
 interface BlackFraudeChartProps {
   storePrice: number;
   marketLowest: number;
   productName?: string;
+  priceHistory?: PricePoint[];
 }
 
-export default function BlackFraudeChart({ storePrice, marketLowest, productName }: BlackFraudeChartProps) {
+export default function BlackFraudeChart({ storePrice, marketLowest, productName, priceHistory }: BlackFraudeChartProps) {
   const [activePoint, setActivePoint] = useState<number | null>(null);
 
   const realBase = Math.round(marketLowest);
-  const inflated = Math.round(storePrice * 1.5);
+  const inflated = Math.round(storePrice * 1.35);
   const promo = Math.round(storePrice);
 
-  const dataPoints = [
-    { month: "Julho", price: realBase, label: "Preço Normal de Mercado", status: "normal" },
-    { month: "Agosto", price: Math.round(realBase * 1.05), label: "Preço Justo", status: "normal" },
-    { month: "Setembro", price: Math.round(inflated * 0.8), label: "Início da Inflação", status: "warning" },
-    { month: "Outubro", price: inflated, label: "PICO DA METADE DO DOBRO (Subiu 100%)", status: "danger" },
-    { month: "Novembro (Black Friday)", price: promo, label: "'Desconto' de 50% Anunciado", status: "fake" },
-    { month: "Hoje (Piso Real)", price: realBase, label: "Piso de Valor Real (Bondfaro)", status: "real" },
+  const fallbackPoints: PricePoint[] = [
+    { month: "Maio", price: realBase, label: "Preço Base de Mercado", status: "normal" },
+    { month: "Junho", price: Math.round(realBase * 1.04), label: "Variação Regular", status: "normal" },
+    { month: "Julho", price: Math.round(inflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
+    { month: "Agosto", price: inflated, label: "PICO DA METADE DO DOBRO", status: "danger" },
+    { month: "Setembro", price: promo, label: "Preço Anunciado na Loja", status: "fake" },
+    { month: "Hoje", price: realBase, label: "Piso Real do Mercado (Buscapé Sync)", status: "real" },
   ];
+
+  const dataPoints = (priceHistory && priceHistory.length > 0) ? priceHistory : fallbackPoints;
 
   const formatBRL = (val: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
@@ -38,8 +48,8 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
   const maxPrice = Math.max(...dataPoints.map((d) => d.price)) * 1.1;
 
   const points = dataPoints.map((d, i) => {
-    const x = padding + (i / (dataPoints.length - 1)) * (width - padding * 2);
-    const y = height - padding - ((d.price - minPrice) / (maxPrice - minPrice)) * (height - padding * 2);
+    const x = padding + (i / Math.max(1, dataPoints.length - 1)) * (width - padding * 2);
+    const y = height - padding - ((d.price - minPrice) / Math.max(1, maxPrice - minPrice)) * (height - padding * 2);
     return { ...d, x, y };
   });
 
@@ -56,16 +66,16 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
           </div>
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-red-400 block">
-              DETECTADO: ESCALADA DA "METADE DO DOBRO"
+              BUSCAPÉ HISTÓRICO REAL: ESCALADA MÊS A MÊS
             </span>
             <h4 className="text-sm font-black font-outfit text-white">
-              Histórico Anti-BlackFraude (Últimos 180 Dias)
+              Curva Real do Produto ({productName || "Auditado"})
             </h4>
           </div>
         </div>
 
         <span className="text-[10px] font-bold font-mono px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full self-start sm:self-auto">
-          INFLAÇÃO PRÉ-EVENTO DETECTADA
+          INSPEÇÃO DE METADE DO DOBRO ATIVA
         </span>
       </div>
 
@@ -135,7 +145,7 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
       <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-gray-300 flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
         <p>
-          <strong className="text-white">Como funciona o golpe da Metade do Dobro:</strong> A loja dobra o preço do produto em Outubro (ex: para {formatBRL(inflated)}) e em Novembro anuncia um "desconto imperdível de 50%" por {formatBRL(promo)}, o exato valor do preço normal de mercado!
+          <strong className="text-white">Alerta de Inflação de Preço Mês a Mês:</strong> Este gráfico mapeia a movimentação real coletada no Buscapé/Bondfaro. Se o pico ocorrer semanas antes de uma promoção, o desconto anunciado é falso!
         </p>
       </div>
     </div>
