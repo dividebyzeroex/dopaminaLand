@@ -1,45 +1,28 @@
 {
   "model_name": "h53_price_oracle",
-  "version": "1.0.0-h5",
-  "framework": "TensorFlow/Keras HDF5",
-  "accuracy": 0.9824,
-  "accuracy_percentage": "98.2%",
-  "r2_score": 0.9876,
-  "input_shape": [
-    7
-  ],
-  "layers": [
-    {
-      "name": "input_layer",
-      "units": 7,
-      "activation": "linear"
-    },
-    {
-      "name": "hidden_layer_1",
-      "units": 128,
-      "activation": "relu"
-    },
-    {
-      "name": "hidden_layer_2",
-      "units": 64,
-      "activation": "relu"
-    },
-    {
-      "name": "hidden_layer_3",
-      "units": 32,
-      "activation": "relu"
-    },
-    {
-      "name": "output_fair_value",
-      "units": 1,
-      "activation": "linear"
-    },
-    {
-      "name": "output_fomo_alert",
-      "units": 1,
-      "activation": "sigmoid"
-    }
-  ],
+  "version": "2.4.0-h5-gbc-audited",
   "trained_samples": 50000,
-  "created_at": "2026-07-26T19:09:55Z"
+  "train_samples": 40000,
+  "test_samples": 10000,
+  "accuracy": 0.9903,
+  "accuracy_percentage": "99.03%",
+  "precision": 0.9911,
+  "recall": 0.9952,
+  "f1_score": 0.9932,
+  "confusion_matrix": {
+    "true_negatives": 2870,
+    "false_positives": 63,
+    "false_negatives": 34,
+    "true_positives": 7033
+  },
+  "feature_importances": {
+    "Store Price (R$)": 0.3347,
+    "Market Lowest (R$)": 0.4407,
+    "Month (1-12)": 0.0005,
+    "Days Launch": 0.0008,
+    "Bot Review %": 0.2214,
+    "Freight (R$)": 0.0012,
+    "Trust Score": 0.0007
+  },
+  "created_at": "2026-07-26T19:14:57Z"
 }
