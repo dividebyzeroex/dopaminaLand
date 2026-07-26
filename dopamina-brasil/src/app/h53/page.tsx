@@ -1,12 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/h53/ScrollReveal";
 import MagneticButton from "@/components/h53/MagneticButton";
+import UrlScannerWidget from "@/components/h53/UrlScannerWidget";
+import MultiStepFormModal from "@/components/h53/MultiStepFormModal";
+import CaseStudiesSection from "@/components/h53/CaseStudiesSection";
+import InsideTheLabSection from "@/components/h53/InsideTheLabSection";
 import { ArrowRight, BrainCircuit, Activity, Eye, Zap, Target, LineChart, Lock } from "lucide-react";
 import Image from "next/image";
 
 export default function H53LandingPage() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [prefilledUrl, setPrefilledUrl] = useState("");
+
+  const handleOpenForm = (url: string = "") => {
+    setPrefilledUrl(url);
+    setIsFormOpen(true);
+  };
+
   return (
     <div className="fixed inset-0 overflow-y-auto bg-[#050505] z-[9900] text-white selection:bg-[#ccff00] selection:text-black font-inter scroll-smooth">
       {/* Background Ambient Glows */}
@@ -17,7 +30,7 @@ export default function H53LandingPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden px-6 pt-20">
+      <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden px-6 pt-20 pb-12">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/h53/hero-bg.png" 
@@ -29,7 +42,7 @@ export default function H53LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-[#050505]/80 to-[#050505]" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto flex flex-col items-center text-center mt-auto mb-20">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col items-center text-center mt-auto mb-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -56,7 +69,7 @@ export default function H53LandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="text-gray-400 text-lg md:text-2xl max-w-3xl mb-12 font-light"
+            className="text-gray-400 text-lg md:text-2xl max-w-3xl mb-8 font-light"
           >
             A H53 não olha para os dados do passado. Nós antecipamos o comportamento futuro através de <strong className="text-white font-medium">análise preditiva</strong> e <strong className="text-white font-medium">arquitetura de neuromarketing</strong> para escalar o LTV da sua operação.
           </motion.p>
@@ -65,15 +78,19 @@ export default function H53LandingPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.8, type: "spring", stiffness: 100 }}
+            className="mb-8"
           >
-            <MagneticButton>
-              <a href="#consultoria" className="group relative px-8 py-4 md:px-10 md:py-5 bg-white text-black font-bold text-sm uppercase tracking-widest rounded-full overflow-hidden flex items-center gap-3">
+            <MagneticButton onClick={() => handleOpenForm("")}>
+              <div className="group relative px-8 py-4 md:px-10 md:py-5 bg-white text-black font-bold text-sm uppercase tracking-widest rounded-full overflow-hidden flex items-center gap-3">
                 <span className="relative z-10">Aplicar para Consultoria</span>
                 <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 <div className="absolute inset-0 bg-[#ccff00] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-              </a>
+              </div>
             </MagneticButton>
           </motion.div>
+
+          {/* Interactive URL Scanner Component */}
+          <UrlScannerWidget onOpenForm={(url) => handleOpenForm(url)} />
         </div>
 
         {/* Ticker Bar */}
@@ -129,7 +146,10 @@ export default function H53LandingPage() {
         </div>
       </section>
 
-      {/* The Methodology Section (New) */}
+      {/* Inside the Lab Section */}
+      <InsideTheLabSection />
+
+      {/* The Methodology Section */}
       <section className="relative py-32 px-6 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image 
@@ -188,6 +208,9 @@ export default function H53LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Case Studies Section */}
+      <CaseStudiesSection />
 
       {/* Capabilities Section */}
       <section className="relative py-32 px-6">
@@ -339,12 +362,12 @@ export default function H53LandingPage() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.3}>
-            <MagneticButton>
-              <a href="mailto:contato@h53.com.br?subject=Aplicação de Consultoria - H53" className="inline-flex relative px-12 py-6 bg-white text-black font-black text-sm uppercase tracking-[0.2em] rounded-full overflow-hidden items-center gap-4 group">
+            <MagneticButton onClick={() => handleOpenForm("")}>
+              <div className="inline-flex relative px-12 py-6 bg-white text-black font-black text-sm uppercase tracking-[0.2em] rounded-full overflow-hidden items-center gap-4 group cursor-pointer">
                 <span className="relative z-10">INICIAR PROTOCOLO</span>
                 <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 <div className="absolute inset-0 bg-[#ccff00] scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
-              </a>
+              </div>
             </MagneticButton>
           </ScrollReveal>
         </div>
@@ -354,7 +377,13 @@ export default function H53LandingPage() {
           <span>CONFIDENTIAL INTELLECTUAL PROPERTY</span>
         </div>
       </section>
+
+      {/* Multi-Step Form Modal */}
+      <MultiStepFormModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        initialUrl={prefilledUrl}
+      />
     </div>
   );
 }
-
