@@ -1,6 +1,7 @@
 "use client";
 
 import { Home, Zap, ShoppingBag, Trophy, User } from "lucide-react";
+import { mobileEffects } from "@/lib/mobileEffects";
 
 interface MobileBottomNavProps {
   activeTab: "home" | "feed" | "cart" | "ranking" | "profile";
@@ -36,10 +37,13 @@ export default function MobileBottomNav({ activeTab, onTabChange, cartCount }: M
             return (
               <button
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => {
+                  mobileEffects.trigger("dopamine");
+                  onTabChange(tab.id);
+                }}
                 className="relative -top-4 flex flex-col items-center justify-center focus:outline-none"
               >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#ccff00] p-0.5 shadow-[0_0_20px_rgba(204,255,0,0.5)] active:scale-95 transition-transform">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#ccff00] p-0.5 shadow-[0_0_20px_rgba(204,255,0,0.5)] active:scale-90 transition-transform">
                   <div className="w-full h-full rounded-full bg-[#0a0a0f] flex items-center justify-center text-[#ccff00]">
                     <Zap className="w-6 h-6 animate-pulse" />
                   </div>
@@ -54,8 +58,11 @@ export default function MobileBottomNav({ activeTab, onTabChange, cartCount }: M
           return (
             <button
               key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`relative flex flex-col items-center py-1 px-3 transition-colors ${
+              onClick={() => {
+                mobileEffects.trigger("tab");
+                onTabChange(tab.id);
+              }}
+              className={`relative flex flex-col items-center py-1 px-3 transition-colors active:scale-90 ${
                 isActive ? "text-[#ccff00]" : "text-gray-400 hover:text-gray-200"
               }`}
             >

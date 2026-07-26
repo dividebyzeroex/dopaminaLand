@@ -1,9 +1,8 @@
-"use client";
-
 import { useState } from "react";
 import { Product } from "@/types";
 import { Zap, Heart, Share2, ShoppingBag, Eye, Flame } from "lucide-react";
 import Image from "next/image";
+import { mobileEffects } from "@/lib/mobileEffects";
 
 interface MobileStoriesFeedProps {
   products: Product[];
@@ -79,7 +78,10 @@ export default function MobileStoriesFeed({ products, onQuickBuy }: MobileStorie
             {/* Right Side Action Dock */}
             <div className="absolute right-4 bottom-32 z-20 flex flex-col items-center gap-5">
               <button
-                onClick={() => toggleLike(product.id)}
+                onClick={() => {
+                  mobileEffects.trigger("pop");
+                  toggleLike(product.id);
+                }}
                 className="flex flex-col items-center gap-1 group"
               >
                 <div
@@ -96,7 +98,10 @@ export default function MobileStoriesFeed({ products, onQuickBuy }: MobileStorie
                 </span>
               </button>
 
-              <button className="flex flex-col items-center gap-1 group">
+              <button
+                onClick={() => mobileEffects.trigger("pop")}
+                className="flex flex-col items-center gap-1 group"
+              >
                 <div className="w-12 h-12 rounded-full bg-black/50 border border-white/20 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform">
                   <Share2 className="w-5 h-5" />
                 </div>
@@ -127,7 +132,10 @@ export default function MobileStoriesFeed({ products, onQuickBuy }: MobileStorie
               </div>
 
               <button
-                onClick={() => onQuickBuy(product)}
+                onClick={() => {
+                  mobileEffects.trigger("dopamine");
+                  onQuickBuy(product);
+                }}
                 className="w-full py-3.5 bg-[#ccff00] text-black font-black text-xs uppercase tracking-widest rounded-xl shadow-[0_0_25px_rgba(204,255,0,0.5)] active:scale-95 transition-transform flex items-center justify-center gap-2"
               >
                 <Zap className="w-4 h-4 fill-current" />

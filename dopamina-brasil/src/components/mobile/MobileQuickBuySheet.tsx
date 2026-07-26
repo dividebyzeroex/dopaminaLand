@@ -1,9 +1,8 @@
-"use client";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/types";
 import { X, Zap, ShieldCheck, ShoppingBag, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { mobileEffects } from "@/lib/mobileEffects";
 
 interface MobileQuickBuySheetProps {
   product: Product | null;
@@ -87,6 +86,7 @@ export default function MobileQuickBuySheet({ product, isOpen, onClose, onConfir
 
           <button
             onClick={() => {
+              mobileEffects.trigger("buy");
               onConfirmBuy(product);
               onClose();
             }}
