@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 const SwipeMode = dynamic(() => import('@/components/SwipeMode'), { ssr: false });
 import MobileAppShell from '@/components/mobile/MobileAppShell';
 import LiveWebAnalyzer from '@/components/LiveWebAnalyzer';
+import TrendingProductsShowcase from '@/components/TrendingProductsShowcase';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -165,6 +166,11 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             <LiveWebAnalyzer />
           </div>
           
+        </div>
+
+        {/* Live E-Commerce Trends Showcase */}
+        <div className="px-4 sm:px-6 relative z-10 pb-8">
+          <TrendingProductsShowcase />
         </div>
       </section>
 
