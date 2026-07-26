@@ -123,15 +123,15 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
           
           {/* Left Text Content */}
           <div className="flex-1 text-center lg:text-left z-10">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#f97316]/30 bg-[#f97316]/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-[#f97316] mb-6 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
-              🚀 Novo Anti-FOMO Liberado
+            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-red-400 mb-6 shadow-[0_0_20px_rgba(239,68,68,0.25)] animate-pulse">
+              🛡️ Proteção Anti-BlackFraude 2026 Ativa
             </span>
             <h1 className="font-[var(--font-display)] text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight text-white mb-6">
-              Vença os e-commerces no<br className="hidden lg:block"/>
-              <span className="bg-gradient-to-r from-[#22c55e] to-[#f97316] bg-clip-text text-transparent drop-shadow-sm"> próprio jogo deles.</span>
+              Não pague mais a<br className="hidden lg:block"/>
+              <span className="bg-gradient-to-r from-[#ef4444] via-[#f97316] to-[#22c55e] bg-clip-text text-transparent drop-shadow-sm"> metade do dobro.</span>
             </h1>
             <p className="text-base sm:text-lg text-[#a1a1aa] mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
-              Conheça a <strong className="text-white">Dopamina Bar</strong>. Um plugin ultraleve que intercepta gatilhos de Escassez Falsa na Amazon e Mercado Livre, revelando se o desconto é real ou pura manipulação psicológica.
+              A <strong className="text-white">Dopamina Bar & Analisador ao Vivo</strong> intercepta a inflação artificial de preços praticada pelos e-commerces semanas antes da Black Friday. Audite qualquer produto ao vivo no gráfico abaixo!
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">

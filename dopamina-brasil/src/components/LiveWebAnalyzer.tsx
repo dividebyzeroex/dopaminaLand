@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, AlertTriangle, ArrowRight, Zap, ShieldAlert, ExternalLink, CheckCircle } from "lucide-react";
 import { trackEvent } from "@/lib/tracking";
+import BlackFraudeChart from "@/components/BlackFraudeChart";
 
 export default function LiveWebAnalyzer() {
   const [urlInput, setUrlInput] = useState("");
@@ -235,6 +236,13 @@ export default function LiveWebAnalyzer() {
                     </p>
                   </div>
                 </div>
+
+                {/* Anti-BlackFraude 180-Day Price History Chart */}
+                <BlackFraudeChart
+                  storePrice={resultData.storePrice}
+                  marketLowest={resultData.marketLowest}
+                  productName={resultData.scrapedName}
+                />
 
                 {/* Detected Dark Patterns */}
                 <div className="space-y-3">
