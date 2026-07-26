@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, CheckCircle, ExternalLink, Loader2, Zap, AlertTriangle, Brain, Clock, Scale, Truck, MessageSquare } from "lucide-react";
+import { X, ShieldAlert, CheckCircle, ExternalLink, Loader2, Zap, AlertTriangle, Brain, Clock, Scale, Truck, MessageSquare, BarChart3 } from "lucide-react";
 import BlackFraudeChart from "@/components/BlackFraudeChart";
 import { trackEvent } from "@/lib/tracking";
 
@@ -25,7 +25,7 @@ export default function TrendAuditModal({
 }: TrendAuditModalProps) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
-  const [activeSubTab, setActiveSubTab] = useState<"chart" | "reviews" | "netprice" | "predict" | "cost">("chart");
+  const [activeSubTab, setActiveSubTab] = useState<"chart" | "reviews" | "netprice" | "predict" | "cost" | "insights">("chart");
 
   useEffect(() => {
     if (!isOpen || !keyword) return;
@@ -58,7 +58,7 @@ export default function TrendAuditModal({
   return (
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md font-inter"
         onClick={onClose}
       >
         {/* Floating Speech Bubble Card */}
@@ -67,7 +67,7 @@ export default function TrendAuditModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 15 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg bg-[#0e0e14]/95 border border-[#22c55e]/30 rounded-3xl p-5 shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(34,197,94,0.15)] text-white space-y-3.5 font-inter backdrop-blur-2xl overflow-hidden"
+          className="relative w-full max-w-lg bg-[#0e0e14]/95 border border-[#22c55e]/30 rounded-3xl p-5 shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_40px_rgba(34,197,94,0.15)] text-white space-y-3.5 backdrop-blur-2xl overflow-hidden"
         >
           {/* Ambient Glow */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-[#22c55e]/10 blur-[80px] rounded-full pointer-events-none" />
@@ -80,7 +80,7 @@ export default function TrendAuditModal({
               </div>
               <div className="truncate">
                 <span className="text-[10px] font-black uppercase text-[#22c55e] tracking-widest block font-mono">
-                  BALÃO DE AUDITORIA (5 MOTORES)
+                  BALÃO DE AUDITORIA & INSIGHTS (6 GUIAS)
                 </span>
                 <h3 className="text-sm font-black font-outfit text-white truncate max-w-[260px] sm:max-w-[320px]">
                   {productName}
@@ -99,7 +99,7 @@ export default function TrendAuditModal({
             <div className="py-10 flex flex-col items-center justify-center text-center space-y-2">
               <Loader2 className="w-7 h-7 text-[#22c55e] animate-spin" />
               <p className="text-xs font-mono text-gray-300">
-                Processando 5 vetores de inteligência...
+                Cruzando dados com a base do Insights e Buscapé...
               </p>
             </div>
           ) : data ? (
@@ -123,7 +123,7 @@ export default function TrendAuditModal({
                 )}
               </div>
 
-              {/* 5 Engine Sub-Tab Selector */}
+              {/* 6 Engine Sub-Tab Switch Selector */}
               <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-bold border-b border-white/10 scrollbar-none">
                 <button
                   onClick={() => setActiveSubTab("chart")}
@@ -159,6 +159,24 @@ export default function TrendAuditModal({
                 >
                   <Clock className="w-2.5 h-2.5" />
                   <span>Radar Futuro</span>
+                </button>
+                <button
+                  onClick={() => setActiveSubTab("cost")}
+                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
+                    activeSubTab === "cost" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  <Scale className="w-2.5 h-2.5" />
+                  <span>Custo p/ Uso</span>
+                </button>
+                <button
+                  onClick={() => setActiveSubTab("insights")}
+                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
+                    activeSubTab === "insights" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  <BarChart3 className="w-2.5 h-2.5" />
+                  <span>📊 Insights Data</span>
                 </button>
               </div>
 
@@ -198,6 +216,41 @@ export default function TrendAuditModal({
                     {data.future_price_prediction?.recommendation}
                   </span>
                   <p className="text-[11px] text-gray-300">{data.future_price_prediction?.reason}</p>
+                </div>
+              )}
+
+              {activeSubTab === "cost" && (
+                <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-500/30 grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-[9px] text-gray-400 block">Custo Diário em 365 Dias</span>
+                    <span className="font-bold font-mono text-blue-400">{data.cost_per_use_calc?.dailyCost365d}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] text-gray-400 block">Auditoria de Frete</span>
+                    <span className="font-bold text-gray-200">{data.freight_audit?.freightPrice} ({data.freight_audit?.verdict})</span>
+                  </div>
+                </div>
+              )}
+
+              {activeSubTab === "insights" && (
+                <div className="p-3.5 rounded-xl bg-orange-950/30 border border-orange-500/30 space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-orange-300 font-bold border-b border-orange-500/20 pb-1.5">
+                    <span>Telemetria Capturada no Insights</span>
+                    <span className="text-[9px] font-mono bg-orange-500/20 px-2 py-0.5 rounded">H53 DATA AGENCY</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-[9px] text-gray-400 block">Pesquisas Auditadas Hoje:</span>
+                      <strong className="text-white font-mono">+1.420 itens</strong>
+                    </div>
+                    <div>
+                      <span className="text-[9px] text-gray-400 block">Economia Gerada aos Usuários:</span>
+                      <strong className="text-[#22c55e] font-mono">R$ 48.900,00</strong>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-gray-300 pt-1 border-t border-orange-500/20">
+                    <span className="text-orange-400 font-bold">Gatilho mais reincidente nesta loja ({store}):</span> Ancoragem Inflada ("Metade do Dobro").
+                  </div>
                 </div>
               )}
 
