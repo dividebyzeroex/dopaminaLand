@@ -1,16 +1,16 @@
 "use client";
 
-import { Home, Zap, ShoppingBag, Trophy, ShieldAlert } from "lucide-react";
+import { Home, Zap, ShoppingBag, Trophy, ShieldAlert, BarChart3 } from "lucide-react";
 import { mobileEffects } from "@/lib/mobileEffects";
 
 interface MobileBottomNavProps {
-  activeTab: "home" | "analyzer" | "feed" | "cart" | "ranking";
-  onTabChange: (tab: "home" | "analyzer" | "feed" | "cart" | "ranking") => void;
+  activeTab: "home" | "analyzer" | "insights" | "feed" | "cart" | "ranking";
+  onTabChange: (tab: "home" | "analyzer" | "insights" | "feed" | "cart" | "ranking") => void;
   cartCount: number;
 }
 
 interface TabItem {
-  id: "home" | "analyzer" | "feed" | "cart" | "ranking";
+  id: "home" | "analyzer" | "insights" | "feed" | "cart" | "ranking";
   label: string;
   icon: any;
   isSpecial?: boolean;
@@ -21,6 +21,7 @@ export default function MobileBottomNav({ activeTab, onTabChange, cartCount }: M
   const tabs: TabItem[] = [
     { id: "home", label: "Início", icon: Home },
     { id: "analyzer", label: "Analisar", icon: ShieldAlert },
+    { id: "insights", label: "Insights", icon: BarChart3 },
     { id: "feed", label: "Dopamina", icon: Zap, isSpecial: true },
     { id: "cart", label: "Carrinho", icon: ShoppingBag, badge: cartCount },
     { id: "ranking", label: "Ranking", icon: Trophy },
@@ -62,7 +63,7 @@ export default function MobileBottomNav({ activeTab, onTabChange, cartCount }: M
                 mobileEffects.trigger("tab");
                 onTabChange(tab.id);
               }}
-              className={`relative flex flex-col items-center py-1 px-3 transition-colors active:scale-90 ${
+              className={`relative flex flex-col items-center py-1 px-2.5 transition-colors active:scale-90 ${
                 isActive ? "text-[#ccff00]" : "text-gray-400 hover:text-gray-200"
               }`}
             >
