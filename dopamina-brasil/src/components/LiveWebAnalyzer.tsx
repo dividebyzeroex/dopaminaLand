@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, AlertTriangle, ArrowRight, Zap, ShieldAlert, ExternalLink, CheckCircle } from "lucide-react";
+import { trackEvent } from "@/lib/tracking";
 
 export default function LiveWebAnalyzer() {
   const [urlInput, setUrlInput] = useState("");
@@ -47,6 +48,27 @@ export default function LiveWebAnalyzer() {
         detectedTriggers: data.detected_triggers || [],
       });
       setStatus("result");
+
+      // Send telemetry to Insights Dashboard
+      try {
+        let storeName = "E-COMMERCE";
+        if (inputUrl.includes("fastshop")) storeName = "FAST SHOP";
+        else if (inputUrl.includes("amazon")) storeName = "AMAZON BRASIL";
+        else if (inputUrl.includes("mercadolivre")) storeName = "MERCADO LIVRE";
+        else if (inputUrl.includes("shopee")) storeName = "SHOPEE";
+        else if (inputUrl.includes("magazineluiza") || inputUrl.includes("magalu")) storeName = "MAGALU";
+
+        trackEvent("dark_pattern_audit", storeName, data.current_price || 0, {
+          source: "home_web_analyzer",
+          url: inputUrl,
+          store_name: storeName,
+          scraped_name: data.scraped_name,
+          scraped_price: data.scraped_price,
+          overpriced_percent: data.overpriced_percent,
+          savings: data.savings,
+          triggers_count: (data.detected_triggers || []).length,
+        });
+      } catch (err) {}
     } catch (e) {
       setStatus("error");
     }
