@@ -5,8 +5,8 @@ import { Product } from "@/types";
 import MobileBottomNav from "./MobileBottomNav";
 import MobileStoriesFeed from "./MobileStoriesFeed";
 import MobileQuickBuySheet from "./MobileQuickBuySheet";
-import { Zap, Flame, ShoppingBag, Search, Sparkles, Trophy, ShieldCheck } from "lucide-react";
-import Image from "next/image";
+import LiveWebAnalyzer from "@/components/LiveWebAnalyzer";
+import { Zap, Flame, ShoppingBag, Trophy, ShieldAlert, Sparkles } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 
 interface MobileAppShellProps {
@@ -15,7 +15,7 @@ interface MobileAppShellProps {
 }
 
 export default function MobileAppShell({ products, flashDeals = [] }: MobileAppShellProps) {
-  const [activeTab, setActiveTab] = useState<"home" | "feed" | "cart" | "ranking" | "profile">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "analyzer" | "feed" | "cart" | "ranking">("home");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false);
   const [cartItems, setCartItems] = useState<Product[]>([]);
@@ -57,23 +57,27 @@ export default function MobileAppShell({ products, flashDeals = [] }: MobileAppS
       <main className="flex-1 overflow-y-auto pb-20">
         {activeTab === "home" && (
           <div className="p-4 space-y-6">
-            {/* Mobile Banner */}
-            <div className="relative p-5 rounded-2xl bg-gradient-to-r from-purple-900/40 via-black to-[#ccff00]/10 border border-[#ccff00]/20 overflow-hidden">
+            {/* Anti-BlackFraude Banner */}
+            <div className="relative p-5 rounded-2xl bg-gradient-to-r from-red-950/50 via-black to-[#ccff00]/10 border border-red-500/30 overflow-hidden">
               <div className="relative z-10 space-y-2">
-                <span className="text-[10px] font-bold text-[#ccff00] uppercase tracking-widest px-2 py-0.5 rounded bg-[#ccff00]/20">
-                  MODO MOBILE ATIVADO
+                <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest px-2 py-0.5 rounded bg-red-500/20 flex items-center gap-1 w-max">
+                  <ShieldAlert className="w-3 h-3" />
+                  PROTEÇÃO ANTI-BLACKFRAUDE MOBILE
                 </span>
                 <h2 className="text-xl font-black font-outfit text-white">
-                  COMPRAS ZERO REAIS
+                  NÃO PAGUE A METADE DO DOBRO
                 </h2>
                 <p className="text-xs text-gray-400">
-                  Toque nos produtos para obter prazer imediato sem fatura no cartão.
+                  Cole o link de qualquer e-commerce abaixo para auditar a curva real de preços mês a mês direto pelo celular.
                 </p>
               </div>
             </div>
 
+            {/* Mobile Live Web Analyzer with Dynamic Price Chart */}
+            <LiveWebAnalyzer />
+
             {/* Mobile Grid */}
-            <div className="space-y-3">
+            <div className="space-y-3 pt-4 border-t border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-gray-300">
                   Ofertas em Destaque
@@ -89,6 +93,22 @@ export default function MobileAppShell({ products, flashDeals = [] }: MobileAppS
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === "analyzer" && (
+          <div className="p-4 space-y-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900/30 via-black to-red-900/20 border border-white/10 space-y-1">
+              <h2 className="text-lg font-black font-outfit text-white flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-red-400" />
+                <span>Auditoria de Preço Mês a Mês</span>
+              </h2>
+              <p className="text-xs text-gray-400">
+                Cole a URL de um e-commerce para verificar a curva temporal de preço e identificar falsos descontos.
+              </p>
+            </div>
+
+            <LiveWebAnalyzer />
           </div>
         )}
 
@@ -165,33 +185,6 @@ export default function MobileAppShell({ products, flashDeals = [] }: MobileAppS
                   <span className="font-mono text-xs text-gray-400">{row.score}</span>
                 </div>
               ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "profile" && (
-          <div className="p-6 space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#a855f7] to-[#ccff00] p-1">
-                <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-2xl">
-                  ⚡
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold font-outfit">Comprador Dopaminado</h3>
-                <p className="text-xs text-gray-400 font-mono">ID: #8942-BR</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                <span className="text-xs text-gray-400 uppercase tracking-wider block">Pontos DP</span>
-                <span className="text-2xl font-black font-outfit text-[#ccff00]">{dopamineScore}</span>
-              </div>
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                <span className="text-xs text-gray-400 uppercase tracking-wider block">Compras R$0</span>
-                <span className="text-2xl font-black font-outfit text-purple-400">{cartItems.length}</span>
-              </div>
             </div>
           </div>
         )}

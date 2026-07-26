@@ -1,16 +1,16 @@
 "use client";
 
-import { Home, Zap, ShoppingBag, Trophy, User } from "lucide-react";
+import { Home, Zap, ShoppingBag, Trophy, ShieldAlert } from "lucide-react";
 import { mobileEffects } from "@/lib/mobileEffects";
 
 interface MobileBottomNavProps {
-  activeTab: "home" | "feed" | "cart" | "ranking" | "profile";
-  onTabChange: (tab: "home" | "feed" | "cart" | "ranking" | "profile") => void;
+  activeTab: "home" | "analyzer" | "feed" | "cart" | "ranking";
+  onTabChange: (tab: "home" | "analyzer" | "feed" | "cart" | "ranking") => void;
   cartCount: number;
 }
 
 interface TabItem {
-  id: "home" | "feed" | "cart" | "ranking" | "profile";
+  id: "home" | "analyzer" | "feed" | "cart" | "ranking";
   label: string;
   icon: any;
   isSpecial?: boolean;
@@ -20,10 +20,10 @@ interface TabItem {
 export default function MobileBottomNav({ activeTab, onTabChange, cartCount }: MobileBottomNavProps) {
   const tabs: TabItem[] = [
     { id: "home", label: "Início", icon: Home },
+    { id: "analyzer", label: "Analisar", icon: ShieldAlert },
     { id: "feed", label: "Dopamina", icon: Zap, isSpecial: true },
     { id: "cart", label: "Carrinho", icon: ShoppingBag, badge: cartCount },
     { id: "ranking", label: "Ranking", icon: Trophy },
-    { id: "profile", label: "Perfil", icon: User },
   ];
 
   return (
