@@ -8,6 +8,11 @@ import UrlScannerWidget from "@/components/h53/UrlScannerWidget";
 import MultiStepFormModal from "@/components/h53/MultiStepFormModal";
 import CaseStudiesSection from "@/components/h53/CaseStudiesSection";
 import InsideTheLabSection from "@/components/h53/InsideTheLabSection";
+import ParticleCanvasBg from "@/components/h53/ParticleCanvasBg";
+import AwwwardsBadge from "@/components/h53/AwwwardsBadge";
+import KineticTextReveal from "@/components/h53/KineticTextReveal";
+import NeuromarketingRoiCalculator from "@/components/h53/NeuromarketingRoiCalculator";
+import { h53Audio } from "@/lib/h53AudioEngine";
 import { ArrowRight, BrainCircuit, Activity, Eye, Zap, Target, LineChart, Lock } from "lucide-react";
 import Image from "next/image";
 
@@ -16,12 +21,19 @@ export default function H53LandingPage() {
   const [prefilledUrl, setPrefilledUrl] = useState("");
 
   const handleOpenForm = (url: string = "") => {
+    h53Audio.playClick();
     setPrefilledUrl(url);
     setIsFormOpen(true);
   };
 
   return (
     <div className="fixed inset-0 overflow-y-auto bg-[#050505] z-[9900] text-white selection:bg-[#ccff00] selection:text-black font-inter scroll-smooth">
+      {/* Interactive 2D/3D Particle Mesh Background */}
+      <ParticleCanvasBg />
+
+      {/* Floating Awwwards Nominee Ribbon */}
+      <AwwwardsBadge />
+
       {/* Background Ambient Glows */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/10 blur-[120px]" />
@@ -55,15 +67,10 @@ export default function H53LandingPage() {
             </h2>
           </motion.div>
 
-          <motion.h1 
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-[7.5rem] font-black font-outfit tracking-tighter leading-[0.85] mb-8"
-          >
-            WE DECODE <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-300 to-gray-600">HUMAN INTENT.</span>
-          </motion.h1>
+          <KineticTextReveal
+            text="WE DECODE HUMAN INTENT."
+            className="text-5xl md:text-[7.5rem] font-black font-outfit tracking-tighter leading-[0.85] mb-8 text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-300 to-gray-600"
+          />
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -81,7 +88,10 @@ export default function H53LandingPage() {
             className="mb-8"
           >
             <MagneticButton onClick={() => handleOpenForm("")}>
-              <div className="group relative px-8 py-4 md:px-10 md:py-5 bg-white text-black font-bold text-sm uppercase tracking-widest rounded-full overflow-hidden flex items-center gap-3">
+              <div
+                onMouseEnter={() => h53Audio.playHover()}
+                className="group relative px-8 py-4 md:px-10 md:py-5 bg-white text-black font-bold text-sm uppercase tracking-widest rounded-full overflow-hidden flex items-center gap-3"
+              >
                 <span className="relative z-10">Aplicar para Consultoria</span>
                 <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 <div className="absolute inset-0 bg-[#ccff00] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
@@ -146,6 +156,9 @@ export default function H53LandingPage() {
         </div>
       </section>
 
+      {/* Neuromarketing ROI Calculator Section */}
+      <NeuromarketingRoiCalculator onOpenForm={() => handleOpenForm("")} />
+
       {/* Inside the Lab Section */}
       <InsideTheLabSection />
 
@@ -172,7 +185,7 @@ export default function H53LandingPage() {
           <div className="grid md:grid-cols-3 gap-12">
             {/* Step 1 */}
             <ScrollReveal delay={0.1} direction="up">
-              <div className="relative group">
+              <div className="relative group" onMouseEnter={() => h53Audio.playHover()}>
                 <div className="text-[6rem] font-black text-white/5 absolute -top-12 -left-6 z-0 group-hover:text-[#ccff00]/10 transition-colors duration-500">01</div>
                 <div className="relative z-10">
                   <Target className="w-8 h-8 text-[#ccff00] mb-6" />
@@ -184,7 +197,7 @@ export default function H53LandingPage() {
             
             {/* Step 2 */}
             <ScrollReveal delay={0.3} direction="up">
-              <div className="relative group">
+              <div className="relative group" onMouseEnter={() => h53Audio.playHover()}>
                 <div className="text-[6rem] font-black text-white/5 absolute -top-12 -left-6 z-0 group-hover:text-[#a855f7]/10 transition-colors duration-500">02</div>
                 <div className="relative z-10">
                   <Activity className="w-8 h-8 text-[#a855f7] mb-6" />
@@ -196,7 +209,7 @@ export default function H53LandingPage() {
 
             {/* Step 3 */}
             <ScrollReveal delay={0.5} direction="up">
-              <div className="relative group">
+              <div className="relative group" onMouseEnter={() => h53Audio.playHover()}>
                 <div className="text-[6rem] font-black text-white/5 absolute -top-12 -left-6 z-0 group-hover:text-blue-500/10 transition-colors duration-500">03</div>
                 <div className="relative z-10">
                   <Lock className="w-8 h-8 text-blue-500 mb-6" />
@@ -234,7 +247,10 @@ export default function H53LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1 */}
             <ScrollReveal delay={0.1}>
-              <div className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default">
+              <div
+                onMouseEnter={() => h53Audio.playHover()}
+                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#ccff00]/0 to-[#ccff00]/0 group-hover:from-[#ccff00]/5 transition-colors duration-500" />
                 <BrainCircuit className="w-10 h-10 text-gray-500 group-hover:text-[#ccff00] transition-colors duration-500 mb-8" />
                 <div>
@@ -246,7 +262,10 @@ export default function H53LandingPage() {
 
             {/* Card 2 */}
             <ScrollReveal delay={0.2}>
-              <div className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default">
+              <div
+                onMouseEnter={() => h53Audio.playHover()}
+                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#a855f7]/0 to-[#a855f7]/0 group-hover:from-[#a855f7]/5 transition-colors duration-500" />
                 <LineChart className="w-10 h-10 text-gray-500 group-hover:text-[#a855f7] transition-colors duration-500 mb-8" />
                 <div>
@@ -258,7 +277,10 @@ export default function H53LandingPage() {
 
             {/* Card 3 */}
             <ScrollReveal delay={0.3}>
-              <div className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default">
+              <div
+                onMouseEnter={() => h53Audio.playHover()}
+                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 transition-colors duration-500" />
                 <Eye className="w-10 h-10 text-gray-500 group-hover:text-blue-500 transition-colors duration-500 mb-8" />
                 <div>
@@ -270,7 +292,10 @@ export default function H53LandingPage() {
 
             {/* Card 4 */}
             <ScrollReveal delay={0.4}>
-              <div className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default">
+              <div
+                onMouseEnter={() => h53Audio.playHover()}
+                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 overflow-hidden min-h-[320px] flex flex-col justify-between cursor-default"
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/0 group-hover:from-red-500/5 transition-colors duration-500" />
                 <Zap className="w-10 h-10 text-gray-500 group-hover:text-red-500 transition-colors duration-500 mb-8" />
                 <div>
@@ -363,7 +388,10 @@ export default function H53LandingPage() {
 
           <ScrollReveal delay={0.3}>
             <MagneticButton onClick={() => handleOpenForm("")}>
-              <div className="inline-flex relative px-12 py-6 bg-white text-black font-black text-sm uppercase tracking-[0.2em] rounded-full overflow-hidden items-center gap-4 group cursor-pointer">
+              <div
+                onMouseEnter={() => h53Audio.playHover()}
+                className="inline-flex relative px-12 py-6 bg-white text-black font-black text-sm uppercase tracking-[0.2em] rounded-full overflow-hidden items-center gap-4 group cursor-pointer"
+              >
                 <span className="relative z-10">INICIAR PROTOCOLO</span>
                 <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 <div className="absolute inset-0 bg-[#ccff00] scale-x-0 origin-left group-hover:scale-x-100 transition-transform duration-500 ease-out" />
