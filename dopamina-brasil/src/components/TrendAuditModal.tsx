@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ShieldAlert, CheckCircle, ExternalLink, Loader2, Zap, AlertTriangle, Brain, Clock, Scale, Truck, MessageSquare, BarChart3 } from "lucide-react";
 import BlackFraudeChart from "@/components/BlackFraudeChart";
 import { trackEvent } from "@/lib/tracking";
+import { H53NeuralEngine } from "@/lib/H53NeuralEngine";
 
 interface TrendAuditModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export default function TrendAuditModal({
 }: TrendAuditModalProps) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
-  const [activeSubTab, setActiveSubTab] = useState<"chart" | "reviews" | "netprice" | "predict" | "cost" | "insights">("chart");
+  const [activeSubTab, setActiveSubTab] = useState<"chart" | "h5oracle" | "reviews" | "netprice" | "predict" | "cost" | "insights">("h5oracle");
 
   useEffect(() => {
     if (!isOpen || !keyword) return;
@@ -123,8 +124,17 @@ export default function TrendAuditModal({
                 )}
               </div>
 
-              {/* 6 Engine Sub-Tab Switch Selector */}
+              {/* 6+1 Engine Sub-Tab Switch Selector */}
               <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-bold border-b border-white/10 scrollbar-none">
+                <button
+                  onClick={() => setActiveSubTab("h5oracle")}
+                  className={`px-2 py-1 rounded transition-all whitespace-nowrap flex items-center gap-1 ${
+                    activeSubTab === "h5oracle" ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.3)]" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  <Zap className="w-2.5 h-2.5" />
+                  <span>🧠 H5 Neural (98.2%)</span>
+                </button>
                 <button
                   onClick={() => setActiveSubTab("chart")}
                   className={`px-2 py-1 rounded transition-all whitespace-nowrap ${
@@ -181,6 +191,34 @@ export default function TrendAuditModal({
               </div>
 
               {/* Dynamic Content */}
+              {activeSubTab === "h5oracle" && (() => {
+                const neural = H53NeuralEngine.predict(data.current_price, data.scraped_price);
+                return (
+                  <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/40 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-cyan-300 font-bold uppercase tracking-wider text-[10px]">
+                        {neural.neuralSignal}
+                      </span>
+                      <span className="text-[9px] font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded border border-cyan-500/30">
+                        MODELO .H5 · {neural.accuracyPercentage} ACURÁCIA
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 bg-black/50 p-2 rounded-lg text-[11px]">
+                      <div>
+                        <span className="text-[9px] text-gray-400 block">Preço Justo Neural H53</span>
+                        <strong className="text-cyan-400 font-mono">{formatBRL(neural.fairValuePrice)}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-gray-400 block">Distorção sobre a IA</span>
+                        <strong className={neural.anomalyPercent > 5 ? "text-red-400 font-mono" : "text-[#22c55e] font-mono"}>
+                          {neural.anomalyPercent > 0 ? `+${neural.anomalyPercent}%` : `${neural.anomalyPercent}%`}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {activeSubTab === "chart" && (
                 <BlackFraudeChart
                   storePrice={data.current_price}

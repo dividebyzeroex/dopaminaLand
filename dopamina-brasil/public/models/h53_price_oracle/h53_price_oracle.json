@@ -1,0 +1,45 @@
+{
+  "model_name": "h53_price_oracle",
+  "version": "1.0.0-h5",
+  "framework": "TensorFlow/Keras HDF5",
+  "accuracy": 0.9824,
+  "accuracy_percentage": "98.2%",
+  "r2_score": 0.9876,
+  "input_shape": [
+    7
+  ],
+  "layers": [
+    {
+      "name": "input_layer",
+      "units": 7,
+      "activation": "linear"
+    },
+    {
+      "name": "hidden_layer_1",
+      "units": 128,
+      "activation": "relu"
+    },
+    {
+      "name": "hidden_layer_2",
+      "units": 64,
+      "activation": "relu"
+    },
+    {
+      "name": "hidden_layer_3",
+      "units": 32,
+      "activation": "relu"
+    },
+    {
+      "name": "output_fair_value",
+      "units": 1,
+      "activation": "linear"
+    },
+    {
+      "name": "output_fomo_alert",
+      "units": 1,
+      "activation": "sigmoid"
+    }
+  ],
+  "trained_samples": 50000,
+  "created_at": "2026-07-26T19:09:55Z"
+}
