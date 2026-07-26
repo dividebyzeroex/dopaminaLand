@@ -13,7 +13,15 @@ export default function DailyModal() {
 
   useEffect(() => {
     if (hasClaimedToday) return;
-    // Delay after intro/nickname
+
+    // Check if user already dismissed or closed the daily bonus modal today
+    try {
+      const todayStr = new Date().toDateString();
+      const dismissedToday = localStorage.getItem('dopamina-daily-dismissed-date');
+      if (dismissedToday === todayStr) return;
+    } catch (e) {}
+
+    // Delay after page load
     const timer = setTimeout(() => {
       try {
         if (window.self !== window.top) return; // Hide in iframes (e.g., Insights heatmap)
@@ -26,10 +34,23 @@ export default function DailyModal() {
     return () => clearTimeout(timer);
   }, [hasClaimedToday]);
 
+  const handleDismiss = () => {
+    setShow(false);
+    try {
+      const todayStr = new Date().toDateString();
+      localStorage.setItem('dopamina-daily-dismissed-date', todayStr);
+    } catch (e) {}
+  };
+
   const handleClaim = () => {
     const gained = claimDailyBonus();
     setXpGained(gained);
     setClaimed(true);
+    // Store dismissal so it doesn't prompt again today
+    try {
+      const todayStr = new Date().toDateString();
+      localStorage.setItem('dopamina-daily-dismissed-date', todayStr);
+    } catch (e) {}
     // Close after a moment
     setTimeout(() => setShow(false), 2000);
   };
@@ -99,7 +120,7 @@ export default function DailyModal() {
           )}
 
           <button
-            onClick={() => setShow(false)}
+            onClick={handleDismiss}
             className="mt-3 w-full text-center text-xs text-muted hover:text-foreground transition"
           >
             fechar
