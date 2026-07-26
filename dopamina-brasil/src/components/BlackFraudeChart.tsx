@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldAlert, AlertTriangle } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
 export interface PricePoint {
   month: string;
@@ -19,18 +19,13 @@ interface BlackFraudeChartProps {
 }
 
 function getDynamicPastMonths(count = 6): string[] {
-  const monthNames = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-  ];
+  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
   const now = new Date();
   const currentMonth = now.getMonth();
-  
   const result: string[] = [];
   for (let i = count - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), currentMonth - i, 1);
-    const mName = monthNames[d.getMonth()];
-    result.push(i === 0 ? "Hoje" : mName);
+    result.push(i === 0 ? "Hoje" : monthNames[d.getMonth()]);
   }
   return result;
 }
@@ -44,23 +39,23 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
   const promo = Math.round(storePrice);
 
   const fallbackPoints: PricePoint[] = [
-    { month: dynamicMonths[0], price: realBase, label: "Preço Base de Mercado", status: "normal" },
-    { month: dynamicMonths[1], price: Math.round(realBase * 1.04), label: "Variação Regular", status: "normal" },
-    { month: dynamicMonths[2], price: Math.round(inflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
-    { month: dynamicMonths[3], price: inflated, label: "PICO DA METADE DO DOBRO", status: "danger" },
-    { month: dynamicMonths[4], price: promo, label: "Preço Anunciado na Loja", status: "fake" },
-    { month: dynamicMonths[5], price: realBase, label: "Piso Real do Mercado (Buscapé Sync)", status: "real" },
+    { month: dynamicMonths[0], price: realBase, label: "Preço Base", status: "normal" },
+    { month: dynamicMonths[1], price: Math.round(realBase * 1.04), label: "Regular", status: "normal" },
+    { month: dynamicMonths[2], price: Math.round(inflated * 0.8), label: "Pré-Aumento", status: "warning" },
+    { month: dynamicMonths[3], price: inflated, label: "Pico Inflado", status: "danger" },
+    { month: dynamicMonths[4], price: promo, label: "Preço Anunciado", status: "fake" },
+    { month: dynamicMonths[5], price: realBase, label: "Piso Real", status: "real" },
   ];
 
-  const dataPoints = (priceHistory && priceHistory.length > 0) ? priceHistory : fallbackPoints;
+  const dataPoints = priceHistory && priceHistory.length > 0 ? priceHistory : fallbackPoints;
 
   const formatBRL = (val: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
 
-  // SVG dimensions
-  const width = 600;
-  const height = 200;
-  const padding = 40;
+  // Compact SVG dimensions
+  const width = 500;
+  const height = 110;
+  const padding = 20;
 
   const minPrice = Math.min(...dataPoints.map((d) => d.price)) * 0.85;
   const maxPrice = Math.max(...dataPoints.map((d) => d.price)) * 1.1;
@@ -75,45 +70,31 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
   const areaD = `${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
 
   return (
-    <div className="w-full bg-[#0a0a0f] border border-red-500/30 rounded-2xl p-5 space-y-4 shadow-[0_0_30px_rgba(239,68,68,0.15)] relative overflow-hidden">
-      {/* Alert Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-red-400 block">
-              HISTÓRICO MÊS A MÊS EM TEMPO REAL
-            </span>
-            <h4 className="text-sm font-black font-outfit text-white">
-              Curva Temporal do Produto ({productName || "Auditado"})
-            </h4>
-          </div>
+    <div className="w-full bg-[#0a0a0f]/90 border border-white/10 rounded-xl p-3.5 space-y-2 relative overflow-hidden backdrop-blur-md">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-1.5 text-gray-300 font-bold">
+          <ShieldAlert className="w-3.5 h-3.5 text-red-400 shrink-0" />
+          <span className="truncate max-w-[240px]">Histórico Temporal Mês a Mês</span>
         </div>
-
-        <span className="text-[10px] font-bold font-mono px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded-full self-start sm:self-auto">
-          INSPEÇÃO TEMPORAL ATIVA
+        <span className="text-[10px] font-mono text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+          BUSCAPÉ SYNC
         </span>
       </div>
 
-      {/* SVG Chart */}
-      <div className="relative pt-4">
+      {/* Sleek Ultra-Compact SVG Chart */}
+      <div className="relative pt-1">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible select-none">
           <defs>
-            <linearGradient id="gradientRed" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4" />
+            <linearGradient id="gradientCompact" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.35" />
               <stop offset="100%" stopColor="#ef4444" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
-          {/* Area Fill */}
-          <path d={areaD} fill="url(#gradientRed)" />
+          <path d={areaD} fill="url(#gradientCompact)" />
+          <path d={pathD} fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Line Path */}
-          <path d={pathD} fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-
-          {/* Data Points */}
           {points.map((p, idx) => {
             const isHovered = activePoint === idx;
             const isPeak = p.status === "danger";
@@ -122,22 +103,12 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={isHovered ? "7" : isPeak ? "6" : "4"}
+                  r={isHovered ? "6" : isPeak ? "5" : "3.5"}
                   fill={isPeak ? "#ef4444" : p.status === "real" ? "#22c55e" : "#f97316"}
                   stroke="#ffffff"
-                  strokeWidth="2"
-                  className="transition-all duration-200"
+                  strokeWidth="1.5"
                 />
-
-                {/* X Axis Label */}
-                <text
-                  x={p.x}
-                  y={height - 10}
-                  textAnchor="middle"
-                  fill="#9ca3af"
-                  fontSize="10"
-                  fontWeight="600"
-                >
+                <text x={p.x} y={height - 4} textAnchor="middle" fill="#9ca3af" fontSize="9" fontWeight="600">
                   {p.month}
                 </text>
               </g>
@@ -145,26 +116,17 @@ export default function BlackFraudeChart({ storePrice, marketLowest, productName
           })}
         </svg>
 
-        {/* Hover Tooltip Card */}
+        {/* Floating Compact Tooltip */}
         {activePoint !== null && (
           <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute top-2 left-1/2 -translate-x-1/2 bg-[#18181b] border border-white/20 p-3 rounded-xl shadow-2xl z-30 pointer-events-none text-center space-y-1 min-w-[200px]"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#18181b] border border-white/20 px-3 py-1.5 rounded-lg shadow-xl z-30 pointer-events-none text-center"
           >
-            <p className="text-[10px] font-bold text-gray-400 uppercase">{points[activePoint].month}</p>
-            <p className="text-lg font-black font-mono text-white">{formatBRL(points[activePoint].price)}</p>
-            <span className="text-[10px] font-bold text-red-400 block">{points[activePoint].label}</span>
+            <span className="text-[9px] font-bold text-gray-400 block uppercase">{points[activePoint].month}</span>
+            <span className="text-xs font-black font-mono text-white">{formatBRL(points[activePoint].price)}</span>
           </motion.div>
         )}
-      </div>
-
-      {/* Explanatory Banner */}
-      <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-gray-300 flex items-start gap-2">
-        <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-        <p>
-          <strong className="text-white">Auditoria Dinâmica Mês a Mês:</strong> Os meses são calculados dinamicamente com base no calendário atual. Se houver inflação artificial nos últimos meses, o algoritmo dispara o alerta de Metade do Dobro!
-        </p>
       </div>
     </div>
   );

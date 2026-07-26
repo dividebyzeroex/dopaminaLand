@@ -10,11 +10,12 @@ export default function LiveWebAnalyzer() {
   const [urlInput, setUrlInput] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "result" | "error">("idle");
   const [resultData, setResultData] = useState<any>(null);
+  const [showChart, setShowChart] = useState(false);
 
   const demoLinks = [
-    { label: "🍎 iPhone 17 (Fast Shop)", url: "https://site.fastshop.com.br/iphone-17-apple--256gb--preto--tela-de-6-3---5g-e-c", query: "iPhone 17 Apple" },
-    { label: "🎮 RTX 4090 (Amazon)", url: "https://www.amazon.com.br/dp/B0BJGFVJMB", query: "RTX 4090" },
-    { label: "👟 Nike Air Max (Mercado Livre)", url: "https://www.mercadolivre.com.br/nike-air-max", query: "Nike Air Max 90" },
+    { label: "🍎 iPhone 17", url: "https://site.fastshop.com.br/iphone-17-apple--256gb--preto--tela-de-6-3---5g-e-c", query: "iPhone 17 Apple" },
+    { label: "🎮 RTX 4090", url: "https://www.amazon.com.br/dp/B0BJGFVJMB", query: "RTX 4090" },
+    { label: "👟 Nike Air Max", url: "https://www.mercadolivre.com.br/nike-air-max", query: "Nike Air Max 90" },
   ];
 
   const handleAnalyze = async (inputUrl: string, customQuery?: string) => {
@@ -24,7 +25,6 @@ export default function LiveWebAnalyzer() {
     setUrlInput(inputUrl);
 
     try {
-      // Call real price-history API (fetches live Buscapé/Bondfaro search result)
       const apiUrl = customQuery
         ? `/api/price-history?q=${encodeURIComponent(customQuery)}`
         : `/api/price-history?url=${encodeURIComponent(inputUrl)}`;
@@ -76,28 +76,28 @@ export default function LiveWebAnalyzer() {
     }
   };
 
+  const formatBRL = (val: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
+
   return (
-    <div className="w-full max-w-4xl mx-auto my-6">
-      <div className="relative p-1 rounded-3xl bg-gradient-to-r from-[#22c55e]/30 via-[#f97316]/30 to-[#a855f7]/30 backdrop-blur-xl shadow-[0_0_50px_rgba(34,197,94,0.15)]">
-        <div className="bg-[#111116]/95 rounded-[22px] p-6 md:p-8 border border-white/10 space-y-6">
+    <div className="w-full max-w-4xl mx-auto my-3">
+      <div className="relative p-0.5 rounded-2xl bg-gradient-to-r from-[#22c55e]/30 via-[#f97316]/30 to-[#a855f7]/30 backdrop-blur-xl shadow-xl">
+        <div className="bg-[#111116]/95 rounded-[15px] p-4 sm:p-5 border border-white/10 space-y-4">
           
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/10 text-xs">
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/30">
-                <Zap className="w-5 h-5" />
+              <span className="p-1.5 rounded-lg bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/30">
+                <Zap className="w-4 h-4" />
               </span>
               <div>
-                <h3 className="text-base font-black font-outfit text-white uppercase tracking-wide">
-                  Analisador Web ao Vivo [Bondfaro / Buscapé Real API]
+                <h3 className="font-black font-outfit text-white uppercase tracking-wide text-xs sm:text-sm">
+                  Analisador de Preços ao Vivo
                 </h3>
-                <p className="text-xs text-gray-400">
-                  Cole o link de qualquer e-commerce para checar o preço real do mercado ao vivo
-                </p>
               </div>
             </div>
-            <span className="text-[10px] font-mono font-bold text-[#22c55e] px-3 py-1 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full self-start sm:self-auto flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-ping" />
+            <span className="text-[9px] font-mono font-bold text-[#22c55e] px-2.5 py-0.5 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full flex items-center gap-1 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-ping" />
               BUSCAPÉ SYNC LIVE
             </span>
           </div>
@@ -109,50 +109,50 @@ export default function LiveWebAnalyzer() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-4"
+                className="space-y-3"
               >
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleAnalyze(urlInput);
                   }}
-                  className="flex flex-col sm:flex-row gap-3"
+                  className="flex flex-col sm:flex-row gap-2"
                 >
                   <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <input
                       type="url"
                       required
-                      placeholder="Cole aqui o link do produto (Fast Shop, Amazon, Mercado Livre...)"
+                      placeholder="Cole o link do produto (Fast Shop, Amazon, Mercado Livre...)"
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors text-sm font-mono"
+                      className="w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors text-xs font-mono"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="px-8 py-4 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-black font-black text-xs uppercase tracking-widest rounded-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-lg"
+                    className="px-5 py-2.5 bg-[#22c55e] text-black font-black text-xs uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shadow-md"
                   >
-                    <span>Consultar Bondfaro</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Analisar</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </form>
 
                 {/* Quick Demo Links */}
-                <div className="space-y-2 pt-2">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
-                    Ou clique para testar com consultas reais ao vivo:
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider shrink-0">
+                    Testes rápidos:
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex gap-1.5">
                     {demoLinks.map((demo, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => handleAnalyze(demo.url, demo.query)}
-                        className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 flex items-center gap-1.5"
+                        className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-gray-300 hover:text-white hover:bg-white/10 transition-all flex items-center gap-1 whitespace-nowrap"
                       >
                         <span>{demo.label}</span>
-                        <ExternalLink className="w-3 h-3 text-gray-500" />
+                        <ExternalLink className="w-2.5 h-2.5 text-gray-500" />
                       </button>
                     ))}
                   </div>
@@ -163,122 +163,108 @@ export default function LiveWebAnalyzer() {
             {status === "loading" && (
               <motion.div
                 key="loading"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="py-10 flex flex-col items-center justify-center text-center space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="py-6 flex flex-col items-center justify-center text-center space-y-2"
               >
-                <div className="relative">
-                  <Loader2 className="w-12 h-12 text-[#22c55e] animate-spin" />
-                  <div className="absolute inset-0 rounded-full bg-[#22c55e]/20 blur-md animate-pulse" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-white">
-                    Consultando scraper real em buscape.com.br...
-                  </p>
-                  <p className="text-xs text-gray-400 font-mono">
-                    URL / Termo: <span className="text-[#22c55e]">{urlInput}</span>
-                  </p>
-                </div>
+                <Loader2 className="w-8 h-8 text-[#22c55e] animate-spin" />
+                <p className="text-xs font-bold text-white">Consultando scraper ao vivo no Buscapé...</p>
               </motion.div>
             )}
 
             {status === "result" && resultData && (
               <motion.div
                 key="result"
-                initial={{ opacity: 0, scale: 0.96 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="space-y-6"
+                className="space-y-3"
               >
-                {/* Result Price Alert */}
-                <div className={`p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                  resultData.isFomoAlert
-                    ? "bg-red-500/10 border-red-500/30"
-                    : "bg-[#22c55e]/10 border-[#22c55e]/30"
-                }`}>
-                  <div className="flex items-start gap-3">
-                    {resultData.isFomoAlert ? (
-                      <ShieldAlert className="w-8 h-8 text-red-400 shrink-0 mt-1" />
-                    ) : (
-                      <CheckCircle className="w-8 h-8 text-[#22c55e] shrink-0 mt-1" />
-                    )}
-                    <div>
-                      <span className={`text-xs font-bold uppercase tracking-wider block mb-1 ${
-                        resultData.isFomoAlert ? "text-red-400" : "text-[#22c55e]"
-                      }`}>
-                        {resultData.isFomoAlert ? "⚠️ Alerta Anti-FOMO: Preço Acima do Piso" : "✅ Oferta Alinhada ao Piso de Mercado"}
-                      </span>
-                      <h4 className="text-base md:text-lg font-black font-outfit text-white">
-                        {resultData.scrapedName}
-                      </h4>
+                {/* Ultra-Compact Main Result Card */}
+                <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 truncate">
+                      {resultData.isFomoAlert ? (
+                        <ShieldAlert className="w-5 h-5 text-red-400 shrink-0" />
+                      ) : (
+                        <CheckCircle className="w-5 h-5 text-[#22c55e] shrink-0" />
+                      )}
+                      <h4 className="text-xs font-bold text-white truncate">{resultData.scrapedName}</h4>
+                    </div>
+
+                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border shrink-0 ${
+                      resultData.isFomoAlert ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-[#22c55e]/10 border-[#22c55e]/30 text-[#22c55e]"
+                    }`}>
+                      {resultData.isFomoAlert ? `+${resultData.overpricedPercent}% MAIS CARO` : "PREÇO JUSTO"}
+                    </span>
+                  </div>
+
+                  {/* Inline Price Comparison Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-black/40 border border-white/5 p-3 rounded-lg text-xs">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <span className="text-[10px] text-gray-400 block">Preço na Loja</span>
+                        <span className="font-bold text-red-400 font-mono">{formatBRL(resultData.storePrice)}</span>
+                      </div>
+                      <div className="h-6 w-[1px] bg-white/10" />
+                      <div>
+                        <span className="text-[10px] text-[#22c55e] font-semibold block">Piso Buscapé</span>
+                        <span className="font-black text-[#22c55e] font-mono">{formatBRL(resultData.marketLowest)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {resultData.savings > 0 && (
+                        <span className="text-xs font-black text-[#22c55e] bg-[#22c55e]/10 px-2 py-1 rounded">
+                          Economia: {formatBRL(resultData.savings)}
+                        </span>
+                      )}
+                      <a
+                        href={resultData.bestDealUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 bg-[#22c55e] text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-colors flex items-center gap-1"
+                      >
+                        <span>Ver Oferta</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-xs text-gray-400 block">Menor Oferta Encontrada:</span>
-                    <span className="text-2xl font-black font-outfit text-[#22c55e]">
-                      R$ {resultData.marketLowest.toFixed(2)}
-                    </span>
+                  {/* Compact Trigger Tags */}
+                  <div className="flex items-center justify-between text-[10px] text-gray-400 pt-1">
+                    <div className="flex items-center gap-1 overflow-x-auto truncate">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span className="truncate">Gatilhos: Ancoragem Inflada · Falsa Escassez</span>
+                    </div>
+
+                    <button
+                      onClick={() => setShowChart(!showChart)}
+                      className="text-[#22c55e] font-bold underline shrink-0 ml-2"
+                    >
+                      {showChart ? "Ocultar Gráfico" : "Ver Gráfico Temporal 📈"}
+                    </button>
                   </div>
                 </div>
 
-                {/* Price Breakdown Grid */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-xs text-gray-400">Preço Estimado na Loja:</span>
-                    <p className="text-xl font-bold font-mono text-red-400">
-                      R$ {resultData.storePrice.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-[#22c55e]/10 border border-[#22c55e]/30 space-y-1">
-                    <span className="text-xs text-[#22c55e] font-semibold">Piso Real do Mercado (Buscapé/Bondfaro API):</span>
-                    <p className="text-xl font-black font-mono text-[#22c55e]">
-                      R$ {resultData.marketLowest.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
+                {/* Collapsible Sleek Chart */}
+                {showChart && (
+                  <BlackFraudeChart
+                    storePrice={resultData.storePrice}
+                    marketLowest={resultData.marketLowest}
+                    productName={resultData.scrapedName}
+                    priceHistory={resultData.priceHistory}
+                  />
+                )}
 
-                {/* Anti-BlackFraude 180-Day Price History Chart */}
-                <BlackFraudeChart
-                  storePrice={resultData.storePrice}
-                  marketLowest={resultData.marketLowest}
-                  productName={resultData.scrapedName}
-                  priceHistory={resultData.priceHistory}
-                />
-
-                {/* Detected Dark Patterns */}
-                <div className="space-y-3">
-                  <h5 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    Gatilhos Psicológicos Interceptados Nesta Consulta:
-                  </h5>
-                  <ul className="space-y-2">
-                    {resultData.detectedTriggers.map((trig: string, idx: number) => (
-                      <li key={idx} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-xs text-gray-300 flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                        <span>{trig}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Actions & Extension Promotion */}
-                <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Reset button */}
+                <div className="text-right">
                   <button
                     onClick={() => setStatus("idle")}
-                    className="text-xs font-bold text-gray-400 hover:text-white underline"
+                    className="text-[11px] text-gray-400 hover:text-white underline font-semibold"
                   >
-                    Consultar Outro Produto
+                    Analisar outro produto ↺
                   </button>
-
-                  <a
-                    href={resultData.bestDealUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full sm:w-auto px-6 py-3 bg-[#22c55e] text-black font-black text-xs uppercase tracking-widest rounded-xl hover:bg-white transition-colors flex items-center justify-center gap-2 shadow-lg"
-                  >
-                    <span>Ver Menor Oferta no Buscapé</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
                 </div>
               </motion.div>
             )}
@@ -288,15 +274,12 @@ export default function LiveWebAnalyzer() {
                 key="error"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-8 text-center space-y-4"
+                className="py-4 text-center space-y-2 text-xs"
               >
-                <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto" />
-                <p className="text-sm text-gray-300">
-                  Não foi possível completar a consulta ao Buscapé para este produto no momento.
-                </p>
+                <p className="text-gray-300">Falha temporária ao conectar ao Buscapé.</p>
                 <button
                   onClick={() => setStatus("idle")}
-                  className="px-6 py-2 bg-white/10 text-white font-bold text-xs uppercase rounded-xl"
+                  className="px-4 py-1.5 bg-white/10 text-white font-bold rounded-lg"
                 >
                   Tentar Novamente
                 </button>
