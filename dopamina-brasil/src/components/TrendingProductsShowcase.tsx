@@ -20,7 +20,7 @@ interface TrendItem {
 export default function TrendingProductsShowcase() {
   const [trends, setTrends] = useState<TrendItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeModalTrendId, setActiveModalTrendId] = useState<string | null>(null);
+  const [activeTrend, setActiveTrend] = useState<TrendItem | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -113,94 +113,81 @@ export default function TrendingProductsShowcase() {
         className="flex gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 px-1 scrollbar-none"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {trends.map((item, index) => {
-          const isModalOpen = activeModalTrendId === item.id;
+        {trends.map((item, index) => (
+          <motion.div
+            key={item.id}
+            whileHover={{ y: -4, scale: 1.01 }}
+            className="min-w-[290px] sm:min-w-[340px] max-w-[340px] p-5 rounded-2xl bg-[#0a0a0f]/90 border border-white/10 hover:border-[#22c55e]/40 transition-all shadow-xl space-y-4 flex flex-col justify-between group shrink-0"
+          >
+            <div className="space-y-3">
+              {/* Card Top Row */}
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black font-mono px-2 py-0.5 rounded bg-white/10 text-white border border-white/10">
+                  #{index + 1} MAIS BUSCADO
+                </span>
+                <span className="text-[10px] font-bold text-orange-400 font-mono flex items-center gap-1">
+                  <Flame className="w-3 h-3 fill-current" />
+                  {item.surge}
+                </span>
+              </div>
 
-          return (
-            <div
-              key={item.id}
-              className="relative min-w-[290px] sm:min-w-[340px] max-w-[340px] shrink-0"
-            >
-              {/* Contextual Speech Balloon Popover Widget */}
-              {isModalOpen && (
-                <TrendAuditModal
-                  isOpen={isModalOpen}
-                  onClose={() => setActiveModalTrendId(null)}
-                  keyword={item.keyword}
-                  productName={item.name}
-                  store={item.store}
-                  estimatedPrice={item.estimatedPrice}
-                />
-              )}
+              {/* Product Info */}
+              <div>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
+                  {item.category}
+                </span>
+                <h3 className="text-base font-bold font-outfit text-white group-hover:text-[#22c55e] transition-colors truncate">
+                  {item.name}
+                </h3>
+              </div>
 
-              {/* Card Container */}
-              <motion.div
-                whileHover={{ y: -4, scale: 1.01 }}
-                className="p-5 rounded-2xl bg-[#0a0a0f]/90 border border-white/10 hover:border-[#22c55e]/40 transition-all shadow-xl space-y-4 flex flex-col justify-between group h-full"
-              >
-                <div className="space-y-3">
-                  {/* Card Top Row */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black font-mono px-2 py-0.5 rounded bg-white/10 text-white border border-white/10">
-                      #{index + 1} MAIS BUSCADO
-                    </span>
-                    <span className="text-[10px] font-bold text-orange-400 font-mono flex items-center gap-1">
-                      <Flame className="w-3 h-3 fill-current" />
-                      {item.surge}
-                    </span>
-                  </div>
-
-                  {/* Product Info */}
-                  <div>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
-                      {item.category}
-                    </span>
-                    <h3 className="text-base font-bold font-outfit text-white group-hover:text-[#22c55e] transition-colors truncate">
-                      {item.name}
-                    </h3>
-                  </div>
-
-                  {/* Store & Price Breakdown */}
-                  <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-2 text-xs">
-                    <div className="flex items-center justify-between text-gray-400 text-[11px]">
-                      <span className="flex items-center gap-1">
-                        <Store className="w-3 h-3 text-purple-400" />
-                        <span>Loja de Origem:</span>
-                      </span>
-                      <strong className="text-white">{item.store}</strong>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                      <div>
-                        <span className="text-[9px] text-gray-400 block">Preço Estimado</span>
-                        <span className="font-bold text-red-400 font-mono">{formatBRL(item.estimatedPrice)}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[9px] text-[#22c55e] block font-bold">Piso Buscapé</span>
-                        <span className="font-black text-[#22c55e] font-mono">{formatBRL(item.marketLowest)}</span>
-                      </div>
-                    </div>
-                  </div>
+              {/* Store & Price Breakdown */}
+              <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-2 text-xs">
+                <div className="flex items-center justify-between text-gray-400 text-[11px]">
+                  <span className="flex items-center gap-1">
+                    <Store className="w-3 h-3 text-purple-400" />
+                    <span>Loja de Origem:</span>
+                  </span>
+                  <strong className="text-white">{item.store}</strong>
                 </div>
 
-                {/* Audit Speech Balloon Trigger Button */}
-                <button
-                  onClick={() => setActiveModalTrendId(isModalOpen ? null : item.id)}
-                  className={`w-full py-3 text-xs uppercase tracking-wider rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 ${
-                    isModalOpen
-                      ? "bg-red-500 text-white"
-                      : "bg-[#22c55e] text-black hover:bg-white"
-                  }`}
-                >
-                  <MessageSquare className="w-3.5 h-3.5 fill-current" />
-                  <span>{isModalOpen ? "Fechar Auditoria ✕" : "Auditar Preço Deste Item"}</span>
-                  {!isModalOpen && <ArrowRight className="w-3.5 h-3.5" />}
-                </button>
-              </motion.div>
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <div>
+                    <span className="text-[9px] text-gray-400 block">Preço Estimado</span>
+                    <span className="font-bold text-red-400 font-mono">{formatBRL(item.estimatedPrice)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[9px] text-[#22c55e] block font-bold">Piso Buscapé</span>
+                    <span className="font-black text-[#22c55e] font-mono">{formatBRL(item.marketLowest)}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          );
-        })}
+
+            {/* Audit Speech Balloon Trigger Button */}
+            <button
+              onClick={() => setActiveTrend(item)}
+              className="w-full py-3 bg-[#22c55e] text-black hover:bg-white font-black text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer"
+            >
+              <MessageSquare className="w-3.5 h-3.5 fill-current" />
+              <span>Auditar Preço Deste Item</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        ))}
       </div>
+
+      {/* High-Z Speech Balloon Modal Dialog */}
+      {activeTrend && (
+        <TrendAuditModal
+          isOpen={!!activeTrend}
+          onClose={() => setActiveTrend(null)}
+          keyword={activeTrend.keyword}
+          productName={activeTrend.name}
+          store={activeTrend.store}
+          estimatedPrice={activeTrend.estimatedPrice}
+        />
+      )}
     </div>
   );
 }
