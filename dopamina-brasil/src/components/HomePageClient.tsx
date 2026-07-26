@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic';
 
 const SwipeMode = dynamic(() => import('@/components/SwipeMode'), { ssr: false });
 import MobileAppShell from '@/components/mobile/MobileAppShell';
+import LiveWebAnalyzer from '@/components/LiveWebAnalyzer';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -152,79 +153,16 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
             </div>
             
             <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-xs font-bold text-[#71717a]">
+              <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona na Fast Shop</span>
               <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona na Amazon</span>
               <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona no Mercado Livre</span>
             </div>
           </div>
 
-          {/* Right Visual / Mockup */}
-          <div className="flex-1 w-full max-w-[500px] lg:max-w-none relative z-10">
-            {/* Main Mockup Card */}
-            <div 
-              className="group relative transition-all duration-700 ease-out"
-              style={{ perspective: '1000px' }}
-            >
-              <div 
-                className="transition-transform duration-700 ease-out"
-                style={{ transform: 'rotateY(-10deg) rotateX(5deg)' }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'rotateY(0deg) rotateX(0deg)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'rotateY(-10deg) rotateX(5deg)'}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#22c55e]/20 to-[#f97316]/20 blur-2xl rounded-[2rem] -z-10 animate-pulse" />
-                
-                <div className="bg-[#18181b] border border-[#27272a] rounded-[1.5rem] p-6 shadow-2xl relative overflow-hidden">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#27272a]">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#f97316]/20 flex items-center justify-center border border-[#f97316]/50 shadow-[0_0_10px_rgba(249,115,22,0.3)]">
-                        <span className="text-xl">🚨</span>
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-black text-[#f97316] uppercase tracking-wide">Falsa Escassez</h3>
-                        <p className="text-[10px] text-[#a1a1aa] font-bold">Bondfaro Sync Actived</p>
-                      </div>
-                    </div>
-                    <div className="px-3 py-1 rounded bg-[#27272a] border border-[#3f3f46]">
-                      <span className="text-[10px] font-bold text-[#e4e4e7]">ON</span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="space-y-4">
-                    <p className="text-xs text-[#e4e4e7] font-medium leading-relaxed">
-                      Cuidado! Este produto está 54.2% mais barato no mercado. Não caia no FOMO!
-                    </p>
-                    
-                    <div className="bg-black/50 border border-white/5 rounded-xl p-4">
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-[#a1a1aa]">Preço detectado aqui:</span>
-                        <span className="text-[#f87171] font-bold">R$ 4.360,50</span>
-                      </div>
-                      <div className="flex justify-between text-xs mb-4">
-                        <span className="text-[#a1a1aa]">Piso do mercado:</span>
-                        <span className="text-[#4ade80] font-bold">R$ 1.999,00</span>
-                      </div>
-                      <div className="pt-4 border-t border-dashed border-[#3f3f46]">
-                        <button className="w-full bg-[#f97316] text-white py-2.5 rounded-lg text-xs font-black tracking-wide shadow-lg hover:bg-[#ea580c] transition-colors">
-                          VER LOJA MAIS BARATA ➔
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating Element 1 */}
-                <div className="absolute -right-12 -top-12 bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-2xl p-4 backdrop-blur-md shadow-xl hidden sm:block pointer-events-none" style={{ animation: 'float 6s ease-in-out infinite' }}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">✅</span>
-                    <div>
-                      <p className="text-[10px] text-[#22c55e] font-black uppercase">Piso do Mercado</p>
-                      <p className="text-white text-sm font-bold">R$ 1.999,00</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Right Visual / Mockup & Live Analyzer */}
+          <div className="flex-1 w-full max-w-[600px] lg:max-w-none relative z-10">
+            {/* Live Web Analyzer Widget */}
+            <LiveWebAnalyzer />
           </div>
           
         </div>
