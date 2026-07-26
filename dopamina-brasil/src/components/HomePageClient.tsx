@@ -14,6 +14,7 @@ import MobileAppShell from '@/components/mobile/MobileAppShell';
 import LiveWebAnalyzer from '@/components/LiveWebAnalyzer';
 import TrendingProductsShowcase from '@/components/TrendingProductsShowcase';
 import ProductIntelligenceSuite from '@/components/ProductIntelligenceSuite';
+import InsightsTelemetryModal from '@/components/InsightsTelemetryModal';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -34,6 +35,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
   const [activeCategory, setActiveCategory] = useState('todos');
   const [heroSlide, setHeroSlide] = useState(0);
   const [swipeMode, setSwipeMode] = useState(false);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
   const { addItem } = useCart();
 
   // SWR Infinite Pagination
@@ -177,7 +179,23 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         {/* 5 Revolutionary Intelligence Suite Engines */}
         <div className="px-4 sm:px-6 relative z-10 pb-12">
           <ProductIntelligenceSuite />
+
+          {/* Trigger for Live Insights Telemetry Modal */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setShowInsightsModal(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500/10 border border-orange-500/40 text-orange-400 font-mono text-xs font-black uppercase tracking-wider hover:bg-orange-500/20 transition-all shadow-[0_0_20px_rgba(249,115,22,0.2)] active:scale-95"
+            >
+              <span>📊 Ver Dashboard de Insights & Telemetria IA ao Vivo</span>
+            </button>
+          </div>
         </div>
+
+        {/* Live Insights Telemetry Modal */}
+        <InsightsTelemetryModal
+          isOpen={showInsightsModal}
+          onClose={() => setShowInsightsModal(false)}
+        />
       </section>
 
       {/* ============ MARQUEE DIVIDER AT TOP ============ */}
