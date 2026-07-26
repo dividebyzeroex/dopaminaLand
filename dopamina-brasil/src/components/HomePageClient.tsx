@@ -13,6 +13,7 @@ const SwipeMode = dynamic(() => import('@/components/SwipeMode'), { ssr: false }
 import MobileAppShell from '@/components/mobile/MobileAppShell';
 import LiveWebAnalyzer from '@/components/LiveWebAnalyzer';
 import TrendingProductsShowcase from '@/components/TrendingProductsShowcase';
+import ProductIntelligenceSuite from '@/components/ProductIntelligenceSuite';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -169,8 +170,13 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         </div>
 
         {/* Live E-Commerce Trends Showcase */}
-        <div className="px-4 sm:px-6 relative z-10 pb-8">
+        <div className="px-4 sm:px-6 relative z-10 pb-4">
           <TrendingProductsShowcase />
+        </div>
+
+        {/* 5 Revolutionary Intelligence Suite Engines */}
+        <div className="px-4 sm:px-6 relative z-10 pb-12">
+          <ProductIntelligenceSuite />
         </div>
       </section>
 

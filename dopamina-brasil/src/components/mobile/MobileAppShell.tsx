@@ -7,6 +7,7 @@ import MobileStoriesFeed from "./MobileStoriesFeed";
 import MobileQuickBuySheet from "./MobileQuickBuySheet";
 import LiveWebAnalyzer from "@/components/LiveWebAnalyzer";
 import TrendingProductsShowcase from "@/components/TrendingProductsShowcase";
+import ProductIntelligenceSuite from "@/components/ProductIntelligenceSuite";
 import { Zap, Flame, ShoppingBag, Trophy, ShieldAlert, Sparkles } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 
@@ -79,6 +80,9 @@ export default function MobileAppShell({ products, flashDeals = [] }: MobileAppS
 
             {/* Mobile Live Trends Carousel */}
             <TrendingProductsShowcase />
+
+            {/* Mobile 5-Engine Intelligence Suite */}
+            <ProductIntelligenceSuite />
 
             {/* Mobile Grid */}
             <div className="space-y-3 pt-4 border-t border-white/10">
