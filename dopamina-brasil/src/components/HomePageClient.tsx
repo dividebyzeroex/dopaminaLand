@@ -10,6 +10,7 @@ import { Product } from '@/types';
 import dynamic from 'next/dynamic';
 
 const SwipeMode = dynamic(() => import('@/components/SwipeMode'), { ssr: false });
+import MobileAppShell from '@/components/mobile/MobileAppShell';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -83,6 +84,14 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
   return (
     <div>
+      {/* EXCLUSIVE MOBILE NATIVE APP SHELL (< 768px) */}
+      <MobileAppShell
+        products={displayedProducts.length > 0 ? displayedProducts : products}
+        flashDeals={flashDeals}
+      />
+
+      {/* DESKTOP LAYOUT (>= 768px) */}
+      <div className="hidden md:block">
       {/* SWIPE MODE OVERLAY */}
       {swipeMode && (
         <SwipeMode
@@ -493,6 +502,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
           ))}
         </div>
       </section>
+      </div>
     </div>
   );
 }
