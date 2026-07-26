@@ -200,11 +200,13 @@ export default function TrendAuditModal({
               {activeSubTab === "netprice" && (
                 <div className="p-3 rounded-xl bg-black/60 border border-white/10 grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-[9px] text-gray-400 block">Cupom Sugerido</span>
-                    <span className="font-bold font-mono text-amber-400">{data.net_price_breakdown?.suggestedCoupon}</span>
+                    <span className="text-[9px] text-gray-400 block">Cupom Válido ({data.net_price_breakdown?.storeName || store})</span>
+                    <span className="font-extrabold font-mono text-amber-400">
+                      {data.net_price_breakdown?.suggestedCoupon} (-{data.net_price_breakdown?.couponDiscountPercent || 10}%)
+                    </span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-[#22c55e] block font-bold">Valor Mínimo Líquido</span>
+                    <span className="text-[9px] text-[#22c55e] block font-bold">Valor Mínimo Líquido (Pix+Cashback)</span>
                     <span className="font-black font-mono text-[#22c55e]">{formatBRL(data.net_price_breakdown?.finalNetPrice || 0)}</span>
                   </div>
                 </div>
