@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Flame, ArrowRight, Store, ChevronLeft, ChevronRight, Zap } from "lucide-react";
-import { trackEvent } from "@/lib/tracking";
+import { Flame, ArrowRight, Store, ChevronLeft, ChevronRight, Zap, MessageSquare } from "lucide-react";
+import TrendAuditModal from "@/components/TrendAuditModal";
 
 interface TrendItem {
   id: string;
@@ -17,13 +17,10 @@ interface TrendItem {
   overpricedPercent: number;
 }
 
-interface TrendingProductsShowcaseProps {
-  onAuditProduct?: (keyword: string, name?: string) => void;
-}
-
-export default function TrendingProductsShowcase({ onAuditProduct }: TrendingProductsShowcaseProps) {
+export default function TrendingProductsShowcase() {
   const [trends, setTrends] = useState<TrendItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeModalTrend, setActiveModalTrend] = useState<TrendItem | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,24 +39,6 @@ export default function TrendingProductsShowcase({ onAuditProduct }: TrendingPro
     if (scrollContainerRef.current) {
       const scrollAmount = direction === "left" ? -360 : 360;
       scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
-
-  const handleAuditClick = (item: TrendItem) => {
-    // Send event to telemetry / Insights
-    try {
-      trackEvent("dark_pattern_audit", item.store, item.estimatedPrice, {
-        source: "trending_carousel",
-        keyword: item.keyword,
-        product_name: item.name,
-        store_name: item.store,
-        market_lowest: item.marketLowest,
-      });
-    } catch (e) {}
-
-    // Trigger price search tool callback if provided
-    if (onAuditProduct) {
-      onAuditProduct(item.keyword, item.name);
     }
   };
 
@@ -128,7 +107,7 @@ export default function TrendingProductsShowcase({ onAuditProduct }: TrendingPro
         </motion.div>
       </div>
 
-      {/* Smooth Horizontal Drag & Slide Carousel */}
+      {/* Smooth Horizontal Slide Carousel */}
       <div
         ref={scrollContainerRef}
         className="flex gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 px-1 scrollbar-none"
@@ -185,18 +164,30 @@ export default function TrendingProductsShowcase({ onAuditProduct }: TrendingPro
               </div>
             </div>
 
-            {/* Integrated Audit Button */}
+            {/* Audit Speech Balloon Trigger Button */}
             <button
-              onClick={() => handleAuditClick(item)}
+              onClick={() => setActiveModalTrend(item)}
               className="w-full py-3 bg-[#22c55e] text-black font-black text-xs uppercase tracking-wider rounded-xl hover:bg-white transition-colors flex items-center justify-center gap-2 shadow-md active:scale-95"
             >
-              <Zap className="w-3.5 h-3.5 fill-current" />
+              <MessageSquare className="w-3.5 h-3.5 fill-current" />
               <span>Auditar Preço Deste Item</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </motion.div>
         ))}
       </div>
+
+      {/* Floating Conversational Speech Balloon Modal */}
+      {activeModalTrend && (
+        <TrendAuditModal
+          isOpen={!!activeModalTrend}
+          onClose={() => setActiveModalTrend(null)}
+          keyword={activeModalTrend.keyword}
+          productName={activeModalTrend.name}
+          store={activeModalTrend.store}
+          estimatedPrice={activeModalTrend.estimatedPrice}
+        />
+      )}
     </div>
   );
 }

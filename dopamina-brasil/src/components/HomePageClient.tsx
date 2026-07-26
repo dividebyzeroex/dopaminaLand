@@ -170,14 +170,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
         {/* Live E-Commerce Trends Showcase */}
         <div className="px-4 sm:px-6 relative z-10 pb-8">
-          <TrendingProductsShowcase
-            onAuditProduct={(keyword) => {
-              const el = document.getElementById("live-analyzer-section");
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-              }
-            }}
-          />
+          <TrendingProductsShowcase />
         </div>
       </section>
 
