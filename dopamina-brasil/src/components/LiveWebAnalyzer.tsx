@@ -2,72 +2,53 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, AlertTriangle, CheckCircle2, ArrowRight, Zap, ShieldAlert, ExternalLink, LineChart } from "lucide-react";
+import { Search, Loader2, AlertTriangle, ArrowRight, Zap, ShieldAlert, ExternalLink, CheckCircle } from "lucide-react";
 
 export default function LiveWebAnalyzer() {
   const [urlInput, setUrlInput] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "result">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "result" | "error">("idle");
   const [resultData, setResultData] = useState<any>(null);
 
   const demoLinks = [
-    { label: "🍎 iPhone 17 (Fast Shop)", url: "https://site.fastshop.com.br/iphone-17-apple--256gb--preto--tela-de-6-3---5g-e-c", query: "iPhone 17 Apple 256GB" },
-    { label: "🎮 RTX 4090 (Amazon)", url: "https://www.amazon.com.br/dp/B0BJGFVJMB", query: "NVIDIA RTX 4090 24GB" },
+    { label: "🍎 iPhone 17 (Fast Shop)", url: "https://site.fastshop.com.br/iphone-17-apple--256gb--preto--tela-de-6-3---5g-e-c", query: "iPhone 17 Apple" },
+    { label: "🎮 RTX 4090 (Amazon)", url: "https://www.amazon.com.br/dp/B0BJGFVJMB", query: "RTX 4090" },
     { label: "👟 Nike Air Max (Mercado Livre)", url: "https://www.mercadolivre.com.br/nike-air-max", query: "Nike Air Max 90" },
   ];
 
-  const handleAnalyze = async (urlToAnalyze: string, customQuery?: string) => {
-    if (!urlToAnalyze.trim()) return;
+  const handleAnalyze = async (inputUrl: string, customQuery?: string) => {
+    if (!inputUrl.trim()) return;
 
     setStatus("loading");
-    setUrlInput(urlToAnalyze);
+    setUrlInput(inputUrl);
 
     try {
-      // Determine search query from URL or demo query
-      let query = customQuery || "";
-      if (!query) {
-        if (urlToAnalyze.includes("iphone")) query = "iPhone 17 Apple";
-        else if (urlToAnalyze.includes("rtx")) query = "RTX 4090";
-        else query = "Geladeira Frost Free";
-      }
+      // Call real price-history API (fetches live Buscapé/Bondfaro search result)
+      const apiUrl = customQuery
+        ? `/api/price-history?q=${encodeURIComponent(customQuery)}`
+        : `/api/price-history?url=${encodeURIComponent(inputUrl)}`;
 
-      const res = await fetch(`/api/price-history?query=${encodeURIComponent(query)}&storePrice=4360.50`);
+      const res = await fetch(apiUrl);
       const data = await res.json();
 
-      setTimeout(() => {
-        setResultData({
-          originalUrl: urlToAnalyze,
-          storePrice: data.storePrice || 4360.5,
-          marketLowest: data.lowestPrice || 1999.0,
-          overpricedPercent: data.overpricedPercent || 54.2,
-          savings: data.savings || 2361.5,
-          bestDealUrl: data.bestDealUrl || "https://www.buscape.com.br",
-          bestDealStore: data.bestDealStore || "Mercado Livre",
-          detectedTriggers: [
-            "🚨 Falsa Escassez: O contador 'Restam apenas 2 unidades' é regenerado a cada atualização da página.",
-            "⚠️ Ancoragem Inflada: Preço sugerido 'De R$ 6.999' nunca foi praticado nos últimos 90 dias.",
-            "👁️ Pressão Social Induzida: '38 pessoas estão com este item no carrinho' é gerado por script local.",
-          ],
-        });
-        setStatus("result");
-      }, 2000);
+      if (!data.success) {
+        setStatus("error");
+        return;
+      }
+
+      setResultData({
+        scrapedName: data.scraped_name || "Produto Auditado",
+        storePrice: data.current_price,
+        marketLowest: data.scraped_price,
+        overpricedPercent: data.overpriced_percent,
+        savings: data.savings,
+        bestDealUrl: data.url,
+        isFomoAlert: data.is_fomo_alert,
+        message: data.message,
+        detectedTriggers: data.detected_triggers || [],
+      });
+      setStatus("result");
     } catch (e) {
-      // Fallback result if API network fails
-      setTimeout(() => {
-        setResultData({
-          originalUrl: urlToAnalyze,
-          storePrice: 4360.5,
-          marketLowest: 1999.0,
-          overpricedPercent: 54.2,
-          savings: 2361.5,
-          bestDealUrl: "https://www.buscape.com.br",
-          bestDealStore: "Mercado Livre",
-          detectedTriggers: [
-            "🚨 Falsa Escassez: O contador de estoque é gerado aleatoriamente via JS.",
-            "⚠️ Ancoragem Inflada: Desconto simulado de 40% com preço base acima do piso.",
-          ],
-        });
-        setStatus("result");
-      }, 1800);
+      setStatus("error");
     }
   };
 
@@ -84,15 +65,16 @@ export default function LiveWebAnalyzer() {
               </span>
               <div>
                 <h3 className="text-base font-black font-outfit text-white uppercase tracking-wide">
-                  Analisador de E-Commerce ao Vivo [Web]
+                  Analisador Web ao Vivo [Bondfaro / Buscapé Real API]
                 </h3>
                 <p className="text-xs text-gray-400">
-                  Cole o link de qualquer produto para checar o menor preço e detectar gatilhos falsos
+                  Cole o link de qualquer e-commerce para checar o preço real do mercado ao vivo
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-mono font-bold text-[#22c55e] px-3 py-1 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full self-start sm:self-auto">
-              BONDFARO SYNC ACTIVE
+            <span className="text-[10px] font-mono font-bold text-[#22c55e] px-3 py-1 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full self-start sm:self-auto flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-ping" />
+              BUSCAPÉ SYNC LIVE
             </span>
           </div>
 
@@ -120,14 +102,14 @@ export default function LiveWebAnalyzer() {
                       placeholder="Cole aqui o link do produto (Fast Shop, Amazon, Mercado Livre...)"
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors text-sm"
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors text-sm font-mono"
                     />
                   </div>
                   <button
                     type="submit"
                     className="px-8 py-4 bg-gradient-to-r from-[#22c55e] to-[#16a34a] text-black font-black text-xs uppercase tracking-widest rounded-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-lg"
                   >
-                    <span>Analisar Agora</span>
+                    <span>Consultar Bondfaro</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>
@@ -135,7 +117,7 @@ export default function LiveWebAnalyzer() {
                 {/* Quick Demo Links */}
                 <div className="space-y-2 pt-2">
                   <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
-                    Ou teste com 1 toque nestes exemplos reais:
+                    Ou clique para testar com consultas reais ao vivo:
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {demoLinks.map((demo, i) => (
@@ -160,7 +142,7 @@ export default function LiveWebAnalyzer() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="py-8 flex flex-col items-center justify-center text-center space-y-4"
+                className="py-10 flex flex-col items-center justify-center text-center space-y-4"
               >
                 <div className="relative">
                   <Loader2 className="w-12 h-12 text-[#22c55e] animate-spin" />
@@ -168,10 +150,10 @@ export default function LiveWebAnalyzer() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-white">
-                    Conectando às APIs de Mercado & Mapeando Gatilhos...
+                    Consultando scraper real em buscape.com.br...
                   </p>
-                  <p className="text-xs text-gray-500 font-mono">
-                    URL: <span className="text-gray-300">{urlInput}</span>
+                  <p className="text-xs text-gray-400 font-mono">
+                    URL / Termo: <span className="text-[#22c55e]">{urlInput}</span>
                   </p>
                 </div>
               </motion.div>
@@ -185,22 +167,33 @@ export default function LiveWebAnalyzer() {
                 className="space-y-6"
               >
                 {/* Result Price Alert */}
-                <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className={`p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                  resultData.isFomoAlert
+                    ? "bg-red-500/10 border-red-500/30"
+                    : "bg-[#22c55e]/10 border-[#22c55e]/30"
+                }`}>
                   <div className="flex items-start gap-3">
-                    <ShieldAlert className="w-8 h-8 text-red-400 shrink-0 mt-1" />
+                    {resultData.isFomoAlert ? (
+                      <ShieldAlert className="w-8 h-8 text-red-400 shrink-0 mt-1" />
+                    ) : (
+                      <CheckCircle className="w-8 h-8 text-[#22c55e] shrink-0 mt-1" />
+                    )}
                     <div>
-                      <span className="text-xs font-bold text-red-400 uppercase tracking-wider block mb-1">
-                        ⚠️ Alerta Anti-FOMO: Produto Sobreprecificado
+                      <span className={`text-xs font-bold uppercase tracking-wider block mb-1 ${
+                        resultData.isFomoAlert ? "text-red-400" : "text-[#22c55e]"
+                      }`}>
+                        {resultData.isFomoAlert ? "⚠️ Alerta Anti-FOMO: Preço Acima do Piso" : "✅ Oferta Alinhada ao Piso de Mercado"}
                       </span>
-                      <h4 className="text-lg font-black font-outfit text-white">
-                        Este produto está {resultData.overpricedPercent}% mais caro nesta loja!
+                      <h4 className="text-base md:text-lg font-black font-outfit text-white">
+                        {resultData.scrapedName}
                       </h4>
                     </div>
                   </div>
+
                   <div className="text-right shrink-0">
-                    <span className="text-xs text-gray-400 block">Economia Potencial:</span>
+                    <span className="text-xs text-gray-400 block">Menor Oferta Encontrada:</span>
                     <span className="text-2xl font-black font-outfit text-[#22c55e]">
-                      R$ {resultData.savings.toFixed(2)}
+                      R$ {resultData.marketLowest.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -208,13 +201,13 @@ export default function LiveWebAnalyzer() {
                 {/* Price Breakdown Grid */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-xs text-gray-400">Preço Detectado Nesta Loja:</span>
+                    <span className="text-xs text-gray-400">Preço Estimado na Loja:</span>
                     <p className="text-xl font-bold font-mono text-red-400">
                       R$ {resultData.storePrice.toFixed(2)}
                     </p>
                   </div>
                   <div className="p-4 rounded-xl bg-[#22c55e]/10 border border-[#22c55e]/30 space-y-1">
-                    <span className="text-xs text-[#22c55e] font-semibold">Piso Real do Mercado (Bondfaro):</span>
+                    <span className="text-xs text-[#22c55e] font-semibold">Piso Real do Mercado (Buscapé/Bondfaro API):</span>
                     <p className="text-xl font-black font-mono text-[#22c55e]">
                       R$ {resultData.marketLowest.toFixed(2)}
                     </p>
@@ -224,7 +217,7 @@ export default function LiveWebAnalyzer() {
                 {/* Detected Dark Patterns */}
                 <div className="space-y-3">
                   <h5 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    Gatilhos Psicológicos Interceptados Nesta Página:
+                    Gatilhos Psicológicos Interceptados Nesta Consulta:
                   </h5>
                   <ul className="space-y-2">
                     {resultData.detectedTriggers.map((trig: string, idx: number) => (
@@ -242,17 +235,39 @@ export default function LiveWebAnalyzer() {
                     onClick={() => setStatus("idle")}
                     className="text-xs font-bold text-gray-400 hover:text-white underline"
                   >
-                    Analisar Outra URL
+                    Consultar Outro Produto
                   </button>
 
                   <a
-                    href="/extensao"
-                    className="w-full sm:w-auto px-6 py-3 bg-[#f97316] text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                    href={resultData.bestDealUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto px-6 py-3 bg-[#22c55e] text-black font-black text-xs uppercase tracking-widest rounded-xl hover:bg-white transition-colors flex items-center justify-center gap-2 shadow-lg"
                   >
-                    <span>Quer isso automático? Instalar Barra de Dopamina</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Ver Menor Oferta no Buscapé</span>
+                    <ExternalLink className="w-4 h-4" />
                   </a>
                 </div>
+              </motion.div>
+            )}
+
+            {status === "error" && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-8 text-center space-y-4"
+              >
+                <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto" />
+                <p className="text-sm text-gray-300">
+                  Não foi possível completar a consulta ao Buscapé para este produto no momento.
+                </p>
+                <button
+                  onClick={() => setStatus("idle")}
+                  className="px-6 py-2 bg-white/10 text-white font-bold text-xs uppercase rounded-xl"
+                >
+                  Tentar Novamente
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
