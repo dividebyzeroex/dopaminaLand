@@ -161,7 +161,7 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
           </div>
 
           {/* Right Visual / Mockup & Live Analyzer */}
-          <div className="flex-1 w-full max-w-[600px] lg:max-w-none relative z-10">
+          <div id="live-analyzer-section" className="flex-1 w-full max-w-[600px] lg:max-w-none relative z-10">
             {/* Live Web Analyzer Widget */}
             <LiveWebAnalyzer />
           </div>
@@ -170,7 +170,14 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
 
         {/* Live E-Commerce Trends Showcase */}
         <div className="px-4 sm:px-6 relative z-10 pb-8">
-          <TrendingProductsShowcase />
+          <TrendingProductsShowcase
+            onAuditProduct={(keyword) => {
+              const el = document.getElementById("live-analyzer-section");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            }}
+          />
         </div>
       </section>
 

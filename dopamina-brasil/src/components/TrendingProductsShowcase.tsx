@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Flame, TrendingUp, Zap, ArrowRight, Store, ShieldAlert } from "lucide-react";
+import { Flame, ArrowRight, Store, ChevronLeft, ChevronRight, Zap } from "lucide-react";
+import { trackEvent } from "@/lib/tracking";
 
 interface TrendItem {
   id: string;
@@ -17,12 +18,13 @@ interface TrendItem {
 }
 
 interface TrendingProductsShowcaseProps {
-  onSelectTrend?: (keyword: string) => void;
+  onAuditProduct?: (keyword: string, name?: string) => void;
 }
 
-export default function TrendingProductsShowcase({ onSelectTrend }: TrendingProductsShowcaseProps) {
+export default function TrendingProductsShowcase({ onAuditProduct }: TrendingProductsShowcaseProps) {
   const [trends, setTrends] = useState<TrendItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/trending-products")
@@ -35,6 +37,31 @@ export default function TrendingProductsShowcase({ onSelectTrend }: TrendingProd
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -360 : 360;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const handleAuditClick = (item: TrendItem) => {
+    // Send event to telemetry / Insights
+    try {
+      trackEvent("dark_pattern_audit", item.store, item.estimatedPrice, {
+        source: "trending_carousel",
+        keyword: item.keyword,
+        product_name: item.name,
+        store_name: item.store,
+        market_lowest: item.marketLowest,
+      });
+    } catch (e) {}
+
+    // Trigger price search tool callback if provided
+    if (onAuditProduct) {
+      onAuditProduct(item.keyword, item.name);
+    }
+  };
 
   const formatBRL = (val: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
@@ -52,7 +79,7 @@ export default function TrendingProductsShowcase({ onSelectTrend }: TrendingProd
 
   return (
     <div className="w-full max-w-7xl mx-auto my-8 space-y-6">
-      {/* Section Header */}
+      {/* Section Header with Carousel Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono text-[10px] font-bold uppercase tracking-wider mb-2">
@@ -63,9 +90,24 @@ export default function TrendingProductsShowcase({ onSelectTrend }: TrendingProd
             Os Mais Buscados do Brasil Hoje
           </h2>
         </div>
-        <span className="text-xs text-gray-400 max-w-xs text-right hidden sm:block">
-          Toque em qualquer item para executar uma auditoria de preço instantânea.
-        </span>
+
+        {/* Slide Carousel Arrow Navigation Controls */}
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button
+            onClick={() => scroll("left")}
+            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/20 active:scale-95 transition-all"
+            aria-label="Anterior"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            className="p-2 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40 text-[#22c55e] hover:bg-[#22c55e]/30 active:scale-95 transition-all"
+            aria-label="Próximo"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Live Trends Ticker */}
@@ -86,13 +128,17 @@ export default function TrendingProductsShowcase({ onSelectTrend }: TrendingProd
         </motion.div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Smooth Horizontal Drag & Slide Carousel */}
+      <div
+        ref={scrollContainerRef}
+        className="flex gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 px-1 scrollbar-none"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {trends.map((item, index) => (
           <motion.div
             key={item.id}
             whileHover={{ y: -4, scale: 1.01 }}
-            className="p-5 rounded-2xl bg-[#0a0a0f]/90 border border-white/10 hover:border-[#22c55e]/40 transition-all shadow-xl space-y-4 flex flex-col justify-between group"
+            className="min-w-[290px] sm:min-w-[340px] max-w-[340px] p-5 rounded-2xl bg-[#0a0a0f]/90 border border-white/10 hover:border-[#22c55e]/40 transition-all shadow-xl space-y-4 flex flex-col justify-between group shrink-0"
           >
             <div className="space-y-3">
               {/* Card Top Row */}
@@ -139,11 +185,12 @@ export default function TrendingProductsShowcase({ onSelectTrend }: TrendingProd
               </div>
             </div>
 
-            {/* Audit CTA Button */}
+            {/* Integrated Audit Button */}
             <button
-              onClick={() => onSelectTrend && onSelectTrend(item.keyword)}
+              onClick={() => handleAuditClick(item)}
               className="w-full py-3 bg-[#22c55e] text-black font-black text-xs uppercase tracking-wider rounded-xl hover:bg-white transition-colors flex items-center justify-center gap-2 shadow-md active:scale-95"
             >
+              <Zap className="w-3.5 h-3.5 fill-current" />
               <span>Auditar Preço Deste Item</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
