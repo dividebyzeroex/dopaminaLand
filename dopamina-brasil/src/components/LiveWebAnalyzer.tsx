@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, AlertTriangle, ArrowRight, Zap, ShieldAlert, ExternalLink, CheckCircle } from "lucide-react";
+import { Search, Loader2, AlertTriangle, ArrowRight, Zap, ShieldAlert, ExternalLink, CheckCircle, Brain, Clock, Scale, Truck } from "lucide-react";
 import { trackEvent } from "@/lib/tracking";
 import BlackFraudeChart from "@/components/BlackFraudeChart";
 
@@ -10,7 +10,7 @@ export default function LiveWebAnalyzer() {
   const [urlInput, setUrlInput] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "result" | "error">("idle");
   const [resultData, setResultData] = useState<any>(null);
-  const [showChart, setShowChart] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState<"chart" | "reviews" | "netprice" | "predict" | "cost">("chart");
 
   const demoLinks = [
     { label: "🍎 iPhone 17", url: "https://site.fastshop.com.br/iphone-17-apple--256gb--preto--tela-de-6-3---5g-e-c", query: "iPhone 17 Apple" },
@@ -48,6 +48,11 @@ export default function LiveWebAnalyzer() {
         message: data.message,
         priceHistory: data.price_history || [],
         detectedTriggers: data.detected_triggers || [],
+        reviewAuthenticity: data.review_authenticity,
+        netPriceBreakdown: data.net_price_breakdown,
+        futurePricePrediction: data.future_price_prediction,
+        costPerUseCalc: data.cost_per_use_calc,
+        freightAudit: data.freight_audit,
       });
       setStatus("result");
 
@@ -80,7 +85,7 @@ export default function LiveWebAnalyzer() {
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-3">
+    <div className="w-full max-w-4xl mx-auto my-3 font-inter">
       <div className="relative p-0.5 rounded-2xl bg-gradient-to-r from-[#22c55e]/30 via-[#f97316]/30 to-[#a855f7]/30 backdrop-blur-xl shadow-xl">
         <div className="bg-[#111116]/95 rounded-[15px] p-4 sm:p-5 border border-white/10 space-y-4">
           
@@ -92,13 +97,13 @@ export default function LiveWebAnalyzer() {
               </span>
               <div>
                 <h3 className="font-black font-outfit text-white uppercase tracking-wide text-xs sm:text-sm">
-                  Analisador de Preços ao Vivo
+                  Motor de Análise de E-Commerce (5 Motores)
                 </h3>
               </div>
             </div>
             <span className="text-[9px] font-mono font-bold text-[#22c55e] px-2.5 py-0.5 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-full flex items-center gap-1 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-ping" />
-              BUSCAPÉ SYNC LIVE
+              BUSCAPÉ & INTELIGÊNCIA SYNC
             </span>
           </div>
 
@@ -123,7 +128,7 @@ export default function LiveWebAnalyzer() {
                     <input
                       type="url"
                       required
-                      placeholder="Cole o link do produto (Fast Shop, Amazon, Mercado Livre...)"
+                      placeholder="Cole a URL do e-commerce (Fast Shop, Amazon, Mercado Livre...)"
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
                       className="w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#22c55e] transition-colors text-xs font-mono"
@@ -133,7 +138,7 @@ export default function LiveWebAnalyzer() {
                     type="submit"
                     className="px-5 py-2.5 bg-[#22c55e] text-black font-black text-xs uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shadow-md"
                   >
-                    <span>Analisar</span>
+                    <span>Auditar ao Vivo</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </form>
@@ -166,10 +171,10 @@ export default function LiveWebAnalyzer() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="py-6 flex flex-col items-center justify-center text-center space-y-2"
+                className="py-8 flex flex-col items-center justify-center text-center space-y-2"
               >
                 <Loader2 className="w-8 h-8 text-[#22c55e] animate-spin" />
-                <p className="text-xs font-bold text-white">Consultando scraper ao vivo no Buscapé...</p>
+                <p className="text-xs font-bold text-white">Executando os 5 Motores de Inteligência ao vivo...</p>
               </motion.div>
             )}
 
@@ -178,9 +183,9 @@ export default function LiveWebAnalyzer() {
                 key="result"
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="space-y-3"
+                className="space-y-4"
               >
-                {/* Ultra-Compact Main Result Card */}
+                {/* Header Result summary */}
                 <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 truncate">
@@ -199,7 +204,7 @@ export default function LiveWebAnalyzer() {
                     </span>
                   </div>
 
-                  {/* Inline Price Comparison Bar */}
+                  {/* Inline Price Bar */}
                   <div className="flex flex-wrap items-center justify-between gap-2 bg-black/40 border border-white/5 p-3 rounded-lg text-xs">
                     <div className="flex items-center gap-4">
                       <div>
@@ -213,49 +218,124 @@ export default function LiveWebAnalyzer() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {resultData.savings > 0 && (
-                        <span className="text-xs font-black text-[#22c55e] bg-[#22c55e]/10 px-2 py-1 rounded">
-                          Economia: {formatBRL(resultData.savings)}
-                        </span>
-                      )}
-                      <a
-                        href={resultData.bestDealUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 bg-[#22c55e] text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-colors flex items-center gap-1"
-                      >
-                        <span>Ver Oferta</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
+                    <a
+                      href={resultData.bestDealUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3.5 py-1.5 bg-[#22c55e] text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-colors flex items-center gap-1"
+                    >
+                      <span>Ver Oferta</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
                   </div>
 
-                  {/* Compact Trigger Tags */}
-                  <div className="flex items-center justify-between text-[10px] text-gray-400 pt-1">
-                    <div className="flex items-center gap-1 overflow-x-auto truncate">
-                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                      <span className="truncate">Gatilhos: Ancoragem Inflada · Falsa Escassez</span>
-                    </div>
-
+                  {/* 5 Engine Sub-Tab Selector */}
+                  <div className="flex items-center gap-1 overflow-x-auto pt-2 pb-1 text-[11px] font-bold border-t border-white/10 scrollbar-none">
                     <button
-                      onClick={() => setShowChart(!showChart)}
-                      className="text-[#22c55e] font-bold underline shrink-0 ml-2"
+                      onClick={() => setActiveSubTab("chart")}
+                      className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${
+                        activeSubTab === "chart" ? "bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30" : "text-gray-400 hover:text-white"
+                      }`}
                     >
-                      {showChart ? "Ocultar Gráfico" : "Ver Gráfico Temporal 📈"}
+                      <span>📈 Histórico Mês a Mês</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveSubTab("reviews")}
+                      className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${
+                        activeSubTab === "reviews" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      <Brain className="w-3 h-3" />
+                      <span>Raio-X Reviews ({resultData.reviewAuthenticity?.score}% Real)</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveSubTab("netprice")}
+                      className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${
+                        activeSubTab === "netprice" ? "bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      <Zap className="w-3 h-3" />
+                      <span>Preço Líquido (Cupom+Pix)</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveSubTab("predict")}
+                      className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${
+                        activeSubTab === "predict" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      <Clock className="w-3 h-3" />
+                      <span>Radar Futuro</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveSubTab("cost")}
+                      className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap flex items-center gap-1 ${
+                        activeSubTab === "cost" ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      <Scale className="w-3 h-3" />
+                      <span>Custo p/ Uso</span>
                     </button>
                   </div>
-                </div>
 
-                {/* Collapsible Sleek Chart */}
-                {showChart && (
-                  <BlackFraudeChart
-                    storePrice={resultData.storePrice}
-                    marketLowest={resultData.marketLowest}
-                    productName={resultData.scrapedName}
-                    priceHistory={resultData.priceHistory}
-                  />
-                )}
+                  {/* Sub-Tab Dynamic Content */}
+                  {activeSubTab === "chart" && (
+                    <BlackFraudeChart
+                      storePrice={resultData.storePrice}
+                      marketLowest={resultData.marketLowest}
+                      productName={resultData.scrapedName}
+                      priceHistory={resultData.priceHistory}
+                    />
+                  )}
+
+                  {activeSubTab === "reviews" && (
+                    <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 space-y-2 text-xs">
+                      <div className="flex items-center justify-between text-purple-300 font-bold">
+                        <span>Autenticidade de Comentários:</span>
+                        <span className="text-[#22c55e] font-mono">{resultData.reviewAuthenticity?.score}% Autêntico</span>
+                      </div>
+                      <p className="text-[11px] text-gray-300 leading-relaxed">
+                        {resultData.reviewAuthenticity?.realSummary}
+                      </p>
+                    </div>
+                  )}
+
+                  {activeSubTab === "netprice" && (
+                    <div className="p-3 rounded-xl bg-black/60 border border-white/10 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-[9px] text-gray-400 block">Cupom Ativo Encontrado</span>
+                        <span className="font-bold font-mono text-amber-400">{resultData.netPriceBreakdown?.suggestedCoupon}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-[#22c55e] block font-bold">Preço Mínimo Pix + Cashback</span>
+                        <span className="font-black font-mono text-[#22c55e]">{formatBRL(resultData.netPriceBreakdown?.finalNetPrice || 0)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeSubTab === "predict" && (
+                    <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 space-y-1 text-xs">
+                      <span className="text-amber-400 font-bold block uppercase tracking-wider text-[10px]">
+                        Recomendação Algorítmica: {resultData.futurePricePrediction?.recommendation}
+                      </span>
+                      <p className="text-[11px] text-gray-300">
+                        {resultData.futurePricePrediction?.reason}
+                      </p>
+                    </div>
+                  )}
+
+                  {activeSubTab === "cost" && (
+                    <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-500/30 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-[9px] text-gray-400 block">Custo Diário em 365 Dias</span>
+                        <span className="font-bold font-mono text-blue-400">{resultData.costPerUseCalc?.dailyCost365d}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-gray-400 block">Auditoria de Frete</span>
+                        <span className="font-bold text-gray-200">{resultData.freightAudit?.freightPrice} ({resultData.freightAudit?.verdict})</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Reset button */}
                 <div className="text-right">
@@ -263,7 +343,7 @@ export default function LiveWebAnalyzer() {
                     onClick={() => setStatus("idle")}
                     className="text-[11px] text-gray-400 hover:text-white underline font-semibold"
                   >
-                    Analisar outro produto ↺
+                    Analisar outro e-commerce ↺
                   </button>
                 </div>
               </motion.div>
@@ -276,7 +356,7 @@ export default function LiveWebAnalyzer() {
                 animate={{ opacity: 1 }}
                 className="py-4 text-center space-y-2 text-xs"
               >
-                <p className="text-gray-300">Falha temporária ao conectar ao Buscapé.</p>
+                <p className="text-gray-300">Falha temporária ao conectar ao motor de pesquisa.</p>
                 <button
                   onClick={() => setStatus("idle")}
                   className="px-4 py-1.5 bg-white/10 text-white font-bold rounded-lg"
