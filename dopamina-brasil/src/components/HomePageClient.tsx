@@ -15,6 +15,9 @@ import LiveWebAnalyzer from '@/components/LiveWebAnalyzer';
 import TrendingProductsShowcase from '@/components/TrendingProductsShowcase';
 import ProductIntelligenceSuite from '@/components/ProductIntelligenceSuite';
 import InsightsTelemetryModal from '@/components/InsightsTelemetryModal';
+import DopaminaTerminal from '@/components/DopaminaTerminal';
+import ForensicReplay from '@/components/ForensicReplay';
+import PricePredator from '@/components/PricePredator';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -114,73 +117,102 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
         <span className="hidden sm:inline">Modo Vício</span>
       </button>
 
-      {/* ============ DOPAMINA BAR HERO ============ */}
-      <section className="relative w-full overflow-hidden bg-[#09090b] border-b border-border">
-        {/* Animated Background Gradients */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-[#f97316]/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[120%] bg-[#22c55e]/10 blur-[100px] rounded-full pointer-events-none mix-blend-screen" />
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-20 pointer-events-none" />
+      {/* ============ DOPAMINA HERO — WOW REDESIGN ============ */}
+      <section className="relative w-full overflow-hidden bg-[#07070a] border-b border-[#1a1a2e]">
+        {/* Animated Background */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-[#22c55e]/8 blur-[160px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[120%] bg-[#f97316]/6 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute top-[50%] left-[40%] w-[30%] h-[60%] bg-[#a855f7]/5 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-32 flex flex-col lg:flex-row items-center gap-12">
+        {/* Hero Top — Headline + Analyzer */}
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-16 sm:pt-20 lg:pt-24 pb-8 flex flex-col lg:flex-row items-center gap-10 z-10">
           
-          {/* Left Text Content */}
-          <div className="flex-1 text-center lg:text-left z-10">
-            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-red-400 mb-6 shadow-[0_0_20px_rgba(239,68,68,0.25)] animate-pulse">
-              🛡️ Proteção Anti-BlackFraude 2026 Ativa
+          {/* Left Text */}
+          <div className="flex-1 text-center lg:text-left">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/40 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-[#22c55e] mb-5 shadow-[0_0_25px_rgba(34,197,94,0.2)]">
+              🧠 IA Neural H5 · 99.03% Acurácia · 2.5M Registros
             </span>
-            <h1 className="font-[var(--font-display)] text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight text-white mb-6">
-              Não pague mais a<br className="hidden lg:block"/>
-              <span className="bg-gradient-to-r from-[#ef4444] via-[#f97316] to-[#22c55e] bg-clip-text text-transparent drop-shadow-sm"> metade do dobro.</span>
+            <h1 className="font-[var(--font-display)] text-4xl sm:text-5xl lg:text-6xl font-black leading-[0.95] tracking-tight text-white mb-5">
+              O Bloomberg Terminal<br className="hidden lg:block"/>
+              <span className="bg-gradient-to-r from-[#22c55e] via-[#f97316] to-[#ef4444] bg-clip-text text-transparent">do consumidor brasileiro.</span>
             </h1>
-            <p className="text-base sm:text-lg text-[#a1a1aa] mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
-              A <strong className="text-white">Dopamina Bar & Analisador ao Vivo</strong> intercepta a inflação artificial de preços praticada pelos e-commerces semanas antes da Black Friday. Audite qualquer produto ao vivo no gráfico abaixo!
+            <p className="text-sm sm:text-base text-[#71717a] mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Candlestick charts, Bollinger Bands, RSI, contagem regressiva neural e replay forense de manipulação de preço — ferramentas que antes só existiam em Wall Street, agora protegem seu bolso.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <a 
-                href="/extensao" 
-                className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black px-8 py-4 text-sm font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.15)] overflow-hidden"
-              >
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:animate-shine" />
-                <span className="relative z-10 flex items-center gap-2">
-                  <span className="text-lg">⚡</span> Instalar Anti-FOMO Grátis
-                </span>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+              <a href="#terminal" className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-[#22c55e] text-black px-7 py-3.5 text-sm font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(34,197,94,0.25)] overflow-hidden">
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:animate-shine" />
+                <span className="relative z-10 flex items-center gap-2">📈 Abrir Terminal</span>
               </a>
-              <a 
-                href="#catalogo" 
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/10"
-              >
-                Testar Simulador ↓
+              <a href="#predator" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-bold text-white transition-all hover:bg-white/10">
+                🎯 Price Predator
               </a>
-            </div>
-            
-            <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-xs font-bold text-[#71717a]">
-              <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona na Fast Shop</span>
-              <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona na Amazon</span>
-              <span className="flex items-center gap-2"><span className="text-[#22c55e]">✓</span> Funciona no Mercado Livre</span>
             </div>
           </div>
 
-          {/* Right Visual / Mockup & Live Analyzer */}
-          <div id="live-analyzer-section" className="flex-1 w-full max-w-[600px] lg:max-w-none relative z-10">
-            {/* Live Web Analyzer Widget */}
+          {/* Right — Live Analyzer */}
+          <div className="flex-1 w-full max-w-[600px] lg:max-w-none">
             <LiveWebAnalyzer />
           </div>
-          
         </div>
 
-        {/* Live E-Commerce Trends Showcase */}
-        <div className="px-4 sm:px-6 relative z-10 pb-4">
+        {/* Trending Showcase */}
+        <div className="px-4 sm:px-6 relative z-10 pb-6">
           <TrendingProductsShowcase />
         </div>
 
-        {/* 5 Revolutionary Intelligence Suite Engines */}
-        <div className="px-4 sm:px-6 relative z-10 pb-12">
+        {/* ============ DOPAMINA TERMINAL (Bloomberg) ============ */}
+        <div id="terminal" className="px-4 sm:px-6 relative z-10 pb-8 max-w-7xl mx-auto">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="w-1 h-8 rounded-full bg-gradient-to-b from-[#22c55e] to-[#22c55e]/0" />
+            <div>
+              <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                Dopamina Terminal
+              </h2>
+              <p className="text-[11px] text-gray-500 font-mono">CANDLESTICK · BOLLINGER · RSI · SMA · VOLUME</p>
+            </div>
+          </div>
+          <DopaminaTerminal />
+        </div>
+
+        {/* ============ FORENSIC REPLAY + PRICE PREDATOR (Side by Side on LG) ============ */}
+        <div className="px-4 sm:px-6 relative z-10 pb-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Forensic Replay */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-red-500 to-red-500/0" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                    Forensic Replay
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono">TIMELAPSE DE MANIPULAÇÃO · 12 MESES EM 30s</p>
+                </div>
+              </div>
+              <ForensicReplay />
+            </div>
+
+            {/* Price Predator */}
+            <div id="predator">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-[#22c55e] to-[#22c55e]/0" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                    Price Predator
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono">CONTAGEM REGRESSIVA NEURAL · PREÇO MÍNIMO EM 90 DIAS</p>
+                </div>
+              </div>
+              <PricePredator />
+            </div>
+          </div>
+        </div>
+
+        {/* Intelligence Suite + Insights */}
+        <div className="px-4 sm:px-6 relative z-10 pb-12 max-w-7xl mx-auto">
           <ProductIntelligenceSuite />
 
-          {/* Trigger for Live Insights Telemetry Modal */}
           <div className="mt-4 text-center">
             <button
               onClick={() => setShowInsightsModal(true)}
@@ -191,7 +223,6 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
           </div>
         </div>
 
-        {/* Live Insights Telemetry Modal */}
         <InsightsTelemetryModal
           isOpen={showInsightsModal}
           onClose={() => setShowInsightsModal(false)}

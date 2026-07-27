@@ -8,6 +8,9 @@ import MobileQuickBuySheet from "./MobileQuickBuySheet";
 import LiveWebAnalyzer from "@/components/LiveWebAnalyzer";
 import TrendingProductsShowcase from "@/components/TrendingProductsShowcase";
 import ProductIntelligenceSuite from "@/components/ProductIntelligenceSuite";
+import DopaminaTerminal from "@/components/DopaminaTerminal";
+import ForensicReplay from "@/components/ForensicReplay";
+import PricePredator from "@/components/PricePredator";
 import { Zap, Flame, ShoppingBag, Trophy, ShieldAlert, Sparkles, BarChart3, Brain, Store } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 
@@ -97,6 +100,33 @@ export default function MobileAppShell({ products, flashDeals = [] }: MobileAppS
 
             {/* Mobile 5-Engine Intelligence Suite */}
             <ProductIntelligenceSuite />
+
+            {/* Mobile Dopamina Terminal */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-black font-outfit text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-[#22c55e]" />
+                Dopamina Terminal
+              </h3>
+              <DopaminaTerminal />
+            </div>
+
+            {/* Mobile Forensic Replay */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-black font-outfit text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-red-500" />
+                Forensic Replay
+              </h3>
+              <ForensicReplay />
+            </div>
+
+            {/* Mobile Price Predator */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-black font-outfit text-white uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-[#22c55e]" />
+                Price Predator
+              </h3>
+              <PricePredator />
+            </div>
 
             {/* Mobile Grid */}
             <div className="space-y-3 pt-4 border-t border-white/10">
