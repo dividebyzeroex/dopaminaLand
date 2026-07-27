@@ -18,6 +18,10 @@ import InsightsTelemetryModal from '@/components/InsightsTelemetryModal';
 import DopaminaTerminal from '@/components/DopaminaTerminal';
 import ForensicReplay from '@/components/ForensicReplay';
 import PricePredator from '@/components/PricePredator';
+import LivePriceSeismograph from '@/components/LivePriceSeismograph';
+import PriceWarArena from '@/components/PriceWarArena';
+import DarkPatternRadar from '@/components/DarkPatternRadar';
+import NeuralNetworkVisualizer from '@/components/NeuralNetworkVisualizer';
 
 const trustBadges = [
   { emoji: '🧾', title: '100% dopamina real', desc: 'a fatura nunca chega' },
@@ -205,6 +209,72 @@ export default function HomePageClient({ products, flashDeals = [] }: { products
                 </div>
               </div>
               <PricePredator />
+            </div>
+          </div>
+        </div>
+
+        {/* ============ SEISMOGRAPH + DARK PATTERN RADAR (Side by Side) ============ */}
+        <div className="px-4 sm:px-6 relative z-10 pb-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Live Price Seismograph */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-amber-500 to-amber-500/0" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                    Sismógrafo de Preços
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono">EARTHQUAKES AO VIVO · 6 LOJAS · REALTIME</p>
+                </div>
+              </div>
+              <LivePriceSeismograph />
+            </div>
+
+            {/* Dark Pattern Radar */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-red-500 to-red-500/0" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                    Dark Pattern Radar
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono">X-RAY SCANNER · DETECTA MANIPULAÇÃO OCULTA</p>
+                </div>
+              </div>
+              <DarkPatternRadar />
+            </div>
+          </div>
+        </div>
+
+        {/* ============ PRICE WAR ARENA + NEURAL NETWORK (Side by Side) ============ */}
+        <div className="px-4 sm:px-6 relative z-10 pb-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Price War Arena */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-purple-500 to-purple-500/0" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                    Price War Arena
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono">LOJA vs LOJA · CUSTO REAL TOTAL · FIGHT!</p>
+                </div>
+              </div>
+              <PriceWarArena />
+            </div>
+
+            {/* Neural Network Visualizer */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-purple-400 to-purple-400/0" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-outfit text-white uppercase tracking-wider">
+                    Neural Network H53
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-mono">VISUALIZAÇÃO INTERNA · 5 CAMADAS · 2.5M AMOSTRAS</p>
+                </div>
+              </div>
+              <NeuralNetworkVisualizer />
             </div>
           </div>
         </div>
