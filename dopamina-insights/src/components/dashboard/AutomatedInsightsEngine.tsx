@@ -35,44 +35,38 @@ export default function AutomatedInsightsEngine({
 
     if (!events || events.length === 0) return items;
 
-    // 1. Friction & Rage Clicks Analysis
-    const rageClicks = events.filter(e => e.event_type === 'rage_click');
-    if (rageClicks.length > 0) {
-      const rageByTag: Record<string, number> = {};
-      rageClicks.forEach(e => {
-        const tag = e.metadata?.tag || e.metadata?.className || 'Elemento desconhecido';
-        rageByTag[tag] = (rageByTag[tag] || 0) + 1;
-      });
-      const topRage = Object.entries(rageByTag).sort((a, b) => b[1] - a[1])[0];
+    // 1. Audit Overprice Alert
+    const searches = events.filter(e => e.event_type === 'super_search');
+    const overpricedSearches = searches.filter(e => (e.metadata?.overprice_percentage || 0) > 20);
+    if (overpricedSearches.length > 0) {
+      const avgOverprice = Math.round(
+        overpricedSearches.reduce((acc, e) => acc + (e.metadata?.overprice_percentage || 0), 0) / overpricedSearches.length
+      );
       items.push({
-        id: 'rage-click-alert',
+        id: 'overprice-alert',
         type: 'alert',
-        icon: '⚡',
-        title: 'Ponto de Estresse Identificado',
-        description: `Detectados ${rageClicks.length} rage clicks. O principal elemento gerador de fricção é: "${topRage ? topRage[0] : 'botões de ação'}".`,
-        metric: `${rageClicks.length} eventos`,
+        icon: '⚠️',
+        title: 'Anomalia de Sobrepreço no Mercado',
+        description: `Detectadas ${overpricedSearches.length} auditorias com sobrepreço médio de ${avgOverprice}% acima do preço justo recomendado pela IA.`,
+        metric: `${overpricedSearches.length} alertas`,
       });
     }
 
-    // 2. High Intent vs Conversion Gap
-    const checkouts = events.filter(e => e.event_type === 'fake_checkout' || e.event_type === 'checkout_basket');
-    const cartAdds = events.filter(e => e.event_type === 'add_to_cart');
-    
-    if (cartAdds.length > 0) {
-      const abandonRate = Math.round(((cartAdds.length - checkouts.length) / cartAdds.length) * 100);
-      if (abandonRate > 40) {
-        items.push({
-          id: 'cart-abandon-insight',
-          type: 'opportunity',
-          icon: '🛒',
-          title: 'Abandono de Carrinho Elevado',
-          description: `${abandonRate}% das adições ao carrinho não prosseguiram para o checkout fictício. Gatilhos de urgência ou escassez podem aumentar a conversão.`,
-          metric: `${abandonRate}% taxa de queda`,
-        });
-      }
+    // 2. Hidden Flaws Scan Insight
+    const flawEvents = searches.filter(e => (e.metadata?.flaws_count || 0) > 0);
+    if (flawEvents.length > 0) {
+      const totalFlaws = flawEvents.reduce((acc, e) => acc + (e.metadata?.flaws_count || 0), 0);
+      items.push({
+        id: 'flaws-insight',
+        type: 'opportunity',
+        icon: '🛡️',
+        title: 'Defeitos Ocultos Mapeados',
+        description: `Varreduras no Reddit e redes identificaram ${totalFlaws} relatos de defeitos e insatisfação nos produtos auditados pelos usuários.`,
+        metric: `${totalFlaws} defeitos`,
+      });
     }
 
-    // 3. Peak Shopping Time Analysis
+    // 3. Peak Audit Activity Time Analysis
     const hourCounts: Record<number, number> = {};
     events.forEach(e => {
       if (e.created_at) {
@@ -87,36 +81,42 @@ export default function AutomatedInsightsEngine({
       items.push({
         id: 'peak-hour-insight',
         type: 'trend',
-        icon: '🌙',
-        title: 'Horário de Maior Estimulação',
-        description: `O pico de engajamento ocorre entre ${hourFormatted}. O cérebro dos usuários busca dopamina predominantemente neste horário.`,
+        icon: '📊',
+        title: 'Horário de Pico de Auditoria',
+        description: `O maior volume de auditorias de produtos e preços ocorre entre ${hourFormatted}.`,
         metric: `Pico às ${h}h`,
       });
     }
 
-    // 4. Top Desired Product
+    // 4. Most Audited Product Insight
     if (topProducts && topProducts.length > 0) {
       const top = topProducts[0];
       items.push({
         id: 'top-product-insight',
         type: 'success',
         icon: '🔥',
-        title: 'Imã de Dopamina Principal',
-        description: `O produto "${top.name || top.short_name || 'Produto Destaque'}" lidera em interesse, gerando maior retenção de atenção e intenção.`,
-        metric: `${top.rev ? `R$ ${top.rev.toLocaleString('pt-BR')}` : 'Líder em desejos'}`,
+        title: 'Produto Mais Auditado Hoje',
+        description: `O produto "${top.name || top.short_name || top.query || 'Produto Destaque'}" lidera em interesse de verificação de preço justo.`,
+        metric: `Líder em Auditorias`,
       });
     }
 
-    // 5. Digital DNA & Hardware Insight
-    const dnaScans = events.filter(e => e.event_type === 'digital_dna_scan');
-    if (dnaScans.length > 0) {
+    // 5. Friction & Rage Clicks Analysis
+    const rageClicks = events.filter(e => e.event_type === 'rage_click');
+    if (rageClicks.length > 0) {
+      const rageByTag: Record<string, number> = {};
+      rageClicks.forEach(e => {
+        const tag = e.metadata?.tag || e.metadata?.className || 'Elemento desconhecido';
+        rageByTag[tag] = (rageByTag[tag] || 0) + 1;
+      });
+      const topRage = Object.entries(rageByTag).sort((a, b) => b[1] - a[1])[0];
       items.push({
-        id: 'dna-scan-insight',
-        type: 'trend',
-        icon: '🧬',
-        title: 'Telemetria de Arquétipos Digitais',
-        description: `${dnaScans.length} escaneamentos de DNA Digital realizados. Maioria dos setups revela usuários com múltiplos núcleos e preferências por Dark Mode.`,
-        metric: `${dnaScans.length} exames`,
+        id: 'rage-click-alert',
+        type: 'alert',
+        icon: '⚡',
+        title: 'Ponto de Fricção na Busca',
+        description: `Detectados ${rageClicks.length} rage clicks durante a auditoria. Elemento em foco: "${topRage ? topRage[0] : 'botões de ação'}".`,
+        metric: `${rageClicks.length} eventos`,
       });
     }
 
@@ -126,14 +126,14 @@ export default function AutomatedInsightsEngine({
   if (generatedInsights.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-neon/20 bg-zinc-950/80 p-6 backdrop-blur-xl shadow-xl">
+    <div className="rounded-2xl border border-cyan-500/20 bg-zinc-950/80 p-6 backdrop-blur-xl shadow-xl">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">💡</span>
-          <h3 className="text-base font-black text-foreground">Diagnóstico de Telemetria Comportamental</h3>
+          <h3 className="text-base font-black text-foreground">Diagnóstico de Inteligência de Mercado (H53)</h3>
         </div>
-        <span className="text-xs font-bold text-neon bg-neon/10 border border-neon/20 rounded-full px-3 py-1">
-          {generatedInsights.length} insights gerados
+        <span className="text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-3 py-1">
+          {generatedInsights.length} insights de auditoria
         </span>
       </div>
 
@@ -143,7 +143,7 @@ export default function AutomatedInsightsEngine({
             alert: 'border-red-500/30 bg-red-500/5 text-red-400',
             opportunity: 'border-amber-500/30 bg-amber-500/5 text-amber-400',
             trend: 'border-blue-500/30 bg-blue-500/5 text-blue-400',
-            success: 'border-neon/30 bg-neon/5 text-neon',
+            success: 'border-cyan-500/30 bg-cyan-500/5 text-cyan-400',
           }[insight.type];
 
           return (
