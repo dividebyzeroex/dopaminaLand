@@ -12,17 +12,17 @@ import AutomatedInsightsEngine from './dashboard/AutomatedInsightsEngine';
 import LiveTickerFeed from './dashboard/LiveTickerFeed';
 import SessionReplayPlayer from './dashboard/SessionReplayPlayer';
 import InteractiveBrazilMap from './dashboard/InteractiveBrazilMap';
-import UserFlowDiagram from './dashboard/UserFlowDiagram';
-import GamificationAnalyticsTab from './dashboard/GamificationAnalyticsTab';
+import AuditIntelligenceTab from './dashboard/AuditIntelligenceTab';
+import SearchAnalyticsTab from './dashboard/SearchAnalyticsTab';
 import { StoreAuditAnalyticsTab } from './dashboard/StoreAuditAnalyticsTab';
 import { TabHeaderBanner } from './dashboard/TabHeaderBanner';
-import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, GitMerge, Trophy, Shield } from 'lucide-react';
+import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3 } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'intent' | 'products' | 'hubspot' | 'ux' | 'ticker' | 'replay' | 'map' | 'flow' | 'gamification' | 'store_audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'audit_intelligence' | 'search_analytics' | 'store_audit' | 'ticker' | 'replay' | 'map' | 'intent' | 'products' | 'ux' | 'hubspot'>('overview');
 
   // Time selector state
   const [timeRange, setTimeRange] = useState<string>('all');
@@ -77,7 +77,7 @@ export default function AnalyticsDashboardClient() {
   const {
     loading, lastUpdated, fetchDashboardData,
     kpis, funnelData, topProducts, timelineData, ecommerceInsights, uxMetrics,
-    intentData, scoreWeights, setScoreWeights,
+    intentData, scoreWeights, setScoreWeights, auditInsights,
     hubspotCrmData, rawSessions, rawEvents, exactCounts,
   } = useInsightsData();
 
@@ -194,14 +194,14 @@ export default function AnalyticsDashboardClient() {
   }
 
   const TABS = [
-    { id: 'overview', label: 'Cockpit de Intenção', icon: LayoutDashboard },
-    { id: 'store_audit', label: '🛡️ Dark Patterns (Extensão)', icon: Shield },
+    { id: 'overview', label: 'Cockpit de Auditoria', icon: LayoutDashboard },
+    { id: 'audit_intelligence', label: 'Audit Intelligence', icon: BarChart3 },
+    { id: 'search_analytics', label: 'Search Analytics', icon: Search },
+    { id: 'store_audit', label: '🛡️ Dark Patterns', icon: Shield },
     { id: 'ticker', label: 'Live Ticker', icon: Radio },
     { id: 'replay', label: 'Replay de Sessão', icon: PlaySquare },
     { id: 'map', label: 'Mapa do Brasil', icon: MapPin },
-    { id: 'flow', label: 'Fluxo & Conversão', icon: GitMerge },
-    { id: 'gamification', label: 'Gamificação', icon: Trophy },
-    { id: 'intent', label: 'Leads & Sinais B2B', icon: Target },
+    { id: 'intent', label: 'Perfis de Auditor', icon: Target },
     { id: 'products', label: 'Sinais de Produto', icon: Package },
     { id: 'ux', label: 'Telemetria UX', icon: MousePointer2 },
     { id: 'hubspot', label: 'HubSpot CRM', icon: Briefcase },

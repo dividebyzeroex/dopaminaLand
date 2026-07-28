@@ -65,6 +65,27 @@ export interface TopProduct {
   };
 }
 
+export interface AuditedProduct {
+  query: string;
+  count: number;
+  avgPrice: number;
+  avgOverprice: number;
+  stores: string[];
+  totalFlaws: number;
+}
+
+export interface AuditInsights {
+  totalAudits: number;
+  avgOverprice: number;
+  overpriceDistribution: { range: string; count: number }[];
+  topAuditedProducts: AuditedProduct[];
+  storeBreakdown: { name: string; count: number }[];
+  searchTypeBreakdown: { type: string; count: number }[];
+  auditTimeline: { date: string; count: number }[];
+  totalFlawsDetected: number;
+  verdictBreakdown: { verdict: string; count: number }[];
+}
+
 export interface TimelineData {
   date: string;
   sessions: number;
@@ -74,7 +95,8 @@ export interface TimelineData {
 export interface IntentLead {
   id: string;
   score: number;
-  stage: 'CONCLUÍDO' | 'ALTA INTENÇÃO' | 'EM EXPLORAÇÃO' | 'FRIO';
+  stage: 'AUDITOR POWER' | 'AUDITOR ATIVO' | 'EXPLORADOR' | 'VISITANTE';
+  audits: any[];
   views: any[];
   carts: any[];
   checkouts: any[];
@@ -86,6 +108,8 @@ export interface IntentLead {
   nickname?: string;
   email?: string;
   fakeRev: number;
+  totalAudits: number;
+  avgOverprice: number;
   triggersDetected?: number;
   darkPatterns?: string[];
 }
@@ -121,13 +145,27 @@ export function useInsightsData() {
     topProducts: [],
   });
 
-  // Weights for intent score computation
+  // Audit Intelligence aggregations
+  const [auditInsights, setAuditInsights] = useState<AuditInsights>({
+    totalAudits: 0,
+    avgOverprice: 0,
+    overpriceDistribution: [],
+    topAuditedProducts: [],
+    storeBreakdown: [],
+    searchTypeBreakdown: [],
+    auditTimeline: [],
+    totalFlawsDetected: 0,
+    verdictBreakdown: [],
+  });
+
+  // Weights for intent score computation (audit-focused)
   const [scoreWeights, setScoreWeights] = useState({
-    viewItem: 10,
-    addToCart: 35,
-    checkoutBasket: 50,
-    dwell60s: 20,
-    rageClick: -10, // Frustration signal
+    viewItem: 5,
+    addToCart: 10,
+    checkoutBasket: 15,
+    superSearch: 40,  // Primary action now
+    dwell60s: 10,
+    rageClick: -10,
     triggersExposed: 15,
   });
 
@@ -206,18 +244,32 @@ export function useInsightsData() {
 
     Object.values(sessionMap).forEach(sess => {
       let score = 0;
+      const audits: any[] = [];
       const views: any[] = [];
       const carts: any[] = [];
       const checkouts: any[] = [];
       let fakeRev = 0;
       let sessTriggers = 0;
+      let sessOverpriceSum = 0;
       const darkPatternsSet = new Set<string>();
 
       sess.events.forEach(ev => {
         const type = ev.event_type;
-        const pName = pDict[ev.product_id]?.name || ev.metadata?.store_name || `Item ${ev.product_id?.split('-')[0] || ''}`;
+        const pName = pDict[ev.product_id]?.name || ev.metadata?.store_name || ev.metadata?.query || `Item ${ev.product_id?.split('-')[0] || ''}`;
 
-        if (type === 'view_item') {
+        if (type === 'super_search') {
+          score += weights.superSearch;
+          audits.push({
+            name: ev.metadata?.query || pName,
+            time: ev.created_at,
+            price: ev.price_displayed || ev.metadata?.current_price || 0,
+            overprice: ev.metadata?.overprice_percentage || 0,
+            store: ev.metadata?.store_detected || 'unknown',
+            flaws: ev.metadata?.flaws_count || 0,
+          });
+          sessOverpriceSum += ev.metadata?.overprice_percentage || 0;
+          fakeRev += ev.price_displayed || 0;
+        } else if (type === 'view_item') {
           score += weights.viewItem;
           views.push({ name: pName, time: ev.created_at });
         } else if (type === 'add_to_cart') {
@@ -246,15 +298,17 @@ export function useInsightsData() {
       score = Math.max(0, Math.min(100, score));
       totalScore += score;
 
-      let stage: IntentLead['stage'] = 'FRIO';
-      if (checkouts.length > 0) stage = 'CONCLUÍDO';
-      else if (score >= 70) stage = 'ALTA INTENÇÃO';
-      else if (score >= 35) stage = 'EM EXPLORAÇÃO';
+      // Audit-focused stages
+      let stage: IntentLead['stage'] = 'VISITANTE';
+      if (audits.length >= 5) stage = 'AUDITOR POWER';
+      else if (audits.length >= 2) stage = 'AUDITOR ATIVO';
+      else if (audits.length >= 1 || score >= 35) stage = 'EXPLORADOR';
 
       leads.push({
         id: sess.id,
         score,
         stage,
+        audits,
         views,
         carts,
         checkouts,
@@ -264,6 +318,8 @@ export function useInsightsData() {
         deviceLocal: sess.deviceLocal,
         gender: sess.gender,
         fakeRev,
+        totalAudits: audits.length,
+        avgOverprice: audits.length > 0 ? Math.round(sessOverpriceSum / audits.length) : 0,
         triggersDetected: sessTriggers,
         darkPatterns: Array.from(darkPatternsSet)
       });
@@ -272,14 +328,14 @@ export function useInsightsData() {
     leads.sort((a, b) => b.score - a.score);
 
     const totalLeads = leads.length || 1;
-    const stageCounts = { 'CONCLUÍDO': 0, 'ALTA INTENÇÃO': 0, 'EM EXPLORAÇÃO': 0, 'FRIO': 0 };
+    const stageCounts: Record<string, number> = { 'AUDITOR POWER': 0, 'AUDITOR ATIVO': 0, 'EXPLORADOR': 0, 'VISITANTE': 0 };
     leads.forEach(l => stageCounts[l.stage]++);
 
     const leadsByStage = [
-      { stage: 'CONCLUÍDO', count: stageCounts['CONCLUÍDO'], percentage: Math.round((stageCounts['CONCLUÍDO'] / totalLeads) * 100) },
-      { stage: 'ALTA INTENÇÃO', count: stageCounts['ALTA INTENÇÃO'], percentage: Math.round((stageCounts['ALTA INTENÇÃO'] / totalLeads) * 100) },
-      { stage: 'EM EXPLORAÇÃO', count: stageCounts['EM EXPLORAÇÃO'], percentage: Math.round((stageCounts['EM EXPLORAÇÃO'] / totalLeads) * 100) },
-      { stage: 'FRIO', count: stageCounts['FRIO'], percentage: Math.round((stageCounts['FRIO'] / totalLeads) * 100) },
+      { stage: 'AUDITOR POWER', count: stageCounts['AUDITOR POWER'], percentage: Math.round((stageCounts['AUDITOR POWER'] / totalLeads) * 100) },
+      { stage: 'AUDITOR ATIVO', count: stageCounts['AUDITOR ATIVO'], percentage: Math.round((stageCounts['AUDITOR ATIVO'] / totalLeads) * 100) },
+      { stage: 'EXPLORADOR', count: stageCounts['EXPLORADOR'], percentage: Math.round((stageCounts['EXPLORADOR'] / totalLeads) * 100) },
+      { stage: 'VISITANTE', count: stageCounts['VISITANTE'], percentage: Math.round((stageCounts['VISITANTE'] / totalLeads) * 100) },
     ];
 
     const distMap: Record<string, number> = { '0-20': 0, '21-40': 0, '41-60': 0, '61-80': 0, '81-100': 0 };
@@ -401,6 +457,16 @@ export function useInsightsData() {
       const heatmapsList: any[] = [];
       const impressionsMap: Record<string, number> = {};
 
+      // Audit Intelligence accumulators
+      let auditCount = 0;
+      let totalOverprice = 0;
+      let totalFlawsDetected = 0;
+      const auditQueryMap: Record<string, { count: number; priceSum: number; overpriceSum: number; stores: Set<string>; flawsSum: number }> = {};
+      const auditStoreMap: Record<string, number> = {};
+      const auditSearchTypeMap: Record<string, number> = {};
+      const auditTimelineMap: Record<string, number> = {};
+      const auditVerdictMap: Record<string, number> = {};
+
       events?.forEach((ev) => {
         const dateStr = new Date(ev.created_at).toLocaleDateString('pt-BR');
         timelineMap[dateStr] = (timelineMap[dateStr] || 0) + 1;
@@ -408,6 +474,35 @@ export function useInsightsData() {
         if (ev.event_type === 'view_item') viewCount++;
         if (ev.event_type === 'add_to_cart') cartCount++;
         if (ev.event_type === 'fake_checkout' || ev.event_type === 'checkout_basket') { checkoutCount++; fakeRev += ev.price_displayed || 0; }
+
+        // Audit Intelligence: process super_search events
+        if (ev.event_type === 'super_search') {
+          auditCount++;
+          const query = (ev.metadata?.query || '').toLowerCase().trim();
+          const overprice = ev.metadata?.overprice_percentage || 0;
+          const store = ev.metadata?.store_detected || ev.metadata?.store_name || 'unknown';
+          const searchType = ev.metadata?.search_type || 'text';
+          const flaws = ev.metadata?.flaws_count || 0;
+          const verdict = ev.metadata?.price_verdict || 'unknown';
+          const auditDate = new Date(ev.created_at).toLocaleDateString('pt-BR');
+
+          totalOverprice += overprice;
+          totalFlawsDetected += flaws;
+
+          if (query) {
+            if (!auditQueryMap[query]) auditQueryMap[query] = { count: 0, priceSum: 0, overpriceSum: 0, stores: new Set(), flawsSum: 0 };
+            auditQueryMap[query].count++;
+            auditQueryMap[query].priceSum += ev.price_displayed || ev.metadata?.current_price || 0;
+            auditQueryMap[query].overpriceSum += overprice;
+            auditQueryMap[query].stores.add(store);
+            auditQueryMap[query].flawsSum += flaws;
+          }
+
+          auditStoreMap[store] = (auditStoreMap[store] || 0) + 1;
+          auditSearchTypeMap[searchType] = (auditSearchTypeMap[searchType] || 0) + 1;
+          auditTimelineMap[auditDate] = (auditTimelineMap[auditDate] || 0) + 1;
+          auditVerdictMap[verdict] = (auditVerdictMap[verdict] || 0) + 1;
+        }
 
         if (ev.event_type === 'page_leave' && ev.metadata?.dwell_time_seconds) { totalDwellTime += ev.metadata.dwell_time_seconds; dwellEvents++; }
         if (ev.event_type === 'rage_click') rageClicks++;
@@ -484,26 +579,61 @@ export function useInsightsData() {
 
       const totalSess = sessionCount || safeSessionData.length || 0;
       const totalEvs = events?.length || 0;
-      const convRate = totalSess > 0 ? ((checkoutCount / totalSess) * 100).toFixed(1) : '0';
+      const auditRate = totalSess > 0 ? ((auditCount / totalSess) * 100).toFixed(1) : '0';
+      const avgOp = auditCount > 0 ? (totalOverprice / auditCount).toFixed(1) : '0';
 
       setKpis([
         { title: 'Sessões Únicas', value: totalSess.toLocaleString('pt-BR'), change: 'Tempo Real', isPositive: true },
+        { title: 'Auditorias Realizadas', value: auditCount.toLocaleString('pt-BR'), change: 'Super Search', isPositive: auditCount > 0 },
+        { title: 'Sobrepreço Médio', value: `${avgOp}%`, change: 'Detectado', isPositive: parseFloat(avgOp) > 0 },
+        { title: 'Defeitos Encontrados', value: totalFlawsDetected.toLocaleString('pt-BR'), change: 'Reddit + IA', isPositive: totalFlawsDetected > 0 },
+        { title: 'Taxa de Auditoria', value: `${auditRate}%`, change: 'Sessão→Busca', isPositive: parseFloat(auditRate) > 10 },
         { title: 'Eventos Capturados', value: totalEvs.toLocaleString('pt-BR'), change: 'Tempo Real', isPositive: true },
-        { title: 'Barras Instaladas', value: (bookmarkletInstallsCount || 0).toLocaleString('pt-BR'), change: 'Extensão', isPositive: (bookmarkletInstallsCount || 0) > 0 },
-        { title: 'Lojas Auditadas', value: (storeAuditsCount || 0).toLocaleString('pt-BR'), change: 'Anti-Truque', isPositive: (storeAuditsCount || 0) > 0 },
-        { title: 'Taxa de Conversão Sim', value: `${convRate}%`, change: 'Tempo Real', isPositive: parseFloat(convRate) > 2 },
-        { title: 'Receita Induzida Sim', value: `R$ ${fakeRev.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, change: 'Tempo Real', isPositive: fakeRev > 0 },
       ]);
 
-      const cartConv = viewCount > 0 ? ((cartCount / viewCount) * 100).toFixed(0) : '0';
-      const checkoutConv = cartCount > 0 ? ((checkoutCount / cartCount) * 100).toFixed(0) : '0';
+      const searchInitiated = auditCount;
+      const reSearch = events?.filter(e => e.event_type === 'super_search').length || 0;
 
       setFunnelData([
         { name: 'Sessões', value: totalSess, conversion: '100%' },
-        { name: 'Visualizou Produto', value: viewCount, conversion: totalSess > 0 ? `${Math.round((viewCount/totalSess)*100)}%` : '0%' },
-        { name: 'Adicionou ao Carrinho', value: cartCount, conversion: `${cartConv}%` },
-        { name: 'Iniciou Checkout', value: checkoutCount, conversion: `${checkoutConv}%` },
+        { name: 'Busca Iniciada', value: searchInitiated, conversion: totalSess > 0 ? `${Math.round((searchInitiated/totalSess)*100)}%` : '0%' },
+        { name: 'Auditoria Concluída', value: auditCount, conversion: searchInitiated > 0 ? `${Math.round((auditCount/searchInitiated)*100)}%` : '0%' },
+        { name: 'Re-busca', value: Math.max(0, reSearch - new Set(events?.filter(e => e.event_type === 'super_search').map(e => e.session_id)).size), conversion: auditCount > 0 ? `${Math.round((Math.max(0, reSearch - new Set(events?.filter(e => e.event_type === 'super_search').map(e => e.session_id)).size)/auditCount)*100)}%` : '0%' },
       ]);
+
+      // Compute Audit Insights
+      const overpriceDistMap: Record<string, number> = { '0-10%': 0, '10-30%': 0, '30-50%': 0, '50%+': 0 };
+      events?.filter(e => e.event_type === 'super_search').forEach(e => {
+        const op = e.metadata?.overprice_percentage || 0;
+        if (op <= 10) overpriceDistMap['0-10%']++;
+        else if (op <= 30) overpriceDistMap['10-30%']++;
+        else if (op <= 50) overpriceDistMap['30-50%']++;
+        else overpriceDistMap['50%+']++;
+      });
+
+      const topAuditedProducts: AuditedProduct[] = Object.entries(auditQueryMap)
+        .map(([query, data]) => ({
+          query,
+          count: data.count,
+          avgPrice: data.count > 0 ? Math.round(data.priceSum / data.count) : 0,
+          avgOverprice: data.count > 0 ? Math.round(data.overpriceSum / data.count) : 0,
+          stores: Array.from(data.stores),
+          totalFlaws: data.flawsSum,
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 15);
+
+      setAuditInsights({
+        totalAudits: auditCount,
+        avgOverprice: auditCount > 0 ? Math.round(totalOverprice / auditCount) : 0,
+        overpriceDistribution: Object.entries(overpriceDistMap).map(([range, count]) => ({ range, count })),
+        topAuditedProducts,
+        storeBreakdown: Object.entries(auditStoreMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10),
+        searchTypeBreakdown: Object.entries(auditSearchTypeMap).map(([type, count]) => ({ type, count })),
+        auditTimeline: Object.entries(auditTimelineMap).map(([date, count]) => ({ date, count })),
+        totalFlawsDetected,
+        verdictBreakdown: Object.entries(auditVerdictMap).map(([verdict, count]) => ({ verdict, count })).sort((a, b) => b.count - a.count),
+      });
 
       setTimelineData(Object.keys(timelineMap).map(date => ({ date, sessions: timelineMap[date], conversions: Math.floor(timelineMap[date] * 0.1) })));
 
@@ -630,7 +760,7 @@ export function useInsightsData() {
     lastUpdated,
     scoreWeights, setScoreWeights,
     kpis, funnelData, topProducts, timelineData, demographics, hardware, marketing,
-    uxMetrics, ecommerceInsights, intentData,
+    uxMetrics, ecommerceInsights, intentData, auditInsights,
     ga4Data, posthogData, posthogError, hubspotCrmData, hubspotError,
     rawSessions, rawEvents,
     exactCounts,

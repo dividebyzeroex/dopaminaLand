@@ -56,7 +56,21 @@ export default function SuperSearchHero() {
       }, 1500);
 
       try {
-        trackEvent("super_search", "search_executed", data.current_price, { query });
+        const isUrlSearch = /^https?:\/\//.test(searchQuery);
+        trackEvent("super_search", "search_executed", data.current_price, {
+          query: searchQuery,
+          search_type: isUrlSearch ? "url" : "text",
+          current_price: data.current_price || 0,
+          scraped_price: data.scraped_price || 0,
+          overprice_percentage: data.overprice_percentage || 0,
+          price_verdict: data.price_verdict || "unknown",
+          flaws_count: data.product_flaws?.length || 0,
+          store_detected: data.store_name || "unknown",
+          has_coupon: !!data.coupon_code,
+          coupon_code: data.coupon_code || null,
+          profit_margin: data.profit_margin_percentage || 0,
+          neural_confidence: neuralPrediction?.confidence || 0,
+        });
       } catch (err) {}
     } catch (e) {
       setStatus("error");
