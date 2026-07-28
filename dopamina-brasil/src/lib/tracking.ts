@@ -91,8 +91,8 @@ export async function initSession(forceUpdate: boolean = false) {
 }
 
 export async function trackEvent(
-  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals' | 'tracking_update' | 'digital_dna_scan' | 'narrator_interaction' | 'neuro_xray_toggle' | 'resistance_training_start' | 'resistance_training_fail' | 'resistance_training_complete' | 'wrapped_generated' | 'wrapped_shared' | 'bookmarklet_installed' | 'dark_pattern_audit',
-  productId?: string,
+  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals' | 'tracking_update' | 'digital_dna_scan' | 'narrator_interaction' | 'neuro_xray_toggle' | 'resistance_training_start' | 'resistance_training_fail' | 'resistance_training_complete' | 'wrapped_generated' | 'wrapped_shared' | 'bookmarklet_installed' | 'dark_pattern_audit' | 'super_search',
+  productName?: string,
   priceDisplayed?: number,
   metadata?: any
 ) {
@@ -107,7 +107,7 @@ export async function trackEvent(
       body: JSON.stringify({
         session_id: sessionId,
         event_type: eventType,
-        product_id: productId,
+        product_id: productName,
         price_displayed: priceDisplayed,
         metadata: metadata
       }),

@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Activity, BarChart3, Zap, ChevronDown } from "lucide-react";
 
+interface DopaminaTerminalProps {
+  data?: any;
+}
+
 interface CandleData {
   date: string;
   open: number;
@@ -78,14 +82,11 @@ function generateCandleData(basePrice: number, months: number = 12): CandleData[
   return candles;
 }
 
-interface DopaminaTerminalProps {
-  productName?: string;
-  basePrice?: number;
-}
-
-export default function DopaminaTerminal({ productName = "iPhone 16 Pro Max 256GB", basePrice = 8999 }: DopaminaTerminalProps) {
+export default function DopaminaTerminal({ data }: DopaminaTerminalProps = {}) {
   const [candles, setCandles] = useState<CandleData[]>([]);
   const [hoveredCandle, setHoveredCandle] = useState<CandleData | null>(null);
+  
+  const basePrice = data?.scraped_price || 4299.90;
   const [animatedCount, setAnimatedCount] = useState(0);
 
   useEffect(() => {
@@ -148,7 +149,7 @@ export default function DopaminaTerminal({ productName = "iPhone 16 Pro Max 256G
       {/* Ticker Row */}
       <div className="px-4 py-2.5 border-b border-[#1a1a2e] flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-bold text-white">{productName}</h3>
+          <h3 className="text-sm font-bold text-white">{data?.scraped_name || "Produto Analisado"}</h3>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xl font-black text-white">{formatBRL(last.close)}</span>
             <span className={`text-xs font-bold flex items-center gap-0.5 ${isUp ? "text-[#22c55e]" : "text-red-400"}`}>
@@ -180,7 +181,7 @@ export default function DopaminaTerminal({ productName = "iPhone 16 Pro Max 256G
           </div>
         )}
 
-        <svg viewBox={`0 0 ${candles.length * 40 + 20} 340`} className="w-full h-48 sm:h-64">
+        <svg viewBox={`0 0 ${candles.length * 40 + 20} 340`} className="w-full h-64 sm:h-96">
           {/* Grid lines */}
           {[0.2, 0.4, 0.6, 0.8].map((pct) => (
             <line key={pct} x1={0} y1={pct * 280} x2={candles.length * 40 + 20} y2={pct * 280} stroke="#1a1a2e" strokeWidth={0.5} />

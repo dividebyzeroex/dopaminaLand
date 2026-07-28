@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import React from 'react';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata = {
@@ -11,7 +10,6 @@ export const metadata = {
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <Header />
       
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12 sm:px-6">
         <div className="mb-10">

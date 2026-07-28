@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Activity, AlertTriangle, TrendingDown, TrendingUp, Zap } from "lucide-react";
 
+interface LivePriceSeismographProps {
+  data?: any;
+}
+
 interface SeismicEvent {
   id: number;
   store: string;
@@ -39,7 +43,7 @@ function generateEvent(id: number): SeismicEvent {
   };
 }
 
-export default function LivePriceSeismograph() {
+export default function LivePriceSeismograph({ data }: LivePriceSeismographProps = {}) {
   const [events, setEvents] = useState<SeismicEvent[]>([]);
   const [waveData, setWaveData] = useState<number[]>([]);
   const [totalQuakes, setTotalQuakes] = useState(847);
@@ -51,13 +55,28 @@ export default function LivePriceSeismograph() {
     setWaveData(initialWave);
 
     // Seed initial events
-    const initial: SeismicEvent[] = [];
-    for (let i = 0; i < 5; i++) {
-      eventCounter.current++;
-      initial.push(generateEvent(eventCounter.current));
-    }
-    setEvents(initial);
-  }, []);
+      const initial: SeismicEvent[] = [];
+      for (let i = 0; i < 5; i++) {
+        eventCounter.current++;
+        initial.push(generateEvent(eventCounter.current));
+      }
+
+      if (data) {
+        eventCounter.current++;
+        initial.unshift({
+          id: eventCounter.current,
+          store: data.net_price_breakdown?.storeName || "Web",
+          product: data.scraped_name || "Produto Buscado",
+          magnitude: data.overpriced_percent > 15 ? 8.5 : 4.2,
+          type: data.is_fomo_alert ? "spike" : "drop",
+          price: data.current_price || 0,
+          change: data.overpriced_percent || 0,
+          timestamp: new Date(),
+        });
+      }
+
+      setEvents(initial);
+    }, [data]);
 
   // Animate wave continuously
   useEffect(() => {

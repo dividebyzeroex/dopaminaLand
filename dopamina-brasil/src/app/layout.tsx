@@ -4,12 +4,9 @@ import { Inter, Outfit } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
-import { CartProvider } from "@/contexts/CartContext";
 import { GameProvider } from "@/contexts/GameContext";
 import { DailyProvider } from "@/contexts/DailyContext";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
 import AchievementToast from "@/components/AchievementToast";
 import FomoToast from "@/components/FomoToast";
 import TrackingProvider from "@/components/TrackingProvider";
@@ -24,6 +21,7 @@ import ManipulationNarrator from "@/components/ManipulationNarrator";
 import LivePresence from "@/components/LivePresence";
 import NeuroXRay from "@/components/NeuroXRay";
 import ResistanceTraining from "@/components/ResistanceTraining";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -84,30 +82,27 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <GameProvider>
-          <CartProvider>
             <DailyProvider>
               <TrackingProvider>
                 <CSPostHogProvider>
-                  <CinematicIntro />
-                  <NicknameSetup />
-                  <DailyModal />
-                  <CustomCursor />
+                  
+                  
+                  
+                  
                   <ScanLine />
-                  <Header />
-                  <main className="flex-1 overflow-x-clip pt-28 pb-8">{children}</main>
-                  <Footer />
-                  <CartDrawer />
-                  <AchievementToast />
-                  <FomoToast />
-                  <DetoxMode />
-                  <ManipulationNarrator />
-                  <LivePresence />
-                  <NeuroXRay />
-                  <ResistanceTraining />
+                  <ThemeToggle />
+                  <main className="flex-1 overflow-x-clip pb-8">{children}</main>
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
                 </CSPostHogProvider>
               </TrackingProvider>
             </DailyProvider>
-          </CartProvider>
         </GameProvider>
         <Analytics />
         <SpeedInsights />

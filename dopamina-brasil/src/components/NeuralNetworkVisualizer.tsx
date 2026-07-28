@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Cpu, Database, Layers, Network, Sparkles, BarChart3 } from "lucide-react";
 
+interface NeuralNetworkVisualizerProps {
+  data?: any;
+}
+
 interface NeuronPulse {
   id: number;
   from: number;
@@ -39,7 +43,7 @@ const processSteps = [
   "Preço justo calculado ✓",
 ];
 
-export default function NeuralNetworkVisualizer() {
+export default function NeuralNetworkVisualizer({ data }: NeuralNetworkVisualizerProps = {}) {
   const [activePulse, setActivePulse] = useState(0);
   const [processStep, setProcessStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(true);
@@ -184,12 +188,18 @@ export default function NeuralNetworkVisualizer() {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-3 sm:grid-cols-6 divide-x divide-[#1a1a2e]">
-        {metrics.map((m, i) => (
-          <div key={i} className="px-3 py-2.5 text-center">
-            <span className="text-[8px] text-gray-600 font-bold uppercase block">{m.label}</span>
-            <span className="text-xs font-black block mt-0.5" style={{ color: m.color }}>{m.value}</span>
-          </div>
-        ))}
+        {metrics.map((m, i) => {
+          let value = m.value;
+          if (m.label === "Acurácia" && data?.neuralPrediction?.accuracyPercentage) {
+            value = `${data.neuralPrediction.accuracyPercentage}%`;
+          }
+          return (
+            <div key={i} className="px-3 py-2.5 text-center">
+              <span className="text-[8px] text-gray-600 font-bold uppercase block">{m.label}</span>
+              <span className="text-xs font-black block mt-0.5" style={{ color: m.color }}>{value}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer */}

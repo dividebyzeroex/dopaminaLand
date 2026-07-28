@@ -4,6 +4,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swords, Crown, Shield, Flame, ExternalLink } from "lucide-react";
 
+interface PriceWarArenaProps {
+  data?: any;
+}
+
 interface Combatant {
   store: string;
   color: string;
@@ -49,11 +53,51 @@ function getTotalCost(c: Combatant) {
   return c.price + c.freight - c.cashback - c.couponDiscount;
 }
 
-export default function PriceWarArena() {
+export default function PriceWarArena({ data }: PriceWarArenaProps = {}) {
   const [activeBattle, setActiveBattle] = useState(0);
   const [showResult, setShowResult] = useState(false);
 
-  const battle = battles[activeBattle];
+  let currentBattles = battles;
+  if (data) {
+    const scrapedName = data.scraped_name || "Produto Analisado";
+    const net = data.net_price_breakdown || {};
+    const bestPrice = net.bestMarketPrice || data.scraped_price || 0;
+    const storePrice = net.storePrice || data.current_price || 0;
+
+    currentBattles = [
+      {
+        product: scrapedName,
+        emoji: "⚔️",
+        left: {
+          store: data.store || "Amazon",
+          color: "#f97316",
+          price: storePrice,
+          freight: 29.9,
+          cashback: 0,
+          coupon: "NENHUM",
+          couponDiscount: 0,
+          installments: `10x R$ ${(storePrice / 10).toFixed(2)}`,
+          deliveryDays: 7,
+          trustScore: 85
+        },
+        right: {
+          store: "Mercado Livre",
+          color: "#ffe600",
+          price: bestPrice,
+          freight: 0,
+          cashback: net.cashbackAmount || 0,
+          coupon: net.suggestedCoupon || "MELI10",
+          couponDiscount: (bestPrice * (net.couponDiscountPercent || 10)) / 100,
+          installments: `12x R$ ${(bestPrice / 12).toFixed(2)}`,
+          deliveryDays: 1,
+          trustScore: 98
+        }
+      },
+      ...battles.slice(0, 2)
+    ];
+  }
+
+  const battle = currentBattles[activeBattle];
   const leftTotal = getTotalCost(battle.left);
   const rightTotal = getTotalCost(battle.right);
   const winner = leftTotal <= rightTotal ? "left" : "right";
@@ -132,7 +176,7 @@ export default function PriceWarArena() {
 
       {/* Battle Selector */}
       <div className="px-4 pt-3 flex items-center gap-2 overflow-x-auto pb-2">
-        {battles.map((b, i) => (
+        {currentBattles.map((b, i) => (
           <button
             key={i}
             onClick={() => { setActiveBattle(i); setShowResult(false); }}

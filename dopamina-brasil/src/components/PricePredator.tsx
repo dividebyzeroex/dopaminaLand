@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Target, Bell, Clock, TrendingDown, Zap, ChevronRight } from "lucide-react";
 
+interface PricePredatorProps {
+  data?: any;
+}
+
 interface PredatorTarget {
   name: string;
   emoji: string;
@@ -67,13 +71,35 @@ function CountdownTimer({ targetDays }: { targetDays: number }) {
   );
 }
 
-export default function PricePredator() {
+export default function PricePredator({ data }: PricePredatorProps = {}) {
   const [activeTarget, setActiveTarget] = useState(0);
   const [alertSet, setAlertSet] = useState<Set<number>>(new Set());
 
-  const target = predatorTargets[activeTarget];
-  const savings = target.currentPrice - target.predictedLow;
-  const savingsPct = ((savings / target.currentPrice) * 100).toFixed(0);
+  // Use real data if available, else fallback
+  let targets = predatorTargets;
+  if (data) {
+    const currentPrice = data.current_price || 0;
+    const dropPercent = data.future_price_prediction?.predictedDropPercent || 0;
+    const predictedLow = dropPercent > 0 ? currentPrice * (1 - dropPercent / 100) : data.scraped_price || currentPrice;
+    const daysUntil = data.future_price_prediction?.daysToWait || 0;
+    
+    targets = [
+      {
+        name: data.scraped_name || "Produto Analisado",
+        emoji: "🎯",
+        currentPrice: currentPrice,
+        predictedLow: predictedLow,
+        daysUntil: daysUntil,
+        confidence: data.neuralPrediction?.accuracyPercentage || 99.03,
+        store: data.net_price_breakdown?.storeName || "Web",
+      },
+      ...predatorTargets.slice(0, 3)
+    ];
+  }
+
+  const target = targets[activeTarget];
+  const savings = Math.max(0, target.currentPrice - target.predictedLow);
+  const savingsPct = target.currentPrice > 0 ? ((savings / target.currentPrice) * 100).toFixed(0) : "0";
 
   const formatBRL = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
@@ -102,14 +128,14 @@ export default function PricePredator() {
       {/* Active Target Spotlight */}
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{target.emoji}</span>
-            <div>
-              <h3 className="text-sm font-bold text-white">{target.name}</h3>
-              <span className="text-[10px] text-gray-500">via {target.store}</span>
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <span className="text-3xl shrink-0">{target.emoji}</span>
+            <div className="min-w-0 pr-4">
+              <h3 className="text-sm font-bold text-white truncate">{target.name}</h3>
+              <span className="text-[10px] text-gray-500 truncate block">via {target.store}</span>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right shrink-0">
             <span className="text-[9px] text-gray-500 block">PREÇO HOJE</span>
             <span className="text-sm font-bold text-red-400 line-through">{formatBRL(target.currentPrice)}</span>
           </div>
@@ -122,8 +148,8 @@ export default function PricePredator() {
           animate={{ opacity: 1, scale: 1 }}
           className="p-4 rounded-xl bg-gradient-to-br from-[#22c55e]/10 via-[#0a0a10] to-[#22c55e]/5 border border-[#22c55e]/30 space-y-3"
         >
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex-1 min-w-[200px]">
               <span className="text-[9px] text-[#22c55e] font-bold uppercase block tracking-wider">
                 IA PREVÊ PREÇO MÍNIMO EM:
               </span>
@@ -131,7 +157,7 @@ export default function PricePredator() {
                 <CountdownTimer targetDays={target.daysUntil} />
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right flex-shrink-0">
               <span className="text-[9px] text-[#22c55e] font-bold block">PREÇO PREVISTO</span>
               <span className="text-2xl font-black text-[#22c55e]">{formatBRL(target.predictedLow)}</span>
               <span className="text-[10px] text-[#22c55e] block font-bold">
@@ -170,11 +196,15 @@ export default function PricePredator() {
           </button>
         </motion.div>
 
-        {/* Target Selector */}
-        <div className="space-y-1.5">
-          <span className="text-[9px] text-gray-600 font-bold uppercase tracking-wider block">ALVOS MONITORADOS PELA IA:</span>
-          <div className="space-y-1">
-            {predatorTargets.map((t, i) => (
+        {/* Target Queue */}
+      <div className="border-t border-[#1a1a2e] bg-[#030308]">
+        <div className="px-4 py-2 border-b border-[#1a1a2e]">
+          <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+            Alvos Monitorados ({targets.length})
+          </span>
+        </div>
+        <div className="divide-y divide-[#1a1a2e]">
+          {targets.map((t, i) => (
               <button
                 key={i}
                 onClick={() => setActiveTarget(i)}
@@ -184,11 +214,13 @@ export default function PricePredator() {
                     : "bg-white/[0.02] border-white/5 hover:border-white/15"
                 }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
-                  <span className="text-lg">{t.emoji}</span>
-                  <div className="truncate">
-                    <span className="text-xs font-semibold text-white block truncate">{t.name}</span>
-                    <span className="text-[9px] text-gray-500">{t.store} · {t.confidence}% confiança</span>
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <span className="text-xl shrink-0">{t.emoji}</span>
+                  <div className="min-w-0 pr-2">
+                    <h4 className="text-sm font-bold text-white truncate">{t.name}</h4>
+                    <span className="text-[10px] text-gray-500 truncate block">
+                      {t.store} · {t.confidence}% confiança
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

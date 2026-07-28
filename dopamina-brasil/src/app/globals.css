@@ -331,3 +331,37 @@ body::after {
               0 0 40px color-mix(in srgb, var(--rarity) 15%, transparent);
   border-color: var(--rarity);
 }
+
+
+/* Cyberpunk Light Mode */
+.cyberpunk-light {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #f7f7f7 !important;
+}
+
+.cyberpunk-light img, 
+.cyberpunk-light video, 
+.cyberpunk-light .emoji,
+.cyberpunk-light .no-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+
+.cyberpunk-light h1,
+.cyberpunk-light h2 {
+  filter: invert(1) hue-rotate(180deg) !important;
+  color: transparent !important;
+  background-image: linear-gradient(to right, #ff5500, #ff00aa) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 20px rgba(255, 0, 170, 0.4) !important;
+}
+
+
+.cyberpunk-light .text-gray-400,
+.cyberpunk-light .text-gray-500 {
+  filter: invert(1) hue-rotate(180deg) !important;
+  color: #2b2b2b !important;
+}
+

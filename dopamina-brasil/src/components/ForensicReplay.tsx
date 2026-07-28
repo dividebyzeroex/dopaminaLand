@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, SkipForward, Share2, AlertTriangle, Camera, Clock, FastForward } from "lucide-react";
 
 interface ForensicReplayProps {
-  productName?: string;
-  basePrice?: number;
+  data?: any;
 }
 
 function generateTimeline(basePrice: number) {
@@ -42,7 +41,9 @@ function generateTimeline(basePrice: number) {
   return points;
 }
 
-export default function ForensicReplay({ productName = "iPhone 16 Pro Max 256GB", basePrice = 8999 }: ForensicReplayProps) {
+export default function ForensicReplay({ data }: ForensicReplayProps = {}) {
+  const basePrice = data?.scraped_price || 8999;
+  const productName = data?.scraped_name || "Produto Analisado";
   const [timeline, setTimeline] = useState<ReturnType<typeof generateTimeline>>([]);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);

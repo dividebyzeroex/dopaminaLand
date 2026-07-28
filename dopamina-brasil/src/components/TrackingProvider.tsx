@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { initSession, trackEvent } from '@/lib/tracking';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useCart } from '@/contexts/CartContext';
 import { useReportWebVitals } from 'next/web-vitals';
 
 function WebVitalsTracker() {
@@ -29,11 +28,6 @@ function TrackingLogic() {
   const mouseMoveHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);
   const lastHeatmapMoveRef = useRef<number>(0);
   
-  const { items, totalFakePrice } = useCart();
-  const cartRef = useRef({ items, totalFakePrice });
-  useEffect(() => {
-    cartRef.current = { items, totalFakePrice };
-  }, [items, totalFakePrice]);
 
   useEffect(() => {
     // Disable tracking on admin routes
@@ -206,15 +200,7 @@ function TrackingLogic() {
     };
     
     // beforeunload catches closing tabs or navigating away externally
-    const handleAbandon = () => {
-      const { items, totalFakePrice } = cartRef.current;
-      if (items.length > 0 && !pathname.includes('sucesso') && !pathname.includes('checkout')) {
-        trackEvent('cart_abandoned', undefined, totalFakePrice, {
-          path: pathname,
-          items: items.map(i => ({ id: i.id, name: i.shortName, qty: i.quantity, price: i.salePrice }))
-        });
-      }
-    };
+    const handleAbandon = () => {};
 
     window.addEventListener('beforeunload', handleLeave);
     window.addEventListener('beforeunload', handleAbandon);
