@@ -69,7 +69,7 @@ export default function SuperSearchHero() {
           has_coupon: !!data.coupon_code,
           coupon_code: data.coupon_code || null,
           profit_margin: data.profit_margin_percentage || 0,
-          neural_confidence: neuralPrediction?.confidence || 0,
+          neural_confidence: neuralPrediction?.confidenceScore || 0,
         });
       } catch (err) {}
     } catch (e) {
