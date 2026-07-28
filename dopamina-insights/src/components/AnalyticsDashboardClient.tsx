@@ -220,10 +220,10 @@ export default function AnalyticsDashboardClient() {
       <div className="mb-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-6 border-b border-border">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-            Telemetria Avançada
+            H53 Market Intelligence
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Insights de Comportamento, Marketing e Intenção de Compra.
+            Telemetria de Auditorias, Sobrepreços e Anomalias de Mercado em Tempo Real.
           </p>
         </div>
 
@@ -480,15 +480,15 @@ export default function AnalyticsDashboardClient() {
             <>
               <TabHeaderBanner
                 icon="🛍️"
-                title="Sinais de Produto & Carrinho"
-                subtitle="Análise por SKU de adições ao carrinho, intenção de checkout e produtos mais desejados"
-                badgeText="SKU ANALYTICS"
+                title="Sinais de Auditoria por Produto"
+                subtitle="Análise por item auditado, histórico de sobrepreço e anomalias de mercado detectadas"
+                badgeText="AUDIT SIGNALS"
                 badgeColor="purple"
-                highlightLabel="Produtos Desejados"
-                highlightValue={topProducts.length}
+                highlightLabel="Itens Mapeados"
+                highlightValue={auditInsights.topAuditedProducts.length}
                 highlightColor="text-purple-400"
               />
-              <ProductsInsights ecommerceInsights={ecommerceInsights} />
+              <ProductsInsights auditInsights={auditInsights} rawEvents={rawEvents} />
             </>
           )}
 
