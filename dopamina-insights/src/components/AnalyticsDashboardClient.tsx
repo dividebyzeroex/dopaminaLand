@@ -322,8 +322,8 @@ export default function AnalyticsDashboardClient() {
             <>
               <TabHeaderBanner
                 icon="🚀"
-                title="Cockpit de Intenção"
-                subtitle="Visão consolidada de sessões, intenção de compra, leads identificados e funil de fricção em tempo real"
+                title="Cockpit de Auditoria"
+                subtitle="Visão consolidada de sessões, auditorias executadas, sobrepreço médio e comportamento de busca em tempo real"
                 badgeText="REALTIME"
                 badgeColor="cyan"
                 highlightLabel="Sessões Gravadas"
@@ -338,7 +338,7 @@ export default function AnalyticsDashboardClient() {
                   totalSessions: rawSessions.length,
                   identifiedLeads: intentData.topLeads.length,
                   identificationRate: rawSessions.length > 0 ? Math.round((intentData.topLeads.length / rawSessions.length) * 100) : 0,
-                  highIntentLeads: intentData.topLeads.filter(l => l.stage === 'ALTA INTENÇÃO' || l.stage === 'CONCLUÍDO').length,
+                  highIntentLeads: intentData.topLeads.filter(l => l.stage === 'AUDITOR POWER' || l.stage === 'AUDITOR ATIVO').length,
                   frictionIndex: uxMetrics.rageClicksCount || 0
                 }}
               />
@@ -347,7 +347,7 @@ export default function AnalyticsDashboardClient() {
                   totalSessions: rawSessions.length,
                   identifiedLeads: intentData.topLeads.length,
                   identificationRate: rawSessions.length > 0 ? (intentData.topLeads.length / rawSessions.length) * 100 : 0,
-                  highIntentLeads: intentData.topLeads.filter(l => l.stage === 'ALTA INTENÇÃO' || l.stage === 'CONCLUÍDO').length,
+                  highIntentLeads: intentData.topLeads.filter(l => l.stage === 'AUDITOR POWER' || l.stage === 'AUDITOR ATIVO').length,
                   frictionIndex: uxMetrics.rageClicksCount || 0,
                   barrasInstaladas: exactCounts.bookmarklets,
                   lojasAuditadas: exactCounts.audits
@@ -423,35 +423,35 @@ export default function AnalyticsDashboardClient() {
             </>
           )}
 
-          {activeTab === 'flow' && (
+          {activeTab === 'audit_intelligence' && (
             <>
               <TabHeaderBanner
-                icon="⚡"
-                title="Fluxo & Conversão de Vendas"
-                subtitle="Funil comportamental da jornada desde a navegação do produto até a intenção de checkout"
-                badgeText="CONVERSÃO B2C"
-                badgeColor="blue"
-                highlightLabel="Taxa de Identificação"
-                highlightValue={`${(rawSessions.length > 0 ? (intentData.topLeads.length / rawSessions.length) * 100 : 0).toFixed(1)}%`}
-                highlightColor="text-blue-400"
+                icon="📊"
+                title="Audit Intelligence"
+                subtitle="Métricas de auditorias executadas, sobrepreço médio detectado, lojas auditadas e defeitos encontrados"
+                badgeText="H53 AUDITOR"
+                badgeColor="cyan"
+                highlightLabel="Total Auditorias"
+                highlightValue={auditInsights.totalAudits.toLocaleString('pt-BR')}
+                highlightColor="text-cyan-400"
               />
-              <UserFlowDiagram events={rawEvents} kpis={{ totalSessions: rawSessions.length }} />
+              <AuditIntelligenceTab auditInsights={auditInsights} />
             </>
           )}
 
-          {activeTab === 'gamification' && (
+          {activeTab === 'search_analytics' && (
             <>
               <TabHeaderBanner
-                icon="🏆"
-                title="Gamificação & Engajamento"
-                subtitle="Métricas de nível de dopamina, tração comportamental e incentivos para retenção de usuários"
-                badgeText="DOPAMINA LOCK"
-                badgeColor="orange"
-                highlightLabel="Alta Intenção"
-                highlightValue={intentData.topLeads.filter(l => l.stage === 'ALTA INTENÇÃO' || l.stage === 'CONCLUÍDO').length}
-                highlightColor="text-orange-400"
+                icon="🔍"
+                title="Search Analytics"
+                subtitle="Análise das buscas realizadas no motor H53, termos em alta, buscas por hora e taxa de sucesso"
+                badgeText="MOTOR H53"
+                badgeColor="purple"
+                highlightLabel="Queries Únicas"
+                highlightValue={auditInsights.topAuditedProducts.length.toLocaleString('pt-BR')}
+                highlightColor="text-purple-400"
               />
-              <GamificationAnalyticsTab events={rawEvents} />
+              <SearchAnalyticsTab auditInsights={auditInsights} rawEvents={rawEvents} />
             </>
           )}
 
