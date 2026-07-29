@@ -162,7 +162,7 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                 
                 {/* The Iframe of the real site */}
                 <iframe 
-                  src={`https://dopamina-land.vercel.app${selectedPath}${selectedPath.includes('?') ? '&' : '?'}heatmap=true`} 
+                  src={`http://localhost:3000${selectedPath}${selectedPath.includes('?') ? '&' : '?'}heatmap=true`} 
                   className="w-full pointer-events-none" 
                   style={{ height: '5000px', border: 'none' }} // Massive height so iframe doesn't scroll internally
                   title="Heatmap Target"

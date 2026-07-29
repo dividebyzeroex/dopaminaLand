@@ -14,15 +14,16 @@ import SessionReplayPlayer from './dashboard/SessionReplayPlayer';
 import InteractiveBrazilMap from './dashboard/InteractiveBrazilMap';
 import AuditIntelligenceTab from './dashboard/AuditIntelligenceTab';
 import SearchAnalyticsTab from './dashboard/SearchAnalyticsTab';
+import { VisitorExplorerTab } from './dashboard/VisitorExplorerTab';
 import { StoreAuditAnalyticsTab } from './dashboard/StoreAuditAnalyticsTab';
 import { TabHeaderBanner } from './dashboard/TabHeaderBanner';
-import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3 } from 'lucide-react';
+import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'audit_intelligence' | 'search_analytics' | 'store_audit' | 'ticker' | 'replay' | 'map' | 'intent' | 'products' | 'ux' | 'hubspot'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'audit_intelligence' | 'search_analytics' | 'intent' | 'ux' | 'visitors'>('overview');
 
   // Time selector state
   const [timeRange, setTimeRange] = useState<string>('all');
@@ -194,17 +195,12 @@ export default function AnalyticsDashboardClient() {
   }
 
   const TABS = [
-    { id: 'overview', label: 'Cockpit de Auditoria', icon: LayoutDashboard },
-    { id: 'audit_intelligence', label: 'Audit Intelligence', icon: BarChart3 },
-    { id: 'search_analytics', label: 'Search Analytics', icon: Search },
-    { id: 'store_audit', label: '🛡️ Dark Patterns', icon: Shield },
-    { id: 'ticker', label: 'Live Ticker', icon: Radio },
-    { id: 'replay', label: 'Replay de Sessão', icon: PlaySquare },
-    { id: 'map', label: 'Mapa do Brasil', icon: MapPin },
-    { id: 'intent', label: 'Perfis de Auditor', icon: Target },
-    { id: 'products', label: 'Sinais de Produto', icon: Package },
-    { id: 'ux', label: 'Telemetria UX', icon: MousePointer2 },
-    { id: 'hubspot', label: 'HubSpot CRM', icon: Briefcase },
+    { id: 'overview', label: '🚀 Cockpit de Auditoria', icon: LayoutDashboard },
+    { id: 'audit_intelligence', label: '📊 Audit Intelligence', icon: BarChart3 },
+    { id: 'search_analytics', label: '🔍 Search Analytics', icon: Search },
+    { id: 'visitors', label: '🕵️‍♂️ Explorador de Visitantes', icon: Users },
+    { id: 'intent', label: '🎯 Perfis de Auditor', icon: Target },
+    { id: 'ux', label: '🧪 Telemetria UX', icon: MousePointer2 },
   ];
 
   return (
@@ -359,70 +355,6 @@ export default function AnalyticsDashboardClient() {
             </>
           )}
 
-          {activeTab === 'store_audit' && (
-            <>
-              <TabHeaderBanner
-                icon="🛡️"
-                title="Anti-Truque & Dark Patterns"
-                subtitle="Auditoria em tempo real de gatilhos psicológicos, ancoragem de preço e indução em e-commerces navegados por usuários"
-                badgeText="VARREDURA REAL"
-                badgeColor="rose"
-                highlightLabel="Lojas Auditadas"
-                highlightValue={rawEvents.filter(e => e.metadata?.store_name || e.event_type === 'dark_pattern_audit').length.toLocaleString('pt-BR')}
-                highlightColor="text-rose-400"
-              />
-              <StoreAuditAnalyticsTab events={rawEvents} />
-            </>
-          )}
-
-          {activeTab === 'ticker' && (
-            <>
-              <TabHeaderBanner
-                icon="📡"
-                title="Live Event Ticker"
-                subtitle="Stream ininterrupto de eventos de telemetria e intenção de compra transmitidos via Supabase Realtime"
-                badgeText="SUPABASE STREAM"
-                badgeColor="emerald"
-                highlightLabel="Eventos ao Vivo"
-                highlightValue={rawEvents.length.toLocaleString('pt-BR')}
-                highlightColor="text-emerald-400"
-              />
-              <LiveTickerFeed events={rawEvents} />
-            </>
-          )}
-
-          {activeTab === 'replay' && (
-            <>
-              <TabHeaderBanner
-                icon="🎬"
-                title="Replay de Sessão & Trilha"
-                subtitle="Reconstituição passo a passo da jornada do usuário, cliques e comportamentos de compra navegados"
-                badgeText="TELEMETRIA UX"
-                badgeColor="purple"
-                highlightLabel="Sessões Mapeadas"
-                highlightValue={rawSessions.length.toLocaleString('pt-BR')}
-                highlightColor="text-purple-400"
-              />
-              <SessionReplayPlayer sessions={rawSessions} events={rawEvents} />
-            </>
-          )}
-
-          {activeTab === 'map' && (
-            <>
-              <TabHeaderBanner
-                icon="🗺️"
-                title="Distribuição Geográfica Brasil"
-                subtitle="Mapa de calor de acessos e concentração de intenção de compra por estado brasileiro"
-                badgeText="GEOLOCALIZAÇÃO"
-                badgeColor="amber"
-                highlightLabel="Estados Ativos"
-                highlightValue={rawSessions.map(s => s.location?.state).filter(Boolean).length || 0}
-                highlightColor="text-amber-400"
-              />
-              <InteractiveBrazilMap sessions={rawSessions} events={rawEvents} />
-            </>
-          )}
-
           {activeTab === 'audit_intelligence' && (
             <>
               <TabHeaderBanner
@@ -455,6 +387,22 @@ export default function AnalyticsDashboardClient() {
             </>
           )}
 
+          {activeTab === 'visitors' && (
+            <>
+              <TabHeaderBanner
+                icon="🕵️‍♂️"
+                title="Explorador de Visitantes & Leads"
+                subtitle="Mergulho profundo em sessões individuais cruzando Telemetria, HubSpot CRM e GA4"
+                badgeText="REVOPS & PRODUCT"
+                badgeColor="cyan"
+                highlightLabel="Visitantes Únicos (Sessões)"
+                highlightValue={rawSessions.length.toLocaleString('pt-BR')}
+                highlightColor="text-cyan-400"
+              />
+              <VisitorExplorerTab sessions={rawSessions} events={rawEvents} />
+            </>
+          )}
+
           {activeTab === 'intent' && (
             <>
               <TabHeaderBanner
@@ -476,21 +424,7 @@ export default function AnalyticsDashboardClient() {
             </>
           )}
 
-          {activeTab === 'products' && (
-            <>
-              <TabHeaderBanner
-                icon="🛍️"
-                title="Sinais de Auditoria por Produto"
-                subtitle="Análise por item auditado, histórico de sobrepreço e anomalias de mercado detectadas"
-                badgeText="AUDIT SIGNALS"
-                badgeColor="purple"
-                highlightLabel="Itens Mapeados"
-                highlightValue={auditInsights.topAuditedProducts.length}
-                highlightColor="text-purple-400"
-              />
-              <ProductsInsights auditInsights={auditInsights} rawEvents={rawEvents} />
-            </>
-          )}
+
 
           {activeTab === 'ux' && (
             <>
@@ -508,21 +442,7 @@ export default function AnalyticsDashboardClient() {
             </>
           )}
 
-          {activeTab === 'hubspot' && (
-            <>
-              <TabHeaderBanner
-                icon="💼"
-                title="HubSpot CRM Cockpit"
-                subtitle="Visão consolidada de Pipeline, Funil de Contatos, Ticket Médio e Fechamento Comercial"
-                badgeText="ENTERPRISE"
-                badgeColor="orange"
-                highlightLabel="Previsão de Receita"
-                highlightValue={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(hubspotCrmData?.kpis?.pipelineValue || 0)}
-                highlightColor="text-emerald-400"
-              />
-              <HubSpotTab data={hubspotCrmData} />
-            </>
-          )}
+
         </div>
       )}
 

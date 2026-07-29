@@ -138,6 +138,64 @@ export default function SearchAnalyticsTab({ auditInsights, rawEvents }: SearchA
         </div>
       </div>
 
+      {/* Exact Search Log */}
+      <div className="rounded-xl border border-border bg-surface p-5">
+        <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Clock className="w-4 h-4 text-primary" />
+          Buscas Exatas por Horário (Log de Eventos)
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-surface-lighter text-muted">
+              <tr>
+                <th className="px-4 py-3 font-semibold rounded-tl-lg">Data / Hora</th>
+                <th className="px-4 py-3 font-semibold">Termo Buscado / URL</th>
+                <th className="px-4 py-3 font-semibold">Preço Retornado</th>
+                <th className="px-4 py-3 font-semibold rounded-tr-lg">Sucesso</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {searchEvents.slice().reverse().slice(0, 50).map((e, i) => {
+                const date = new Date(e.created_at);
+                const query = e.metadata?.query || '-';
+                const price = e.price_displayed || e.metadata?.current_price || 0;
+                const isSuccess = price > 0;
+                
+                return (
+                  <tr key={i} className="hover:bg-surface-hover transition">
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted">
+                      {date.toLocaleDateString('pt-BR')} {date.toLocaleTimeString('pt-BR')}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate" title={query}>
+                      {query}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs">
+                      {price > 0 ? `R$ ${price.toFixed(2)}` : '-'}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isSuccess ? (
+                        <span className="flex items-center gap-1 text-emerald-500 text-xs font-bold">
+                          <CheckCircle className="w-3 h-3" /> Sim
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-rose-500 text-xs font-bold">
+                          <XCircle className="w-3 h-3" /> Não
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {searchEvents.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-muted">Nenhuma busca registrada.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* URL vs Text + Success vs Fail */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-xl border border-border bg-surface p-5">
