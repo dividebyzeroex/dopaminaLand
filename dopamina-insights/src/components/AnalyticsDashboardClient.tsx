@@ -17,13 +17,14 @@ import SearchAnalyticsTab from './dashboard/SearchAnalyticsTab';
 import { VisitorExplorerTab } from './dashboard/VisitorExplorerTab';
 import { StoreAuditAnalyticsTab } from './dashboard/StoreAuditAnalyticsTab';
 import { TabHeaderBanner } from './dashboard/TabHeaderBanner';
+import LeadsTab from './dashboard/LeadsTab';
 import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'audit_intelligence' | 'search_analytics' | 'intent' | 'ux' | 'visitors'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'audit_intelligence' | 'search_analytics' | 'leads' | 'intent' | 'ux' | 'visitors'>('overview');
 
   // Time selector state
   const [timeRange, setTimeRange] = useState<string>('all');
@@ -198,6 +199,7 @@ export default function AnalyticsDashboardClient() {
     { id: 'overview', label: '🚀 Cockpit de Auditoria', icon: LayoutDashboard },
     { id: 'audit_intelligence', label: '📊 Audit Intelligence', icon: BarChart3 },
     { id: 'search_analytics', label: '🔍 Search Analytics', icon: Search },
+    { id: 'leads', label: '📧 Base de Leads', icon: Users },
     { id: 'visitors', label: '🕵️‍♂️ Explorador de Visitantes', icon: Users },
     { id: 'intent', label: '🎯 Perfis de Auditor', icon: Target },
     { id: 'ux', label: '🧪 Telemetria UX', icon: MousePointer2 },
@@ -388,6 +390,8 @@ export default function AnalyticsDashboardClient() {
               <SearchAnalyticsTab auditInsights={auditInsights} rawEvents={rawEvents} />
             </>
           )}
+
+          {activeTab === 'leads' && <LeadsTab />}
 
           {activeTab === 'visitors' && (
             <>
