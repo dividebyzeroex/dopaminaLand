@@ -77,8 +77,14 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6">
         
+        <div className="mt-8 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight">
+            {data.scraped_name || "Análise de Produto"}
+          </h1>
+        </div>
+
         {/* Features Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
           
           {/* Full Width Hero */}
           <div className="lg:col-span-12">
