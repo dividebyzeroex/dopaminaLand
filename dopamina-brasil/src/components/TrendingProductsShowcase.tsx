@@ -48,8 +48,8 @@ export default function TrendingProductsShowcase() {
   if (loading) {
     return (
       <div className="w-full py-8 text-center space-y-2">
-        <div className="w-6 h-6 border-2 border-[#22c55e] border-t-transparent rounded-full animate-spin mx-auto" />
-        <span className="text-xs text-gray-400 font-mono">Conectando às APIs de Tendência dos Players...</span>
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+        <span className="text-xs text-muted font-mono">Conectando às APIs de Tendência dos Players...</span>
       </div>
     );
   }
@@ -59,13 +59,13 @@ export default function TrendingProductsShowcase() {
   return (
     <div className="w-full max-w-7xl mx-auto my-8 space-y-6">
       {/* Section Header with Carousel Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono text-[10px] font-bold uppercase tracking-wider mb-2">
             <Flame className="w-3.5 h-3.5 fill-current animate-bounce text-orange-400" />
             MERCADO LIVRE & BUSCAPÉ TRENDS LIVE
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black font-outfit text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-black font-outfit text-foreground tracking-tight">
             Os Mais Buscados do Brasil Hoje
           </h2>
         </div>
@@ -74,14 +74,14 @@ export default function TrendingProductsShowcase() {
         <div className="flex items-center gap-2 self-end sm:self-auto">
           <button
             onClick={() => scroll("left")}
-            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/20 active:scale-95 transition-all"
+            className="p-2 rounded-xl bg-surface-light border border-border text-foreground hover:bg-primary/90/20 active:scale-95 transition-all"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="p-2 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40 text-[#22c55e] hover:bg-[#22c55e]/30 active:scale-95 transition-all"
+            className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 active:scale-95 transition-all"
             aria-label="Próximo"
           >
             <ChevronRight className="w-5 h-5" />
@@ -90,18 +90,18 @@ export default function TrendingProductsShowcase() {
       </div>
 
       {/* Live Trends Ticker */}
-      <div className="w-full border border-white/10 bg-white/[0.02] backdrop-blur-md rounded-xl overflow-hidden py-2.5 px-4 relative">
+      <div className="w-full border border-border bg-surface backdrop-blur-md rounded-xl overflow-hidden py-2.5 px-4 relative">
         <motion.div
           animate={{ x: [0, -1000] }}
           transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-          className="whitespace-nowrap flex items-center gap-8 text-xs font-mono font-bold text-gray-300"
+          className="whitespace-nowrap flex items-center gap-8 text-xs font-mono font-bold text-muted"
         >
           {[...trends, ...trends].map((item, idx) => (
             <span key={idx} className="flex items-center gap-2">
-              <span className="text-[#22c55e]">⚡</span>
-              <strong className="text-white">{item.name}</strong>
+              <span className="text-primary">⚡</span>
+              <strong className="text-foreground">{item.name}</strong>
               <span className="text-orange-400 font-bold">{item.surge}</span>
-              <span className="text-gray-600">●</span>
+              <span className="text-muted-light">●</span>
             </span>
           ))}
         </motion.div>
@@ -117,12 +117,12 @@ export default function TrendingProductsShowcase() {
           <motion.div
             key={item.id}
             whileHover={{ y: -4, scale: 1.01 }}
-            className="min-w-[290px] sm:min-w-[340px] max-w-[340px] p-5 rounded-2xl bg-[#0a0a0f]/90 border border-white/10 hover:border-[#22c55e]/40 transition-all shadow-xl space-y-4 flex flex-col justify-between group shrink-0"
+            className="min-w-[290px] sm:min-w-[340px] max-w-[340px] p-5 rounded-2xl bg-white border border-border hover:border-primary/20 transition-all shadow-xl space-y-4 flex flex-col justify-between group shrink-0"
           >
             <div className="space-y-3">
               {/* Card Top Row */}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black font-mono px-2 py-0.5 rounded bg-white/10 text-white border border-white/10">
+                <span className="text-[10px] font-black font-mono px-2 py-0.5 rounded bg-surface-light border border-border text-foreground border border-border">
                   #{index + 1} MAIS BUSCADO
                 </span>
                 <span className="text-[10px] font-bold text-orange-400 font-mono flex items-center gap-1">
@@ -133,32 +133,32 @@ export default function TrendingProductsShowcase() {
 
               {/* Product Info */}
               <div>
-                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">
                   {item.category}
                 </span>
-                <h3 className="text-base font-bold font-outfit text-white group-hover:text-[#22c55e] transition-colors truncate">
+                <h3 className="text-base font-bold font-outfit text-foreground group-hover:text-primary transition-colors truncate">
                   {item.name}
                 </h3>
               </div>
 
               {/* Store & Price Breakdown */}
-              <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-gray-400 text-[11px]">
+              <div className="p-3 rounded-xl bg-surface-light border border-border space-y-2 text-xs">
+                <div className="flex items-center justify-between text-muted text-[11px]">
                   <span className="flex items-center gap-1">
                     <Store className="w-3 h-3 text-purple-400" />
                     <span>Loja de Origem:</span>
                   </span>
-                  <strong className="text-white">{item.store}</strong>
+                  <strong className="text-foreground">{item.store}</strong>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between pt-2 border-t border-border">
                   <div>
-                    <span className="text-[9px] text-gray-400 block">Preço Estimado</span>
+                    <span className="text-[9px] text-muted block">Preço Estimado</span>
                     <span className="font-bold text-red-400 font-mono">{formatBRL(item.estimatedPrice)}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9px] text-[#22c55e] block font-bold">Piso Buscapé</span>
-                    <span className="font-black text-[#22c55e] font-mono">{formatBRL(item.marketLowest)}</span>
+                    <span className="text-[9px] text-primary block font-bold">Piso Buscapé</span>
+                    <span className="font-black text-primary font-mono">{formatBRL(item.marketLowest)}</span>
                   </div>
                 </div>
               </div>
@@ -167,7 +167,7 @@ export default function TrendingProductsShowcase() {
             {/* Audit Speech Balloon Trigger Button */}
             <button
               onClick={() => setActiveTrend(item)}
-              className="w-full py-3 bg-[#22c55e] text-black hover:bg-white font-black text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer"
+              className="w-full py-3 bg-primary text-primary-foreground hover:bg-primary/90 font-black text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer"
             >
               <MessageSquare className="w-3.5 h-3.5 fill-current" />
               <span>Auditar Preço Deste Item</span>
