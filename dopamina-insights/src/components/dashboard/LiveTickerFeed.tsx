@@ -51,7 +51,7 @@ export default function LiveTickerFeed({ events }: LiveTickerFeedProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md font-mono">
+    <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-md font-mono">
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4 mb-4">
         <div className="flex items-center gap-3">

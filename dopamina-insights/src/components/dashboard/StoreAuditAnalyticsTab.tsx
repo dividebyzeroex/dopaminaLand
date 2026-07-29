@@ -121,7 +121,7 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
     <div className="space-y-8">
       {/* Top Banner KPI Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-border bg-zinc-950 p-5 shadow-xl">
+        <div className="rounded-2xl border border-border bg-surface-light p-5 shadow-xl">
           <div className="flex items-center justify-between text-xs text-muted">
             <span>AUDITORIAS REAIS REGISTRADAS</span>
             <span className="text-primary text-[10px] font-black uppercase">100% Real</span>
@@ -139,7 +139,7 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
           <p className="mt-1 text-[11px] text-amber-200/70">Calculado dos eventos recebidos</p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-zinc-950 p-5 shadow-xl">
+        <div className="rounded-2xl border border-border bg-surface-light p-5 shadow-xl">
           <div className="flex items-center justify-between text-xs text-muted">
             <span>LOJA MAIS AUDITADA</span>
             <span className="text-primary font-bold">Real</span>
@@ -152,7 +152,7 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-zinc-950 p-5 shadow-xl">
+        <div className="rounded-2xl border border-border bg-surface-light p-5 shadow-xl">
           <div className="flex items-center justify-between text-xs text-muted">
             <span>STATUS DA TRANSMISSÃO</span>
             <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
@@ -166,7 +166,7 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
       </div>
 
       {/* Store Risk Level Rankings */}
-      <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
+      <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-md">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-black text-foreground flex items-center gap-2">
@@ -209,7 +209,7 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
       </div>
 
       {/* Live Extension Audit Stream Table */}
-      <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
+      <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-md">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-black text-foreground flex items-center gap-2">

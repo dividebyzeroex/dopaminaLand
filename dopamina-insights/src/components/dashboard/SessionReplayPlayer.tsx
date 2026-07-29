@@ -79,7 +79,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
   const currentEvent = sessionEvents[currentStepIndex];
 
   return (
-    <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
+    <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-md">
       {/* Controls Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 mb-4">
         <div className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
               <svg width="20" height="24" viewBox="0 0 16 20" fill="none">
                 <path d="M0 0L16 12L8 12L12 20L8 18L4 12L0 16V0Z" fill="#ccff00" stroke="#000" strokeWidth="1" />
               </svg>
-              <span className="absolute left-4 top-2 text-[9px] font-black bg-zinc-950/90 text-primary border border-primary/30 px-2 py-0.5 rounded shadow whitespace-nowrap">
+              <span className="absolute left-4 top-2 text-[9px] font-black bg-surface-light text-primary border border-primary/30 px-2 py-0.5 rounded shadow whitespace-nowrap">
                 {cursorPos.type}
               </span>
             </div>
@@ -173,7 +173,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
         ))}
 
         {/* HUD Info */}
-        <div className="absolute top-4 left-4 z-30 bg-zinc-950/90 border border-border rounded-xl p-3 text-xs  max-w-xs">
+        <div className="absolute top-4 left-4 z-30 bg-surface-light border border-border rounded-xl p-3 text-xs  max-w-xs">
           <p className="text-zinc-500 font-bold text-[10px]">EVENTO ATUAL ({currentStepIndex + 1}/{sessionEvents.length})</p>
           <p className="text-foreground font-bold mt-1">
             {currentEvent ? currentEvent.event_type : 'Aguardando início...'}

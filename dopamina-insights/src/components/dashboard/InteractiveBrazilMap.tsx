@@ -70,7 +70,7 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
   const maxSessions = Math.max(...Object.values(stateMetrics).map(m => m.sessions), 1);
 
   return (
-    <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
+    <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-md">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🗺️</span>
@@ -130,21 +130,21 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
                 </h4>
 
                 <div className="mt-6 space-y-4">
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-border">
+                  <div className="p-3 rounded-lg bg-surface-light border border-border">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold">Volume de Acessos</p>
                     <p className="text-2xl font-black text-zinc-100 mt-0.5">
                       {stateMetrics[selectedState]?.sessions || 0}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-border">
+                  <div className="p-3 rounded-lg bg-surface-light border border-border">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold">Checkouts Fictícios</p>
                     <p className="text-2xl font-black text-primary mt-0.5">
                       {stateMetrics[selectedState]?.checkouts || 0}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-border">
+                  <div className="p-3 rounded-lg bg-surface-light border border-border">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold">Receita Estimada</p>
                     <p className="text-xl font-black text-emerald-400 mt-0.5">
                       R$ {(stateMetrics[selectedState]?.revenue || 0).toLocaleString('pt-BR')}

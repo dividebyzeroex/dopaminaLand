@@ -126,7 +126,7 @@ export default function AutomatedInsightsEngine({
   if (generatedInsights.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-cyan-500/20 bg-zinc-950/80 p-6 backdrop-blur-xl shadow-xl">
+    <div className="rounded-2xl border border-cyan-500/20 bg-surface-light p-6 backdrop-blur-xl shadow-xl">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">💡</span>
