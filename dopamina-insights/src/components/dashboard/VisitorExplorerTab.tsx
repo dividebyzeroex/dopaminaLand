@@ -41,7 +41,7 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
 
       // Archetype Auto-Tagging
       let archetype = 'Explorador Neutro';
-      let archetypeColor = 'bg-gray-500/20 text-gray-400';
+      let archetypeColor = 'bg-gray-500/20 text-muted';
       if (searchCount > 3 && walletSaved > 1000) {
         archetype = 'Caçador de Pechinchas';
         archetypeColor = 'bg-emerald-500/20 text-emerald-400';
@@ -102,13 +102,13 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
     <div className="space-y-6">
       
       {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-black/20 p-4 rounded-xl border border-white/5">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface-light p-4 rounded-xl border border-border">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input 
             type="text" 
             placeholder="Buscar por ID, localização ou dispositivo..."
-            className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#ccff00]/50 text-white"
+            className="w-full bg-surface-light border border-border rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#ccff00]/50 text-foreground"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -117,19 +117,19 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
         <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
           <button 
             onClick={() => setFilterType('all')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${filterType === 'all' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${filterType === 'all' ? 'bg-indigo-500 text-foreground' : 'bg-surface-light text-muted hover:text-foreground'}`}
           >
             Todas as Sessões
           </button>
           <button 
             onClick={() => setFilterType('frustrated')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${filterType === 'frustrated' ? 'bg-rose-500 text-white' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${filterType === 'frustrated' ? 'bg-rose-500 text-foreground' : 'bg-surface-light text-muted hover:text-foreground'}`}
           >
             <Activity className="w-3 h-3" /> Alta Frustração
           </button>
           <button 
             onClick={() => setFilterType('hunters')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${filterType === 'hunters' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${filterType === 'hunters' ? 'bg-emerald-500 text-foreground' : 'bg-surface-light text-muted hover:text-foreground'}`}
           >
             <Target className="w-3 h-3" /> Caçadores de Pechincha
           </button>
@@ -137,11 +137,11 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
       </div>
 
       {/* Smart Table */}
-      <div className="bg-black/40 border border-white/10 rounded-2xl overflow-hidden">
+      <div className="bg-surface-light border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white/5 border-b border-white/10 text-xs uppercase tracking-wider text-gray-400">
+              <tr className="bg-surface-light border-b border-border text-xs uppercase tracking-wider text-muted">
                 <th className="p-4 font-semibold">Visitante / Arquétipo</th>
                 <th className="p-4 font-semibold">Localização & GA4</th>
                 <th className="p-4 font-semibold">Dispositivo</th>
@@ -153,7 +153,7 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
             <tbody className="divide-y divide-white/5">
               {filteredSessions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-gray-500 text-sm">
+                  <td colSpan={6} className="p-8 text-center text-muted-light text-sm">
                     Nenhum visitante encontrado com estes filtros.
                   </td>
                 </tr>
@@ -161,12 +161,12 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
                 filteredSessions.map((session) => (
                   <tr 
                     key={session.id} 
-                    className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                    className="hover:bg-surface-light/[0.02] transition-colors cursor-pointer group"
                     onClick={() => setSelectedSession(session)}
                   >
                     <td className="p-4">
                       <div className="flex flex-col gap-1">
-                        <span className="font-mono text-xs text-gray-300">
+                        <span className="font-mono text-xs text-muted">
                           {session.id.substring(0, 8)}...
                         </span>
                         <div className="flex items-center gap-2 mt-1">
@@ -179,12 +179,12 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
                     
                     <td className="p-4">
                       <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-sm text-gray-300">
-                          <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                        <div className="flex items-center gap-1.5 text-sm text-muted">
+                          <MapPin className="w-3.5 h-3.5 text-muted-light" />
                           {session.location.city || 'Desconhecido'}, {session.location.country}
                         </div>
                         {session.utm_tags?.source && (
-                          <div className="text-[10px] text-gray-500 flex items-center gap-1">
+                          <div className="text-[10px] text-muted-light flex items-center gap-1">
                             <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded">
                               {session.utm_tags.source} / {session.utm_tags.medium}
                             </span>
@@ -194,7 +194,7 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
                     </td>
 
                     <td className="p-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-muted">
                         {session.deviceType === 'mobile' ? (
                           <Smartphone className="w-4 h-4" />
                         ) : (
@@ -206,11 +206,11 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
 
                     <td className="p-4">
                       <div className="flex items-center gap-4 text-xs">
-                        <div className="flex items-center gap-1.5 text-gray-400" title="Duração da Sessão">
+                        <div className="flex items-center gap-1.5 text-muted" title="Duração da Sessão">
                           <Clock className="w-3.5 h-3.5" />
                           {formatDuration(session.durationSeconds)}
                         </div>
-                        <div className="flex items-center gap-1.5 text-gray-400" title="Buscas Realizadas">
+                        <div className="flex items-center gap-1.5 text-muted" title="Buscas Realizadas">
                           <Search className="w-3.5 h-3.5" />
                           {session.searchCount}
                         </div>
@@ -230,7 +230,7 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
                     </td>
 
                     <td className="p-4 text-right">
-                      <button className="p-2 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-white/10 text-white">
+                      <button className="p-2 bg-surface-light rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-surface-light text-foreground">
                         <ChevronRight className="w-4 h-4" />
                       </button>
                     </td>

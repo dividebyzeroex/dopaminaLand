@@ -17,10 +17,10 @@ export default function SessionDrawer({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedLead(null)} />
+      <div className="fixed inset-0 z-40 bg-surface-light " onClick={() => setSelectedLead(null)} />
       
       {/* Drawer */}
-      <div className="fixed top-0 right-0 z-50 h-screen w-full max-w-[480px] border-l border-border bg-[#09090b] shadow-2xl animate-toast-in">
+      <div className="fixed top-0 right-0 z-50 h-screen w-full max-w-[480px] border-l border-border bg-background shadow-md animate-toast-in">
         <div className="flex h-full flex-col overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border p-6 bg-surface-light">

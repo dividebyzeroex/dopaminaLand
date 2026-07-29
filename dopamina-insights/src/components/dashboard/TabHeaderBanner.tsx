@@ -62,14 +62,14 @@ export function TabHeaderBanner({
   const style = colorStyles[badgeColor] || colorStyles.cyan;
 
   return (
-    <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border bg-gradient-to-r p-6 md:p-8 shadow-2xl text-white mb-6 ${style.gradient}`}>
+    <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border bg-gradient-to-r p-6 md:p-8 shadow-md text-foreground mb-6 ${style.gradient}`}>
       <div className="flex items-center gap-4">
         <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-3xl shadow-inner ${style.box}`}>
           {icon}
         </div>
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-black tracking-tight text-white font-[var(--font-display)]">{title}</h1>
+            <h1 className="text-2xl font-black tracking-tight text-foreground font-[var(--font-display)]">{title}</h1>
             <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${style.badge}`}>
               <span className="h-1.5 w-1.5 rounded-full bg-current animate-ping" />
               {badgeText}
@@ -81,7 +81,7 @@ export function TabHeaderBanner({
 
       {highlightLabel && (
         <div className="flex items-center gap-3 shrink-0">
-          <div className="rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2 text-right shadow-inner">
+          <div className="rounded-xl border border-border bg-surface-light px-4 py-2 text-right shadow-inner">
             <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">{highlightLabel}</span>
             <span className={`text-lg font-black ${highlightColor}`}>{highlightValue}</span>
           </div>

@@ -121,12 +121,12 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
     <div className="space-y-8">
       {/* Top Banner KPI Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-xl">
-          <div className="flex items-center justify-between text-xs text-zinc-400">
+        <div className="rounded-2xl border border-border bg-zinc-950 p-5 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>AUDITORIAS REAIS REGISTRADAS</span>
-            <span className="text-neon text-[10px] font-black uppercase">100% Real</span>
+            <span className="text-primary text-[10px] font-black uppercase">100% Real</span>
           </div>
-          <p className="mt-2 text-2xl font-black text-white">{totalAudits.toLocaleString()}</p>
+          <p className="mt-2 text-2xl font-black text-foreground">{totalAudits.toLocaleString()}</p>
           <p className="mt-1 text-[11px] text-zinc-500">Eventos reais gravados no banco</p>
         </div>
 
@@ -139,12 +139,12 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
           <p className="mt-1 text-[11px] text-amber-200/70">Calculado dos eventos recebidos</p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-xl">
-          <div className="flex items-center justify-between text-xs text-zinc-400">
+        <div className="rounded-2xl border border-border bg-zinc-950 p-5 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>LOJA MAIS AUDITADA</span>
-            <span className="text-neon font-bold">Real</span>
+            <span className="text-primary font-bold">Real</span>
           </div>
-          <p className="mt-2 text-xl font-black text-neon">
+          <p className="mt-2 text-xl font-black text-primary">
             {realStoreRankings[0]?.name || 'Nenhuma loja'}
           </p>
           <p className="mt-1 text-[11px] text-zinc-500">
@@ -152,38 +152,38 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-xl">
-          <div className="flex items-center justify-between text-xs text-zinc-400">
+        <div className="rounded-2xl border border-border bg-zinc-950 p-5 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>STATUS DA TRANSMISSÃO</span>
             <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
               ONLINE
             </span>
           </div>
-          <p className="mt-2 text-xl font-black text-white">Telemetria HTTP + Realtime</p>
+          <p className="mt-2 text-xl font-black text-foreground">Telemetria HTTP + Realtime</p>
           <p className="mt-1 text-[11px] text-zinc-500">Zero dados mockados/simulados</p>
         </div>
       </div>
 
       {/* Store Risk Level Rankings */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+      <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-black text-white flex items-center gap-2">
+            <h3 className="text-lg font-black text-foreground flex items-center gap-2">
               <span>🏆 Ranking Real de Risco por E-Commerce</span>
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Score de indução computado estritamente pelas auditorias reais recebidas da extensão.
             </p>
           </div>
-          <span className="rounded-full bg-neon/10 border border-neon/30 px-3 py-1 text-xs font-bold text-neon">
+          <span className="rounded-full bg-primary border border-primary/30 px-3 py-1 text-xs font-bold text-primary">
             {realStoreRankings.length} Lojas Auditadas Realmente
           </span>
         </div>
 
         {realStoreRankings.length === 0 ? (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-8 text-center text-xs text-zinc-400 space-y-2">
-            <p className="font-bold text-zinc-200 text-sm">📍 Nenhuma auditoria registrada neste período</p>
+          <div className="rounded-xl border border-border bg-surface-light p-8 text-center text-xs text-muted space-y-2">
+            <p className="font-bold text-foreground text-sm">📍 Nenhuma auditoria registrada neste período</p>
             <p>Ative a extensão ou favorito em uma página de produto no Mercado Livre, Amazon ou Shopee para registrar os dados em tempo real!</p>
           </div>
         ) : (
@@ -191,15 +191,15 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
             {realStoreRankings.map(store => (
               <div key={store.name} className={`rounded-xl border p-4 transition hover:scale-[1.02] ${store.color}`}>
                 <div className="flex items-center justify-between">
-                  <span className="font-black text-sm tracking-wide text-white">{store.name}</span>
+                  <span className="font-black text-sm tracking-wide text-foreground">{store.name}</span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full border border-current">
                     {store.risk} ({store.score}/100)
                   </span>
                 </div>
-                <div className="mt-3 h-2 w-full rounded-full bg-black/40 overflow-hidden">
+                <div className="mt-3 h-2 w-full rounded-full bg-surface-light overflow-hidden">
                   <div className={`h-full rounded-full ${store.bar}`} style={{ width: `${store.score}%` }} />
                 </div>
-                <p className="mt-3 text-[11px] text-zinc-300">
+                <p className="mt-3 text-[11px] text-muted">
                   <strong>Gatilhos detectados:</strong> {store.triggers}
                 </p>
               </div>
@@ -209,17 +209,17 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
       </div>
 
       {/* Live Extension Audit Stream Table */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+      <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-black text-white flex items-center gap-2">
+            <h3 className="text-lg font-black text-foreground flex items-center gap-2">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-neon"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
               </span>
               <span>Feed de Auditorias de Usuários em Tempo Real (100% Real)</span>
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Telemetria enviada ao vivo pela extensão/bookmarklet em e-commerces navegados por usuários.
             </p>
           </div>
@@ -233,7 +233,7 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-zinc-800 text-zinc-400 font-bold uppercase tracking-wider">
+              <thead className="border-b border-border text-muted font-bold uppercase tracking-wider">
                 <tr>
                   <th className="pb-3">Horário</th>
                   <th className="pb-3">Loja Visitada</th>
@@ -242,19 +242,19 @@ export function StoreAuditAnalyticsTab({ events }: StoreAuditAnalyticsTabProps) 
                   <th className="pb-3">Ação do Usuário</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/50 text-zinc-300 font-medium">
+              <tbody className="divide-y divide-zinc-800/50 text-muted font-medium">
                 {auditEvents.map((audit) => (
-                  <tr key={audit.id} className="hover:bg-zinc-900/50 transition">
+                  <tr key={audit.id} className="hover:bg-surface-light transition">
                     <td className="py-3 text-zinc-500 font-mono">{audit.timestamp}</td>
-                    <td className="py-3 font-bold text-white flex items-center gap-2">
-                      <span className="text-neon">⚡</span> {audit.store}
+                    <td className="py-3 font-bold text-foreground flex items-center gap-2">
+                      <span className="text-primary">⚡</span> {audit.store}
                     </td>
                     <td className="py-3">
                       <span className={`inline-block px-2 py-0.5 rounded-md font-black text-[11px] ${audit.score > 75 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : audit.score > 60 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
                         🚨 {audit.score}/100
                       </span>
                     </td>
-                    <td className="py-3 text-zinc-400">
+                    <td className="py-3 text-muted">
                       <div className="flex flex-wrap gap-1">
                         {audit.counts?.ancoragem > 0 && <span className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-1.5 py-0.5 rounded text-[10px]">⚓ Ancoragem ({audit.counts.ancoragem})</span>}
                         {audit.counts?.enquadramento > 0 && <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded text-[10px]">🏷️ Desconto ({audit.counts.enquadramento})</span>}

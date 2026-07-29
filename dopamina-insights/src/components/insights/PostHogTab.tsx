@@ -11,7 +11,7 @@ const GRADIENT_COLORS = ['#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b', 
 const GlassTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-2xl border border-white/20 bg-white/90 px-4 py-3 shadow-xl backdrop-blur-md">
+    <div className="rounded-2xl border border-border bg-surface-light px-4 py-3 shadow-xl ">
       <p className="text-xs font-bold text-muted">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-sm font-black text-foreground">
@@ -26,7 +26,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
   if (!data) {
     return (
       <div className="animate-fade-in">
-        <div className="rounded-3xl border border-border bg-white p-12 text-center shadow-sm">
+        <div className="rounded-3xl border border-border bg-surface-light p-12 text-center shadow-sm">
           <div className="text-5xl mb-4">🦔</div>
           <h3 className="text-xl font-bold text-foreground">PostHog não configurado</h3>
           <p className="mt-2 text-muted max-w-lg mx-auto text-sm">
@@ -62,17 +62,17 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
           <div className="text-4xl font-black text-foreground">{data.kpis.pageviews30d.toLocaleString('pt-BR')}</div>
           <div className="mt-1 text-xs font-bold text-muted">Pageviews (30d)</div>
         </div>
-        <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-sm">
           <div className="text-2xl">👥</div>
           <div className="mt-2 text-4xl font-black text-foreground">{data.kpis.sessions30d.toLocaleString('pt-BR')}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões Únicas (30d)</div>
         </div>
-        <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-sm">
           <div className="text-2xl">📊</div>
           <div className="mt-2 text-4xl font-black text-indigo-500">{data.kpis.pageviews7d.toLocaleString('pt-BR')}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Pageviews (7d)</div>
         </div>
-        <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface-light p-6 shadow-sm">
           <div className="text-2xl">🔁</div>
           <div className="mt-2 text-4xl font-black text-emerald-500">{data.kpis.sessions7d.toLocaleString('pt-BR')}</div>
           <div className="mt-1 text-xs font-bold uppercase tracking-wider text-muted">Sessões (7d)</div>
@@ -81,7 +81,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
 
       {/* Pageviews Area Chart + Device Donut */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="col-span-1 lg:col-span-2 rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="col-span-1 lg:col-span-2 rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
             📈 Pageviews por Dia
           </h2>
@@ -104,7 +104,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-4 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
             📱 Dispositivos
           </h2>
@@ -137,7 +137,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
 
       {/* Top Pages + Top Referrers */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
             🔥 Páginas Mais Visitadas
           </h2>
@@ -161,7 +161,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-6 font-[var(--font-display)] text-xl font-extrabold uppercase tracking-wide text-foreground">
             🔗 Fontes de Tráfego (Referrers)
           </h2>
@@ -191,7 +191,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
       {/* Top Events + Browsers + Cities */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Custom Events */}
-        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-6 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
             ⚡ Eventos Customizados
           </h2>
@@ -215,7 +215,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
         </div>
 
         {/* Browsers */}
-        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-6 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
             🌐 Navegadores
           </h2>
@@ -241,7 +241,7 @@ export default function PostHogTab({ data }: { data: PostHogData | null; error?:
         </div>
 
         {/* Cities */}
-        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm md:p-8">
+        <div className="rounded-3xl border border-border bg-surface-light p-6 shadow-sm md:p-8">
           <h2 className="mb-6 font-[var(--font-display)] text-lg font-extrabold uppercase tracking-wide text-foreground">
             📍 Top Cidades
           </h2>

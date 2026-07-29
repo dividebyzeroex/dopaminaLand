@@ -70,7 +70,7 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
   const maxSessions = Math.max(...Object.values(stateMetrics).map(m => m.sessions), 1);
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+    <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🗺️</span>
@@ -95,13 +95,13 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
                 onClick={() => setSelectedState(st.id)}
                 className={`rounded-xl border p-3 text-left transition duration-200 relative overflow-hidden ${
                   isSelected
-                    ? 'border-neon bg-neon/10 shadow-lg shadow-neon/10'
-                    : 'border-zinc-800 bg-zinc-900/60 hover:border-zinc-700'
+                    ? 'border-primary bg-primary shadow-lg shadow-neon/10'
+                    : 'border-border bg-surface-light hover:border-border'
                 }`}
               >
                 {/* Heat Indicator Bar */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-neon transition-all"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary transition-all"
                   style={{ opacity: 0.3 + intensity * 0.7 }}
                 />
                 
@@ -109,10 +109,10 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
                   <span className="text-lg font-black text-zinc-100">{st.id}</span>
                   <span className="text-[10px] text-zinc-500">{st.region}</span>
                 </div>
-                <p className="text-xs font-bold text-zinc-300 mt-1 truncate">{st.name}</p>
+                <p className="text-xs font-bold text-muted mt-1 truncate">{st.name}</p>
                 <div className="mt-2 flex items-center justify-between text-[11px]">
                   <span className="text-zinc-500">{m.sessions} acessos</span>
-                  {m.checkouts > 0 && <span className="text-neon font-bold">{m.checkouts} compras</span>}
+                  {m.checkouts > 0 && <span className="text-primary font-bold">{m.checkouts} compras</span>}
                 </div>
               </button>
             );
@@ -120,9 +120,9 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
         </div>
 
         {/* Selected State Details Panel */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 flex flex-col justify-between">
+        <div className="rounded-xl border border-border bg-surface-light p-5 flex flex-col justify-between">
           <div>
-            <span className="text-xs font-bold text-neon uppercase tracking-wider">Detalhamento Regional</span>
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">Detalhamento Regional</span>
             {selectedState ? (
               <>
                 <h4 className="text-xl font-black text-zinc-100 mt-1">
@@ -130,21 +130,21 @@ export default function InteractiveBrazilMap({ sessions, events }: InteractiveBr
                 </h4>
 
                 <div className="mt-6 space-y-4">
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <div className="p-3 rounded-lg bg-zinc-950 border border-border">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold">Volume de Acessos</p>
                     <p className="text-2xl font-black text-zinc-100 mt-0.5">
                       {stateMetrics[selectedState]?.sessions || 0}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <div className="p-3 rounded-lg bg-zinc-950 border border-border">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold">Checkouts Fictícios</p>
-                    <p className="text-2xl font-black text-neon mt-0.5">
+                    <p className="text-2xl font-black text-primary mt-0.5">
                       {stateMetrics[selectedState]?.checkouts || 0}
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <div className="p-3 rounded-lg bg-zinc-950 border border-border">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold">Receita Estimada</p>
                     <p className="text-xl font-black text-emerald-400 mt-0.5">
                       R$ {(stateMetrics[selectedState]?.revenue || 0).toLocaleString('pt-BR')}

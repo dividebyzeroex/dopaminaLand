@@ -7,7 +7,7 @@ import { Users, Search, ShieldAlert, BarChart3, AlertCircle, CheckCircle, Bug } 
 const GlassTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#121214]/90 px-4 py-3 shadow-2xl backdrop-blur-md">
+    <div className="rounded-xl border border-border bg-surface-light px-4 py-3 shadow-md ">
       <p className="text-xs font-semibold text-muted">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-sm font-bold text-foreground mt-1">
@@ -56,7 +56,7 @@ export default function OverviewTab({ kpis, funnelData, topProducts, timelineDat
         ].map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
-            <div key={idx} className="rounded-xl border border-border bg-surface-light p-5 shadow-sm hover:border-white/20 transition-colors flex flex-col justify-between">
+            <div key={idx} className="rounded-xl border border-border bg-surface-light p-5 shadow-sm hover:border-border transition-colors flex flex-col justify-between">
               <Icon className="h-5 w-5 text-muted mb-3" />
               <div>
                 <div className={`text-2xl font-semibold tracking-tight ${kpi.color}`}>{kpi.value}</div>

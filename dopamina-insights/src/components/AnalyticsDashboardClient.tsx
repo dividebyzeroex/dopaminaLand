@@ -165,15 +165,15 @@ export default function AnalyticsDashboardClient() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-xl">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface-light p-8 shadow-sm">
           <div className="mb-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-hover border border-border">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-light border border-border">
               <Lock className="h-6 w-6 text-foreground" />
             </div>
-            <h1 className="mt-4 text-xl font-bold text-foreground">
+            <h1 className="mt-4 text-xl font-semibold text-foreground">
               Acesso Restrito
             </h1>
-            <p className="text-sm text-muted">Dashboard de Insights Avançados v4</p>
+            <p className="text-sm text-muted mt-1">Dashboard de Insights Avançados v4</p>
           </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <input
@@ -181,11 +181,11 @@ export default function AnalyticsDashboardClient() {
               placeholder="Senha de administrador"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium text-foreground outline-none transition focus:border-primary"
+              className="rounded-xl border border-border bg-surface-light px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:bg-surface-light"
               autoFocus
             />
-            {error && <p className="text-sm text-rose-500 font-medium">{error}</p>}
-            <button type="submit" className="rounded-lg bg-foreground px-4 py-3 text-sm font-semibold text-background transition hover:bg-muted">
+            {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
+            <button type="submit" className="rounded-xl bg-primary px-4 py-3 text-sm font-medium text-foreground transition hover:bg-primary-hover">
               Acessar Painel
             </button>
           </form>
@@ -207,7 +207,7 @@ export default function AnalyticsDashboardClient() {
     <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
       {/* Toast notification */}
       {successToast && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-foreground text-background px-5 py-3.5 font-bold text-sm shadow-2xl animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-foreground text-background px-5 py-3.5 font-bold text-sm shadow-md animate-bounce">
           {successToast}
         </div>
       )}
@@ -288,25 +288,27 @@ export default function AnalyticsDashboardClient() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-8 flex flex-wrap gap-2 border-b border-border">
-        {TABS.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 ${
-                activeTab === tab.id
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted hover:text-foreground hover:border-border'
-              }`}
-            >
-              <Icon className="h-4 w-4" /> {tab.label}
-            </button>
-          );
-        })}
-      </div>
+        {/* Nav Tabs */}
+        <div className="mt-8 flex flex-wrap gap-2 overflow-x-auto no-scrollbar pb-2">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all
+                  ${isActive 
+                    ? 'bg-primary text-foreground shadow-sm' 
+                    : 'bg-surface-light border border-border text-foreground hover:bg-surface-light hover:border-border'
+                  }`}
+              >
+                <Icon className={`h-4 w-4 ${isActive ? 'text-foreground' : 'text-primary'}`} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
       {loading && timelineData.length === 0 ? (
         <div className="flex py-20 justify-center">

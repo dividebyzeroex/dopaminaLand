@@ -79,9 +79,9 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
   const currentEvent = sessionEvents[currentStepIndex];
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+    <div className="rounded-2xl border border-border bg-zinc-950 p-6 shadow-md">
       {/* Controls Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-4 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 mb-4">
         <div className="flex items-center gap-3">
           <span className="text-xl">🎬</span>
           <div>
@@ -99,7 +99,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
               setCurrentStepIndex(0);
               setIsPlaying(false);
             }}
-            className="bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-neon"
+            className="bg-surface-light border border-border text-foreground text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
           >
             {sessions.map((s, idx) => (
               <option key={s.session_id || idx} value={s.session_id}>
@@ -109,12 +109,12 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
           </select>
 
           {/* Speed Selector */}
-          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg p-1 text-xs">
+          <div className="flex items-center gap-1 bg-surface-light border border-border rounded-lg p-1 text-xs">
             {[1, 2, 4].map(spd => (
               <button
                 key={spd}
                 onClick={() => setPlaybackSpeed(spd)}
-                className={`px-2 py-1 rounded font-bold transition ${playbackSpeed === spd ? 'bg-neon text-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                className={`px-2 py-1 rounded font-bold transition ${playbackSpeed === spd ? 'bg-primary text-black' : 'text-muted hover:text-foreground'}`}
               >
                 {spd}x
               </button>
@@ -124,7 +124,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
           {/* Play/Pause Button */}
           <button
             onClick={handlePlayPause}
-            className="flex items-center gap-2 bg-neon hover:bg-neon-light text-black font-black text-xs px-4 py-2 rounded-lg transition active:scale-95 shadow-lg shadow-neon/10"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-light text-black font-black text-xs px-4 py-2 rounded-lg transition active:scale-95 shadow-lg shadow-neon/10"
           >
             <span>{isPlaying ? '⏸️ PAUSAR' : '▶️ REPRODUZIR'}</span>
           </button>
@@ -132,7 +132,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
       </div>
 
       {/* Replay Viewport */}
-      <div className="relative bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 h-[550px]">
+      <div className="relative bg-surface-light rounded-xl overflow-hidden border border-border h-[550px]">
         {/* Real Site Iframe */}
         <iframe
           src="https://dopamina-land.vercel.app/?replayMode=true"
@@ -150,7 +150,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
               <svg width="20" height="24" viewBox="0 0 16 20" fill="none">
                 <path d="M0 0L16 12L8 12L12 20L8 18L4 12L0 16V0Z" fill="#ccff00" stroke="#000" strokeWidth="1" />
               </svg>
-              <span className="absolute left-4 top-2 text-[9px] font-black bg-zinc-950/90 text-neon border border-neon/30 px-2 py-0.5 rounded shadow whitespace-nowrap">
+              <span className="absolute left-4 top-2 text-[9px] font-black bg-zinc-950/90 text-primary border border-primary/30 px-2 py-0.5 rounded shadow whitespace-nowrap">
                 {cursorPos.type}
               </span>
             </div>
@@ -173,13 +173,13 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
         ))}
 
         {/* HUD Info */}
-        <div className="absolute top-4 left-4 z-30 bg-zinc-950/90 border border-zinc-800 rounded-xl p-3 text-xs backdrop-blur-md max-w-xs">
+        <div className="absolute top-4 left-4 z-30 bg-zinc-950/90 border border-border rounded-xl p-3 text-xs  max-w-xs">
           <p className="text-zinc-500 font-bold text-[10px]">EVENTO ATUAL ({currentStepIndex + 1}/{sessionEvents.length})</p>
-          <p className="text-zinc-200 font-bold mt-1">
+          <p className="text-foreground font-bold mt-1">
             {currentEvent ? currentEvent.event_type : 'Aguardando início...'}
           </p>
           {currentEvent?.price_displayed && (
-            <p className="text-neon font-black text-xs mt-0.5">R$ {currentEvent.price_displayed.toLocaleString('pt-BR')}</p>
+            <p className="text-primary font-black text-xs mt-0.5">R$ {currentEvent.price_displayed.toLocaleString('pt-BR')}</p>
           )}
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function SessionReplayPlayer({ sessions, events }: SessionReplayP
           }}
           className="flex-1 accent-neon cursor-pointer h-2 bg-zinc-800 rounded-lg"
         />
-        <span className="text-xs text-zinc-400 font-mono tabular-nums">
+        <span className="text-xs text-muted font-mono tabular-nums">
           {currentStepIndex + 1} / {sessionEvents.length}
         </span>
       </div>

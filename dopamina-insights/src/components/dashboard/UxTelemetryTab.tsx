@@ -131,7 +131,7 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                 <select 
                   value={selectedPath} 
                   onChange={(e) => setSelectedPath(e.target.value)}
-                  className="bg-background border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-neon"
+                  className="bg-background border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
                 >
                   {uniquePaths.map(p => (
                     <option key={p} value={p}>{p}</option>
@@ -142,13 +142,13 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                 <div className="flex bg-background rounded border border-border overflow-hidden p-1 gap-1">
                   <button 
                     onClick={() => setDevice('desktop')}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'desktop' ? 'bg-neon text-black' : 'text-muted hover:text-foreground'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'desktop' ? 'bg-primary text-black' : 'text-muted hover:text-foreground'}`}
                   >
                     <Monitor className="w-4 h-4" /> Desktop
                   </button>
                   <button 
                     onClick={() => setDevice('mobile')}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'mobile' ? 'bg-neon text-black' : 'text-muted hover:text-foreground'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'mobile' ? 'bg-primary text-black' : 'text-muted hover:text-foreground'}`}
                   >
                     <Smartphone className="w-4 h-4" /> Mobile
                   </button>
@@ -156,9 +156,9 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
               </div>
             </div>
             
-            <div className="flex justify-center bg-black/50 p-4 rounded-xl border border-border relative overflow-hidden">
+            <div className="flex justify-center bg-surface-light p-4 rounded-xl border border-border relative overflow-hidden">
               {/* This wrapper limits the height so we can scroll the heatmap naturally */}
-              <div className={`relative bg-background overflow-y-auto overflow-x-hidden border border-border/50 rounded shadow-2xl h-[700px] custom-scrollbar ${containerWidthClass}`}>
+              <div className={`relative bg-background overflow-y-auto overflow-x-hidden border border-border/50 rounded shadow-md h-[700px] custom-scrollbar ${containerWidthClass}`}>
                 
                 {/* The Iframe of the real site */}
                 <iframe 
@@ -171,7 +171,7 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                 {/* The Overlay where points are plotted */}
                 <div className="absolute top-0 left-0 w-full" style={{ height: '5000px', pointerEvents: 'none' }}>
                   {heatmapNodes.length > 0 ? heatmapNodes : (
-                    <div className="flex items-center justify-center h-[500px] text-muted text-sm bg-background/80 backdrop-blur-sm">
+                    <div className="flex items-center justify-center h-[500px] text-muted text-sm bg-background/80 ">
                       Nenhum dado capturado para esta tela neste dispositivo.
                     </div>
                   )}
@@ -282,7 +282,7 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                       <span className="text-sm font-medium text-foreground truncate max-w-[70%]">
                         {imp.name}
                       </span>
-                      <span className="text-sm font-bold text-neon bg-neon/10 px-2 py-1 rounded">
+                      <span className="text-sm font-bold text-primary bg-primary px-2 py-1 rounded">
                         {imp.count} views
                       </span>
                     </div>

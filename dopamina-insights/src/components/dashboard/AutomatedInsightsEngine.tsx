@@ -157,12 +157,12 @@ export default function AutomatedInsightsEngine({
                   <h4 className="text-sm font-bold text-zinc-100">{insight.title}</h4>
                 </div>
                 {insight.metric && (
-                  <span className="text-[10px] font-black uppercase tracking-wider rounded-md bg-zinc-900/80 px-2 py-1 border border-zinc-800">
+                  <span className="text-[10px] font-black uppercase tracking-wider rounded-md bg-surface-light px-2 py-1 border border-border">
                     {insight.metric}
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
+              <p className="mt-2 text-xs text-muted leading-relaxed">
                 {insight.description}
               </p>
             </div>

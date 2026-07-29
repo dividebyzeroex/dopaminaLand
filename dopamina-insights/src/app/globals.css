@@ -1,30 +1,34 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* ═══ SAAS DARK PALETTE (Linear/Vercel style) ═══ */
-  --color-background: #09090b; /* Very dark, almost black */
-  --color-foreground: #fafafa;
-  --color-muted: #a1a1aa;
+  /* ═══ CLEAN / APPLE-INSPIRED PALETTE ═══ */
+  --color-background: #FAFAFA; /* Off-white background */
+  --color-foreground: #1D1D1F; /* Soft black/dark gray */
+  --color-muted: #86868B;
+  --color-muted-light: #A1A1A6;
   
-  --color-surface: #121214;
-  --color-surface-light: #18181b;
-  --color-surface-lighter: #27272a;
+  --color-surface: #FFFFFF;
+  --color-surface-light: #F5F5F7;
+  --color-surface-lighter: #E5E5EA;
   
-  --color-card: #09090b;
-  --color-card-hover: #121214;
+  --color-card: #FFFFFF;
+  --color-card-hover: #F5F5F7;
   
-  --color-border: #27272a;
+  --color-border: rgba(0, 0, 0, 0.08);
   
-  --color-primary: #3b82f6; /* Blue for accents */
-  --color-primary-hover: #2563eb;
+  --color-primary: #0071E3; /* Apple blue */
+  --color-primary-light: #2997FF;
+  --color-primary-hover: #0077ED;
   
-  --color-neon: #3b82f6; /* Overriding previous neon with blue for less code churn */
-  --color-neon-light: #60a5fa;
+  --color-neon: #0071E3; /* Keep variable for compatibility */
+  --color-neon-light: #2997FF;
   
-  --color-pop: #f59e0b; /* Warning/Amber */
+  --color-pop: #FF9500; /* Apple amber */
+  --color-accent: #34C759; /* Apple green */
+  --color-danger: #FF3B30; /* Apple red */
   
   --font-sans: var(--font-inter);
-  --font-display: var(--font-inter); /* Use inter everywhere for a cleaner look */
+  --font-display: var(--font-inter);
 }
 
 /* ════ BASE STYLES ════ */
@@ -47,7 +51,7 @@ input, select, button {
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-slide-up {
-  animation: slide-up 0.4s ease-out;
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ════ FADE IN ════ */
@@ -79,7 +83,7 @@ input, select, button {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
+  background: var(--color-muted-light);
 }
 
 /* ════ TOAST ANIMATIONS ════ */
