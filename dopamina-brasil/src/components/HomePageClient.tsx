@@ -21,8 +21,7 @@ export default function HomePageClient() {
   }
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col bg-gradient-to-b from-[#0a192f] via-[#050508] to-[#050508] overflow-hidden">
-      {/* Super Search Hero Section takes full height */}
+    <div className="w-full h-[100dvh] flex flex-col bg-background overflow-hidden">
       <section className="flex-1 w-full h-full flex items-center justify-center relative">
         <SuperSearchHero />
       </section>

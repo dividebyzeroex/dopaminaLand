@@ -10,18 +10,7 @@ import Footer from "@/components/Footer";
 import AchievementToast from "@/components/AchievementToast";
 import FomoToast from "@/components/FomoToast";
 import TrackingProvider from "@/components/TrackingProvider";
-import CustomCursor from "@/components/CustomCursor";
-import ScanLine from "@/components/ScanLine";
-import CinematicIntro from "@/components/CinematicIntro";
-import NicknameSetup from "@/components/NicknameSetup";
-import DailyModal from "@/components/DailyModal";
-import DetoxMode from "@/components/DetoxMode";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
-import ManipulationNarrator from "@/components/ManipulationNarrator";
-import LivePresence from "@/components/LivePresence";
-import NeuroXRay from "@/components/NeuroXRay";
-import ResistanceTraining from "@/components/ResistanceTraining";
-import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,35 +25,31 @@ const outfit = Outfit({
 });
 
 export const viewport = {
-  themeColor: "#0a0a0f",
+  themeColor: "#FAFAFA",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dopaminado.com.br'),
-  title: "Dopamina Brasil ⚡ — Estimule sua Dopamina de Compras Grátis",
+  title: "Dopamina — Audite preços com inteligência",
   description:
-    "Extravase e estimule sua dopamina de compras sem gastar um único centavo. O simulador de e-commerce cyberpunk onde a dopamina é infinita e o preço é R$ 0,00.",
+    "Pesquise qualquer produto e descubra se o preço é justo. Análise inteligente de preços com histórico, comparativos e detecção de sobrepreço.",
   keywords: [
     "dopamina",
-    "o que é dopamina",
-    "dopamina de comprar",
-    "estimular dopamina",
-    "loja cyberpunk",
-    "e-commerce paródia",
-    "comprar sem gastar",
-    "checkout falso",
-    "rastreamento falso",
-    "simulador de compras",
+    "auditoria de preços",
+    "comparador de preços",
+    "preço justo",
+    "análise de preço",
+    "sobrepreço",
+    "histórico de preços",
     "dopaminado",
-    "compras virtuais",
-    "frete grátis infinito",
-    "gamificação"
+    "verificar preço",
+    "comprar barato",
   ],
   robots: "index, follow",
   openGraph: {
-    title: "Dopamina Brasil ⚡ — Estimule sua Dopamina de Compras Grátis",
+    title: "Dopamina — Audite preços com inteligência",
     description:
-      "O simulador de e-commerce cyberpunk projetado para você obter o prazer da dopamina de compras sem fatura.",
+      "Pesquise qualquer produto e descubra se o preço é justo. Análise de preços inteligente e gratuita.",
     locale: "pt_BR",
     type: "website",
   },
@@ -78,28 +63,14 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${outfit.variable} h-full antialiased dark`}
+      className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <GameProvider>
             <DailyProvider>
               <TrackingProvider>
                 <CSPostHogProvider>
-                  
-                  
-                  
-                  
-                  <ScanLine />
-                  <ThemeToggle />
-                  <main className="flex-1 overflow-x-clip pb-8">{children}</main>
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
+                  <main className="flex-1 overflow-x-clip">{children}</main>
                 </CSPostHogProvider>
               </TrackingProvider>
             </DailyProvider>
