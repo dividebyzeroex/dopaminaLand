@@ -26,7 +26,7 @@ export default function PriceForecastCard({ data }: PriceForecastCardProps) {
     : Math.round(data.scraped_price * (1 - forecast.predictedDropPercent / 100));
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between h-full">
       <h3 className="text-sm font-semibold text-foreground mb-1">Previsão de Preço</h3>
       <p className="text-xs text-muted mb-5">Baseado em padrões dos últimos 180 dias</p>
 

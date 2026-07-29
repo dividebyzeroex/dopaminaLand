@@ -56,7 +56,7 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
   const areaD = pathD + ` L 500 180 L 0 180 Z`;
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between h-full">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Histórico de Preços</h3>

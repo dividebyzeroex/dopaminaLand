@@ -22,7 +22,7 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
 
   if (alternatives.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between h-full">
         <h3 className="text-sm font-semibold text-foreground mb-1">Alternativas de Mercado</h3>
         <div className="flex flex-col items-center justify-center py-8 text-muted">
           <Tag className="w-8 h-8 text-blue-400 mb-2" />

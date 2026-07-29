@@ -25,7 +25,7 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-6 sm:p-8 shadow-sm">
+    <div className="rounded-2xl border border-border bg-white p-6 sm:p-8 shadow-sm flex flex-col justify-between h-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         
         {/* Left: Price Info */}
