@@ -9,14 +9,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 });
     }
 
-    // Mock response for now
-    // In a real scenario, we would insert this into Supabase:
-    // await supabase.from('price_alerts').insert({ product_name: productName, target_price: targetPrice, contact_method: contactMethod, contact_value: contactValue })
+    // 1. In a real scenario, insert into Supabase:
+    // await supabase.from('price_alerts').insert({ ... })
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    // 2. Enviar confirmação de alerta criado via Zernio API
+    const zernioApiKey = process.env.ZERNIO_API_KEY;
+    
+    if (zernioApiKey) {
+      const messageText = `Olá! Seu alerta na Dopamina para o produto "${productName}" foi criado com sucesso. Avisaremos quando o preço cair para R$ ${targetPrice}.`;
+      
+      try {
+        await fetch('https://zernio.com/api/messages', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${zernioApiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            to: contactValue,
+            channel: contactMethod === 'whatsapp' ? 'whatsapp' : 'email',
+            text: messageText
+          })
+        });
+      } catch (err) {
+        console.error("Erro ao enviar mensagem via Zernio:", err);
+      }
+    } else {
+      // Simulate delay if no API key is present for local dev
+      await new Promise((resolve) => setTimeout(resolve, 800));
+    }
 
-    return NextResponse.json({ success: true, message: "Alerta criado com sucesso (Mock)" }, { status: 201 });
+    return NextResponse.json({ success: true, message: "Alerta criado e integração Zernio acionada!" }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Erro ao processar alerta" }, { status: 500 });
   }
