@@ -19,6 +19,25 @@ export default function SuperSearchHero() {
     }
   }, []);
 
+  const [recentSearches, setRecentSearches] = useState<string[]>([
+    "iPhone 15 Pro Max 256GB",
+    "PlayStation 5 Slim 1TB",
+    "Samsung Galaxy S24 Ultra",
+    "Smart TV LG OLED 55\"",
+    "MacBook Air M3 16GB",
+  ]);
+
+  useEffect(() => {
+    fetch('/api/recent-searches')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.searches && data.searches.length > 0) {
+          setRecentSearches(data.searches);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const handleSearch = async (e?: React.FormEvent, customQuery?: string) => {
     if (e) e.preventDefault();
     const searchQuery = customQuery || query;
@@ -204,13 +223,7 @@ export default function SuperSearchHero() {
             </div>
             
             <div className="flex flex-wrap justify-center gap-2">
-              {[
-                "iPhone 15 Pro Max 256GB",
-                "PlayStation 5 Slim 1TB",
-                "Samsung Galaxy S24 Ultra",
-                "Smart TV LG OLED 55\"",
-                "MacBook Air M3 16GB",
-              ].map((item, i) => (
+              {recentSearches.map((item, i) => (
                 <button
                   key={i}
                   onClick={() => handleSearch(undefined, item)}
