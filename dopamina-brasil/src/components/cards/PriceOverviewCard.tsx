@@ -1,6 +1,8 @@
 "use client";
 
-import { ShieldCheck, AlertTriangle, ExternalLink, TrendingDown } from "lucide-react";
+import { ShieldCheck, AlertTriangle, ExternalLink, TrendingDown, Bell } from "lucide-react";
+import { useState } from "react";
+import PriceAlertModal from "../PriceAlertModal";
 
 interface PriceOverviewCardProps {
   data: {
@@ -16,6 +18,7 @@ interface PriceOverviewCardProps {
 }
 
 export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const isFair = !data.is_fomo_alert;
   const savingsPercent = data.current_price > 0
     ? Math.round((data.savings / data.current_price) * 100)
@@ -90,18 +93,34 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
           )}
 
           {data.url && (
-            <a
-              href={data.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:text-primary-light font-medium flex items-center gap-1.5 transition"
-            >
-              Ver no Buscapé
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsAlertModalOpen(true)}
+                className="text-sm text-foreground bg-surface hover:bg-surface-dark border border-border px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition shadow-sm active:scale-95"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                Criar Alerta
+              </button>
+              <a
+                href={data.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:text-primary-light font-medium flex items-center gap-1.5 transition"
+              >
+                Ver no Buscapé
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           )}
         </div>
       </div>
+
+      <PriceAlertModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        productName={data.scraped_name || "Produto Buscado"}
+        currentPrice={data.scraped_price || data.current_price}
+      />
     </div>
   );
 }
