@@ -155,7 +155,11 @@ export default function SearchAnalyticsTab({ auditInsights, rawEvents }: SearchA
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {searchEvents.slice().reverse().slice(0, 50).map((e, i) => {
+              {searchEvents
+                .slice()
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .slice(0, 50)
+                .map((e, i) => {
                 const date = new Date(e.created_at);
                 const query = e.metadata?.query || '-';
                 const price = e.price_displayed || e.metadata?.current_price || 0;
