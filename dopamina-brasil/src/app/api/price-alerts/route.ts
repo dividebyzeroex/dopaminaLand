@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            from: contactMethod === 'whatsapp' ? (process.env.ZERNIO_WHATSAPP_ID || "6a6a9042df17280d93dfd5c8") : undefined,
             to: contactValue,
             channel: contactMethod === 'whatsapp' ? 'whatsapp' : 'email',
             text: messageText
