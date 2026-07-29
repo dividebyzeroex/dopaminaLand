@@ -30,7 +30,13 @@ export async function POST(req: NextRequest) {
       const messageText = `Olá! Seu alerta na Dopamina para o produto "${productName}" foi criado com sucesso. Avisaremos quando o preço cair para R$ ${targetPrice}.`;
       
       try {
-        await fetch('https://zernio.com/api/messages', {
+        // Formatar contato para garantir +55 no WhatsApp brasileiro, caso falte
+        let formattedContact = contactValue;
+        if (contactMethod === 'whatsapp' && !contactValue.startsWith('+')) {
+          formattedContact = contactValue.startsWith('55') ? `+${contactValue}` : `+55${contactValue}`;
+        }
+
+        const res = await fetch('https://zernio.com/api/messages', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${zernioApiKey}`,
@@ -38,11 +44,16 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             from: contactMethod === 'whatsapp' ? (process.env.ZERNIO_WHATSAPP_ID || "6a6a9042df17280d93dfd5c8") : undefined,
-            to: contactValue,
+            to: formattedContact,
             channel: contactMethod === 'whatsapp' ? 'whatsapp' : 'email',
             text: messageText
           })
         });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("Zernio API Error em dopamina-brasil:", errorText);
+        }
       } catch (err) {
         console.error("Erro ao enviar mensagem via Zernio:", err);
       }
