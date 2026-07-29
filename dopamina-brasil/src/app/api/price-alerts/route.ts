@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { productName, targetPrice, contactMethod, contactValue } = body;
+    const { productName, targetPrice, contactMethod, contactValue, currentPrice } = body;
 
     if (!contactValue || !targetPrice) {
       return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 });
     }
 
-    // 1. In a real scenario, insert into Supabase:
-    // await supabase.from('price_alerts').insert({ ... })
+    // 1. Inserir no Supabase:
+    const { error: dbError } = await supabase.from('price_alerts').insert({
+      contact: contactValue,
+      channel: contactMethod,
+      product_name: productName,
+      current_price: currentPrice || 0, // Fallback to 0 if not passed, but we should make sure it is passed
+      target_price: targetPrice
+    });
+
+    if (dbError) {
+      console.error("Erro ao inserir alerta no Supabase:", dbError);
+    }
 
     // 2. Enviar confirmação de alerta criado via Zernio API
     const zernioApiKey = process.env.ZERNIO_API_KEY;

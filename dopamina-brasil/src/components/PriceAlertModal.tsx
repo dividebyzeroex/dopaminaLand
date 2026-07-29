@@ -35,6 +35,7 @@ export default function PriceAlertModal({ isOpen, onClose, productName, currentP
           targetPrice,
           contactMethod,
           contactValue,
+          currentPrice,
         }),
       });
 
