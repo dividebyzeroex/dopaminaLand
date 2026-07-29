@@ -30,15 +30,15 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dopaminado.com.br'),
-  title: "Dopamina — Audite preços com inteligência",
+  title: "Dopamina — Auditoria e Alertas de Menor Preço",
   description:
-    "Pesquise qualquer produto e descubra se o preço é justo. Análise inteligente de preços com histórico, comparativos e detecção de sobrepreço.",
+    "Pesquise qualquer produto, descubra as melhores alternativas de mercado, analise o histórico e crie alertas para comprar sempre no menor preço.",
   keywords: [
     "dopamina",
     "auditoria de preços",
     "comparador de preços",
     "preço justo",
-    "análise de preço",
+    "alerta de preço",
     "sobrepreço",
     "histórico de preços",
     "dopaminado",
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   ],
   robots: "index, follow",
   openGraph: {
-    title: "Dopamina — Audite preços com inteligência",
+    title: "Dopamina — Auditoria e Alertas de Menor Preço",
     description:
-      "Pesquise qualquer produto e descubra se o preço é justo. Análise de preços inteligente e gratuita.",
+      "Descubra as melhores alternativas de mercado, analise o histórico e crie alertas para comprar sempre no menor preço.",
     locale: "pt_BR",
     type: "website",
   },
