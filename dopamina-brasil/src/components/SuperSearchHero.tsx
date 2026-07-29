@@ -61,7 +61,7 @@ export default function SuperSearchHero() {
           scraped_price: data.scraped_price || 0,
           overprice_percentage: data.overprice_percentage || 0,
           price_verdict: data.price_verdict || "unknown",
-          flaws_count: data.product_flaws?.length || 0,
+          market_alternatives_count: data.market_alternatives?.length || 0,
           store_detected: data.store_name || "unknown",
           has_coupon: !!data.coupon_code,
           coupon_code: data.coupon_code || null,

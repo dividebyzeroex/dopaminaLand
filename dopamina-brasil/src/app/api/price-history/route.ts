@@ -65,56 +65,8 @@ function getRealStoreCoupon(urlOrQuery: string): { coupon: string; discountPerce
   return { coupon: 'CUPOM10', discountPercent: 10, storeName: 'E-Commerce' };
 }
 
-// Real Product Flaws via Reddit API
-async function fetchRealRedditFlaws(productName: string) {
-  try {
-    const cleanName = productName.substring(0, 30); // Prevent ultra long queries
-    const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(cleanName + ' (issue OR problem OR bug OR defeito)')}&sort=relevance&limit=3`;
-    
-    const res = await fetch(url, { headers: { 'User-Agent': 'Dopamina-App/1.0' } });
-    const data = await res.json();
-    
-    if (data?.data?.children?.length > 0) {
-      return data.data.children.slice(0, 3).map((child: any, index: number) => {
-        const title = child.data.title;
-        const severity = index === 0 ? "high" : index === 1 ? "medium" : "low";
-        const freq = index === 0 ? Math.floor(Math.random() * 20 + 40) : Math.floor(Math.random() * 15 + 15);
-        return {
-          title: "Relato de Consumidor",
-          severity,
-          frequency: freq,
-          description: title.substring(0, 150) + (title.length > 150 ? "..." : ""),
-          source: `Reddit (r/${child.data.subreddit})`
-        };
-      });
-    }
-  } catch(e) {
-    console.error("Reddit fetch failed", e);
-  }
-  
-  // Dynamic fallback based on product keywords if Reddit fails
-  const lower = productName.toLowerCase();
-  if (lower.includes('iphone') || lower.includes('galaxy') || lower.includes('smartphone')) {
-    return [
-      { title: "Degradação Acelerada", severity: "high", frequency: 45, description: "Bateria perde capacidade de retenção de carga rapidamente após 8 meses de uso contínuo.", source: "Análise Heurística Mobile" },
-      { title: "Aquecimento em Carga", severity: "medium", frequency: 28, description: "Aparelho atinge temperaturas anormais durante o carregamento rápido.", source: "Análise Heurística Mobile" },
-      { title: "Lente Frágil", severity: "low", frequency: 12, description: "Vidro da câmera traseira trinca com pequenos impactos.", source: "Análise Heurística Mobile" }
-    ];
-  } else if (lower.includes('tv') || lower.includes('smart tv') || lower.includes('oled')) {
-    return [
-      { title: "Burn-in Precoce", severity: "high", frequency: 38, description: "Retenção permanente de imagem após uso prolongado de interfaces estáticas.", source: "Análise Heurística Display" },
-      { title: "Vazamento de Backlight", severity: "medium", frequency: 32, description: "Manchas brancas visíveis nas bordas durante cenas escuras.", source: "Análise Heurística Display" },
-      { title: "OS Lento", severity: "low", frequency: 18, description: "Sistema operacional engasga após 6 meses de atualizações.", source: "Análise Heurística Display" }
-    ];
-  } else {
-    // Generic fallback that uses the product name
-    return [
-      { title: "Lote Problemático", severity: "high", frequency: 35, description: `Relatos frequentes de falha prematura em lotes recentes do ${productName.substring(0, 20)}.`, source: "Mapeamento Global de Lotes" },
-      { title: "Garantia Burocrática", severity: "medium", frequency: 25, description: "Dificuldade extrema em acionar a garantia nacional do fabricante.", source: "Reclamações em Procons" },
-      { title: "Desgaste Prematuro", severity: "low", frequency: 15, description: "Materiais de acabamento descascam com o suor ou fricção.", source: "Análise Heurística Geral" }
-    ];
-  }
-}
+// We removed fetchRealRedditFlaws because it was mocked.
+// Now using market_alternatives.
 
 export async function GET(req: NextRequest) {
   try {
@@ -152,6 +104,27 @@ export async function GET(req: NextRequest) {
     const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
     const firstName = firstCard.find('[data-testid="product-card::name"]').text();
     let firstUrl = firstCard.attr('href');
+    
+    // Scrape real market alternatives from the next 3 cards
+    const market_alternatives: any[] = [];
+    $('[data-testid="product-card::card"]').slice(1, 4).each((i, el) => {
+      const name = $(el).find('[data-testid="product-card::name"]').text();
+      let priceStr = $(el).find('[data-testid="product-card::price"]').text();
+      let link = $(el).attr('href');
+      if (link && !link.startsWith('http')) {
+        link = `https://www.buscape.com.br${link}`;
+      }
+      
+      let price = 0;
+      if (priceStr) {
+        const num = priceStr.replace(/[^0-9,]/g, '').replace(',', '.');
+        if (num) price = parseFloat(num);
+      }
+      
+      if (name && price > 0) {
+        market_alternatives.push({ name, price, link });
+      }
+    });
     
     if (firstUrl && !firstUrl.startsWith('http')) {
       firstUrl = `https://www.buscape.com.br${firstUrl}`;
@@ -276,7 +249,7 @@ export async function GET(req: NextRequest) {
       future_price_prediction: futurePricePrediction,
       cost_per_use_calc: costPerUseCalc,
       freight_audit: freightAudit,
-      product_flaws: await fetchRealRedditFlaws(firstName || query),
+      market_alternatives: market_alternatives,
       detected_triggers: [
         "🚨 Falsa Escassez: O contador 'Restam poucas unidades' é gerado por rotina local na página.",
         "⚠️ Ancoragem Inflada: O valor riscado 'De R$' está acima da média dos últimos 90 dias.",

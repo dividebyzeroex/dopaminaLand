@@ -6,7 +6,7 @@ import PriceOverviewCard from "./cards/PriceOverviewCard";
 import PriceHistoryChart from "./cards/PriceHistoryChart";
 import NetPriceCard from "./cards/NetPriceCard";
 import PriceForecastCard from "./cards/PriceForecastCard";
-import ProductFlawsCard from "./cards/ProductFlawsCard";
+import MarketAlternativesCard from "./cards/MarketAlternativesCard";
 import CostPerUseCard from "./cards/CostPerUseCard";
 import { useState, useEffect } from "react";
 import { Search, Loader2 } from "lucide-react";
@@ -104,9 +104,9 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <PriceForecastCard data={data} />
           </div>
 
-          {/* Third Row */}
+          {/* MARKET ALTERNATIVES (Replaces MOCKED ProductFlawsCard) */}
           <div className="lg:col-span-6">
-            <ProductFlawsCard data={data} />
+            <MarketAlternativesCard data={data} />
           </div>
 
           <div className="lg:col-span-6">
