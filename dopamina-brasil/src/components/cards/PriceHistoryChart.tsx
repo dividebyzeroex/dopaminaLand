@@ -85,16 +85,59 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
           {/* Line */}
           <path d={pathD} fill="none" stroke="#0071E3" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Dots */}
+          {/* Dots & Tooltips */}
           {points.map((p, i) => {
             const x = (i / (points.length - 1)) * 500;
             const y = toY(p.price);
+            let textAnchor = "middle";
+            let xOffset = 0;
+            if (i === 0) { textAnchor = "start"; xOffset = -2; }
+            else if (i === points.length - 1) { textAnchor = "end"; xOffset = 2; }
+
             return (
-              <circle
-                key={i}
-                cx={x} cy={y} r={4}
-                fill="white" stroke="#0071E3" strokeWidth={2}
-              />
+              <g key={i} className="group cursor-pointer">
+                {/* Hit area for easier hover/tap on mobile */}
+                <circle cx={x} cy={y} r={20} fill="transparent" />
+                
+                <circle
+                  cx={x} cy={y} r={4}
+                  fill="white" stroke="#0071E3" strokeWidth={2}
+                  className="transition-all duration-300 group-hover:r-[6px] group-hover:stroke-[3px]"
+                />
+                
+                {/* Tooltip Label */}
+                <text
+                  x={x + xOffset}
+                  y={y - 24}
+                  textAnchor={textAnchor}
+                  className="text-[9px] fill-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                >
+                  {p.label}
+                </text>
+                
+                {/* Tooltip Price Halo (for readability) */}
+                <text
+                  x={x + xOffset}
+                  y={y - 10}
+                  textAnchor={textAnchor}
+                  className="text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  stroke="white"
+                  strokeWidth="3"
+                  strokeLinejoin="round"
+                >
+                  {formatBRL(p.price)}
+                </text>
+                
+                {/* Tooltip Price */}
+                <text
+                  x={x + xOffset}
+                  y={y - 10}
+                  textAnchor={textAnchor}
+                  className="text-[11px] font-bold fill-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                >
+                  {formatBRL(p.price)}
+                </text>
+              </g>
             );
           })}
 
