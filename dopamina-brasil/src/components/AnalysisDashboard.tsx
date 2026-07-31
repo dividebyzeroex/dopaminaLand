@@ -8,6 +8,7 @@ import NetPriceCard from "./cards/NetPriceCard";
 import PriceForecastCard from "./cards/PriceForecastCard";
 import MarketAlternativesCard from "./cards/MarketAlternativesCard";
 import CostPerUseCard from "./cards/CostPerUseCard";
+import TrustScoreCard from "./cards/TrustScoreCard";
 import { useState, useEffect } from "react";
 import { Search, Loader2 } from "lucide-react";
 
@@ -210,8 +211,12 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <PriceForecastCard data={data} />
           </div>
 
-          <div className="lg:col-span-12">
+          <div className="lg:col-span-6">
             <CostPerUseCard data={data} />
+          </div>
+          
+          <div className="lg:col-span-6">
+            <TrustScoreCard data={data} />
           </div>
 
         </div>

@@ -27,8 +27,27 @@ export default function PriceForecastCard({ data }: PriceForecastCardProps) {
 
   return (
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
-      <h3 className="text-sm font-semibold text-foreground mb-1">Previsão de Preço</h3>
-      <p className="text-xs text-muted mb-5">Baseado em padrões dos últimos 180 dias</p>
+      <div className="flex justify-between items-start mb-5">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-1">Previsão de Preço</h3>
+          <p className="text-xs text-muted">Baseado em padrões dos últimos 180 dias</p>
+        </div>
+        
+        {/* Breathing Dot Indicator */}
+        <div className="flex items-center gap-2 bg-black/5 rounded-full px-2.5 py-1">
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            Sinal AI
+          </span>
+          <div className="relative flex h-2 w-2">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+              isBuyNow ? 'bg-emerald-400' : 'bg-amber-400'
+            }`}></span>
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${
+              isBuyNow ? 'bg-emerald-500' : 'bg-amber-500'
+            }`}></span>
+          </div>
+        </div>
+      </div>
 
       {/* Recommendation Badge */}
       <div className={`rounded-xl p-4 mb-4 ${isBuyNow ? 'bg-emerald-50 border border-emerald-100' : 'bg-amber-50 border border-amber-100'}`}>
