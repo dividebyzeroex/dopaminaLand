@@ -140,7 +140,7 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
                   key={idx}
                   onClick={() => {
                     if (!isActive && onSearch) {
-                      onSearch(prod.link || prod.name);
+                      onSearch(prod.name);
                     }
                   }}
                   className={`flex-shrink-0 w-64 text-left p-4 rounded-2xl border transition-all duration-300 backdrop-blur-md ${
