@@ -18,7 +18,7 @@ export default function CostPerUseCard({ data }: CostPerUseCardProps) {
   const isHighInvestment = calc.rationalityRating === "Alto Investimento";
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between h-full">
+    <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Custo por Uso</h3>

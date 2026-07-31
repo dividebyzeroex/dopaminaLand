@@ -101,24 +101,24 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
       </div>
 
       {/* Ticker Marquee */}
-      <div className="fixed top-14 left-0 w-full z-[50] bg-black text-white text-xs py-1.5 overflow-hidden flex items-center border-b border-white/10">
+      <div className="fixed top-14 left-0 w-full z-[50] bg-white/50 backdrop-blur-md text-foreground text-xs py-2 overflow-hidden flex items-center border-b border-black/5 shadow-sm">
         <motion.div
           className="flex whitespace-nowrap"
           animate={{ x: ["0%", "-50%"] }}
           transition={{ ease: "linear", duration: 30, repeat: Infinity }}
         >
           {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="flex items-center gap-6 pr-6">
-              <span>⚡ 42 pessoas analisaram produtos parecidos hoje</span>
-              <span className="text-white/30">•</span>
+            <div key={i} className="flex items-center gap-6 pr-6 font-medium">
+              <span className="text-foreground/80">⚡ 42 pessoas analisaram produtos parecidos hoje</span>
+              <span className="text-black/10">•</span>
               {data.is_fomo_alert ? (
-                <span className="text-red-400">🛑 Alerta de sobrepreço nas lojas detectado</span>
+                <span className="text-red-600/90">🛑 Alerta de sobrepreço nas lojas detectado</span>
               ) : (
-                <span className="text-emerald-400">🟢 Monitoramento do piso do mercado ativo</span>
+                <span className="text-emerald-600/90">🟢 Monitoramento do piso do mercado ativo</span>
               )}
-              <span className="text-white/30">•</span>
-              <span>👀 Vendedores alteraram preços nas últimas 24h</span>
-              <span className="text-white/30">•</span>
+              <span className="text-black/10">•</span>
+              <span className="text-foreground/80">👀 Vendedores alteraram preços nas últimas 24h</span>
+              <span className="text-black/10">•</span>
             </div>
           ))}
         </motion.div>
@@ -128,7 +128,7 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
         
         <div className="mt-8 mb-4">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight mb-6">
-            {data.scraped_name || "Análise de Produto"}
+            Análise do Produto
           </h1>
 
           {/* Product Selection Hero Section */}
@@ -143,16 +143,16 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
                       onSearch(prod.link || prod.name);
                     }
                   }}
-                  className={`flex-shrink-0 w-64 text-left p-4 rounded-2xl border transition-all duration-300 ${
+                  className={`flex-shrink-0 w-64 text-left p-4 rounded-2xl border transition-all duration-300 backdrop-blur-md ${
                     isActive 
-                      ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20 shadow-sm' 
-                      : 'bg-surface hover:bg-surface-hover border-border hover:border-black/10'
+                      ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20 shadow-sm' 
+                      : 'bg-white/60 hover:bg-white/80 border-black/5 hover:border-black/10 shadow-[0_2px_10px_rgba(0,0,0,0.02)]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-14 h-14 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${
-                        isActive ? 'bg-white border-primary/20 border' : 'bg-white border border-border'
+                        isActive ? 'bg-white border-primary/20 border shadow-sm' : 'bg-white/80 border border-black/5 shadow-sm'
                       }`}>
                         {prod.image ? (
                           <img src={prod.image} alt={prod.name} className="w-full h-full object-contain p-1" />

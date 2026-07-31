@@ -56,8 +56,8 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
   const areaD = pathD + ` L 500 180 L 0 180 Z`;
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between h-full">
-      <div className="flex items-center justify-between mb-5">
+    <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between mb-6">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Histórico de Preços</h3>
           <p className="text-xs text-muted mt-0.5">Últimos 6 meses via Buscapé</p>

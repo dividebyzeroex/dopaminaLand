@@ -33,7 +33,7 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col h-full">
+    <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col h-full">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Alternativas de Mercado</h3>
