@@ -127,8 +127,21 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6">
         
         <div className="mt-8 mb-4">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight mb-6 flex items-center flex-wrap gap-3">
             Análise do Produto
+            <span className="text-lg sm:text-xl font-medium text-muted-foreground/60 bg-black/5 px-3 py-1 rounded-full border border-black/5 tracking-normal">
+              {(() => {
+                const str = data.scraped_name || data.query || "produto";
+                return str
+                  .replace(/[^a-zA-Z0-9À-ÿ\s]/g, '')
+                  .split(/\s+/)
+                  .map((word: string, index: number) => {
+                    if (index === 0) return word.toLowerCase();
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                  })
+                  .join('');
+              })()}
+            </span>
           </h1>
 
           {/* Product Selection Hero Section */}
