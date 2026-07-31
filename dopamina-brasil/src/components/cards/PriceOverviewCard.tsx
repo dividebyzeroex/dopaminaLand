@@ -3,6 +3,7 @@
 import { ShieldCheck, AlertTriangle, ExternalLink, TrendingDown, Bell } from "lucide-react";
 import { useState } from "react";
 import PriceAlertModal from "../PriceAlertModal";
+import AnimatedNumber from "../ui/AnimatedNumber";
 
 interface PriceOverviewCardProps {
   data: {
@@ -28,8 +29,8 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-6 sm:p-8 shadow-sm flex flex-col justify-between h-full">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+    <div className="rounded-2xl border border-border bg-white p-6 sm:p-8 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
         
         {/* Left: Price Info */}
         <div className="flex-1">
@@ -50,9 +51,9 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
           <div className="flex items-baseline gap-4 flex-wrap">
             <div>
               <p className="text-xs text-muted mb-1">Melhor preço encontrado</p>
-              <p className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                {formatBRL(data.scraped_price)}
-              </p>
+              <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+                <AnimatedNumber value={data.scraped_price} />
+              </div>
             </div>
 
             {data.savings > 0 && (
@@ -68,8 +69,8 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
           {data.savings > 0 && (
             <div className="mt-4 flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-medium text-emerald-700">
-                Economia de {formatBRL(data.savings)} ({savingsPercent}%)
+              <span className="text-sm font-medium text-emerald-700 flex items-center gap-1">
+                Economia de <AnimatedNumber value={data.savings} /> ({savingsPercent}%)
               </span>
             </div>
           )}

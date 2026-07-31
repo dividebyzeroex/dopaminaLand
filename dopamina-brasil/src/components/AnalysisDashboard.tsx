@@ -55,7 +55,12 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
   };
 
   return (
-    <div className={`fixed inset-0 z-50 bg-background overflow-y-auto overflow-x-hidden pt-20 pb-20 transition-opacity duration-500 ${isReloading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+    <div className={`fixed inset-0 z-50 bg-background overflow-y-auto overflow-x-hidden pt-[104px] pb-20 transition-opacity duration-500 ${isReloading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+
+      {/* Ambient Glow */}
+      <div className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[50vh] blur-[120px] pointer-events-none transition-colors duration-1000 opacity-40 z-0 ${
+        data.is_fomo_alert ? 'bg-red-500/30' : 'bg-emerald-500/30'
+      }`} />
 
       {/* Top Header Bar */}
       <div className="fixed top-0 left-0 w-full z-[60] bg-white/80 backdrop-blur-xl border-b border-border">
@@ -93,6 +98,30 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <span className="hidden sm:inline">Voltar</span>
           </button>
         </div>
+      </div>
+
+      {/* Ticker Marquee */}
+      <div className="fixed top-14 left-0 w-full z-[50] bg-black text-white text-xs py-1.5 overflow-hidden flex items-center border-b border-white/10">
+        <motion.div
+          className="flex whitespace-nowrap"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ ease: "linear", duration: 30, repeat: Infinity }}
+        >
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="flex items-center gap-6 pr-6">
+              <span>⚡ 42 pessoas analisaram produtos parecidos hoje</span>
+              <span className="text-white/30">•</span>
+              {data.is_fomo_alert ? (
+                <span className="text-red-400">🛑 Alerta de sobrepreço nas lojas detectado</span>
+              ) : (
+                <span className="text-emerald-400">🟢 Monitoramento do piso do mercado ativo</span>
+              )}
+              <span className="text-white/30">•</span>
+              <span>👀 Vendedores alteraram preços nas últimas 24h</span>
+              <span className="text-white/30">•</span>
+            </div>
+          ))}
+        </motion.div>
       </div>
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6">
