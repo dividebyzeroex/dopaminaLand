@@ -108,12 +108,20 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
 
         {/* X labels */}
         <div className="flex justify-between px-1 mt-2">
-          {points.map((p, i) => (
-            <div key={i} className="text-center">
-              <span className="text-[10px] text-muted block">{p.month}</span>
-              <span className="text-[10px] font-medium text-foreground/70">{formatBRL(p.price)}</span>
-            </div>
-          ))}
+          {points.map((p, i) => {
+            const formatCompactBRL = (v: number) => {
+              if (v >= 1000) {
+                return `R$ ${(v / 1000).toFixed(1).replace('.', ',').replace(',0', '')}k`;
+              }
+              return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+            };
+            return (
+              <div key={i} className="text-center">
+                <span className="text-[10px] text-muted block">{p.month}</span>
+                <span className="text-[10px] font-medium text-foreground/70">{formatCompactBRL(p.price)}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
