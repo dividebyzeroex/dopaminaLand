@@ -21,10 +21,10 @@ export default function CostPerUseCard({ data }: CostPerUseCardProps) {
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Custo por Uso</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">Análise de Amortização</h3>
           <p className="text-xs text-muted mt-0.5">Impacto financeiro diário</p>
         </div>
-        <Calculator className="w-5 h-5 text-muted-light" />
+        <Calculator className="w-5 h-5 text-muted-light" strokeWidth={1.5} />
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-5">
@@ -41,7 +41,7 @@ export default function CostPerUseCard({ data }: CostPerUseCardProps) {
       </div>
 
       <div className={`rounded-xl p-3 flex items-center justify-center gap-2 ${isHighInvestment ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
-        <Sparkles className="w-4 h-4" />
+        <Sparkles className="w-4 h-4" strokeWidth={1.5} />
         <span className="text-sm font-medium">{calc.rationalityRating}</span>
       </div>
     </div>

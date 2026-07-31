@@ -59,11 +59,11 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Histórico de Preços</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">Histórico de Volatilidade</h3>
           <p className="text-xs text-muted mt-0.5">Últimos 6 meses via Buscapé</p>
         </div>
         <div className={`flex items-center gap-1.5 text-sm font-medium ${trend <= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-          {trend <= 0 ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
+          {trend <= 0 ? <TrendingDown className="w-4 h-4" strokeWidth={1.5} /> : <TrendingUp className="w-4 h-4" strokeWidth={1.5} />}
           {trend <= 0 ? '' : '+'}{trendPct}%
         </div>
       </div>

@@ -29,7 +29,7 @@ export default function PriceForecastCard({ data }: PriceForecastCardProps) {
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
       <div className="flex justify-between items-start mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-foreground mb-1">Previsão de Preço</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-1">Projeção Algorítmica</h3>
           <p className="text-xs text-muted">Baseado em padrões dos últimos 180 dias</p>
         </div>
         
@@ -53,9 +53,9 @@ export default function PriceForecastCard({ data }: PriceForecastCardProps) {
       <div className={`rounded-xl p-4 mb-4 ${isBuyNow ? 'bg-emerald-50 border border-emerald-100' : 'bg-amber-50 border border-amber-100'}`}>
         <div className="flex items-center gap-3">
           {isBuyNow ? (
-            <CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+            <CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" strokeWidth={1.5} />
           ) : (
-            <Clock className="w-6 h-6 text-amber-600 shrink-0" />
+            <Clock className="w-6 h-6 text-amber-600 shrink-0" strokeWidth={1.5} />
           )}
           <div>
             <p className={`text-base font-semibold ${isBuyNow ? 'text-emerald-700' : 'text-amber-700'}`}>

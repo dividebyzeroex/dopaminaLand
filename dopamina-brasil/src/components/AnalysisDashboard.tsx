@@ -129,7 +129,7 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
         
         <div className="mt-8 mb-4">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight mb-6 flex items-center flex-wrap gap-3">
-            Análise do Produto
+            Inteligência de Mercado
             <span className="text-lg sm:text-xl font-medium text-muted-foreground/60 bg-black/5 px-3 py-1 rounded-full border border-black/5 tracking-normal">
               {(() => {
                 const str = data.scraped_name || data.query || "produto";

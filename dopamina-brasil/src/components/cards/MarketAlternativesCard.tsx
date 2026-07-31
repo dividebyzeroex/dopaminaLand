@@ -23,7 +23,7 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
   if (alternatives.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-sm flex flex-col justify-between h-full">
-        <h3 className="text-sm font-semibold text-foreground mb-1">Alternativas de Mercado</h3>
+        <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-1">Dinâmica de Mercado</h3>
         <div className="flex flex-col items-center justify-center py-8 text-muted">
           <Tag className="w-8 h-8 text-blue-400 mb-2" />
           <p className="text-sm">Nenhuma alternativa mapeada no momento.</p>
@@ -36,11 +36,11 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col h-full">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Alternativas de Mercado</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">Dinâmica de Mercado</h3>
           <p className="text-xs text-muted mt-0.5">Opções com melhor custo-benefício encontradas</p>
         </div>
         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 shrink-0">
-          <ShoppingCart className="w-4 h-4" />
+          <ShoppingCart className="w-4 h-4" strokeWidth={1.5} />
         </div>
       </div>
 

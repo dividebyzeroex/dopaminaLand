@@ -57,7 +57,7 @@ export default function NetPriceCard({ data }: NetPriceCardProps) {
 
   return (
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-full">
-      <h3 className="text-sm font-semibold text-foreground mb-1">Melhor Preço Net</h3>
+      <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-1">Melhor Preço Net</h3>
       <p className="text-xs text-muted mb-5">Combinando todas as economias possíveis</p>
 
       <div className="space-y-0">

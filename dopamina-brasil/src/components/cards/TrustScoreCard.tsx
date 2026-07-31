@@ -19,7 +19,7 @@ export default function TrustScoreCard({ data }: TrustScoreCardProps) {
     <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col h-full">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-sm font-semibold text-foreground mb-1">Score de Confiança</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-1">Índice de Confiança</h3>
           <p className="text-xs text-muted">Análise de risco da loja e oferta</p>
         </div>
         <div className={`p-2 rounded-lg bg-black/5`}>
@@ -47,7 +47,7 @@ export default function TrustScoreCard({ data }: TrustScoreCardProps) {
       </div>
 
       <div className="bg-black/5 rounded-xl p-3 flex items-start gap-3 mt-auto">
-        <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+        <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" strokeWidth={1.5} />
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           {isSuspicious 
             ? "O preço está muito abaixo do mercado (possível fraude). Recomendamos cautela extrema." 
