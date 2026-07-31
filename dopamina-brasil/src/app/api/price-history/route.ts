@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
     const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
     const firstName = firstCard.find('[data-testid="product-card::name"]').text();
     let firstUrl = firstCard.attr('href');
+    let firstImage = firstCard.find('[data-testid="product-card::image"] img').attr('src') || firstCard.find('img').first().attr('src');
     
     // Scrape real market alternatives from the next 3 cards
     const market_alternatives: any[] = [];
@@ -111,6 +112,8 @@ export async function GET(req: NextRequest) {
       const name = $(el).find('[data-testid="product-card::name"]').text();
       let priceStr = $(el).find('[data-testid="product-card::price"]').text();
       let link = $(el).attr('href');
+      let image = $(el).find('[data-testid="product-card::image"] img').attr('src') || $(el).find('img').first().attr('src');
+
       if (link && !link.startsWith('http')) {
         link = `https://www.buscape.com.br${link}`;
       }
@@ -122,7 +125,7 @@ export async function GET(req: NextRequest) {
       }
       
       if (name && price > 0) {
-        market_alternatives.push({ name, price, link });
+        market_alternatives.push({ name, price, link, image });
       }
     });
     
@@ -236,6 +239,7 @@ export async function GET(req: NextRequest) {
       success: true,
       query,
       scraped_name: firstName || query,
+      image: firstImage,
       scraped_price: scrapedPrice,
       current_price: currentPrice,
       overpriced_percent: parseFloat(diff.toFixed(1)),
