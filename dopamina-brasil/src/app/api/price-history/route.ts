@@ -207,7 +207,7 @@ export async function GET(req: NextRequest) {
 
     // Future Price Prediction (Powered by H53 Neural Engine)
     await H53NeuralEngine.loadModel();
-    const neuralPrediction = H53NeuralEngine.predict(scrapedPrice, currentPrice);
+    const neuralPrediction = H53NeuralEngine.predict(currentPrice, scrapedPrice);
     
     // Anomaly percent tells us how much overpriced it is.
     // If it's negative or very small, it's a good time to buy.
