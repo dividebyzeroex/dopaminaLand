@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { H53NeuralEngine } from '@/lib/H53NeuralEngine';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -204,15 +205,25 @@ export async function GET(req: NextRequest) {
       realSummary: "Compradores reais destacam entrega rápida e excelente acabamento, mas alertam para manual apenas em inglês."
     };
 
-    // Future Price Prediction
-    const isGoodTimeToBuy = !isFomoAlert;
+    // Future Price Prediction (Powered by H53 Neural Engine)
+    await H53NeuralEngine.loadModel();
+    const neuralPrediction = H53NeuralEngine.predict(scrapedPrice, currentPrice);
+    
+    // Anomaly percent tells us how much overpriced it is.
+    // If it's negative or very small, it's a good time to buy.
+    const isGoodTimeToBuy = neuralPrediction.anomalyPercent <= 5; 
+    
+    // Dynamic Drop and Wait time based on H53 Model
+    const dynamicDrop = isGoodTimeToBuy ? 0 : Math.min(30, Math.max(5, Math.round(neuralPrediction.anomalyPercent * 0.85)));
+    const dynamicDaysToWait = isGoodTimeToBuy ? 0 : Math.max(3, Math.ceil(dynamicDrop * 0.7));
+
     const futurePricePrediction = {
-      recommendation: isGoodTimeToBuy ? "COMPRE AGORA 🟢" : "ESPERE 12 DIAS 🛑",
-      daysToWait: isGoodTimeToBuy ? 0 : 12,
-      predictedDropPercent: isGoodTimeToBuy ? 0 : 14,
+      recommendation: isGoodTimeToBuy ? "COMPRE AGORA 🟢" : "ESPERE " + dynamicDaysToWait + " DIAS 🛑",
+      daysToWait: dynamicDaysToWait,
+      predictedDropPercent: dynamicDrop,
       reason: isGoodTimeToBuy
-        ? "Preço atingiu o menor nível dos últimos 180 dias."
-        : "Tendência de queda acumulada de 14% estimada para o próximo ciclo de ofertas."
+        ? "Preço validado pelo modelo H53 como excelente oportunidade de compra."
+        : `A IA detectou sobrepreço e estima uma correção de ${dynamicDrop}% para o próximo ciclo.`
     };
 
     // Cost Per Use
