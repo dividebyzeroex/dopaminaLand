@@ -77,10 +77,61 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6">
         
-        <div className="mt-8 mb-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight">
+        <div className="mt-8 mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-[var(--font-display)] tracking-tight mb-6">
             {data.scraped_name || "Análise de Produto"}
           </h1>
+
+          {/* Product Selection Hero Section */}
+          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 gap-4 hide-scrollbar">
+            {[
+              {
+                name: data.scraped_name || "Produto Buscado",
+                price: data.current_price,
+                link: null,
+                isMain: true
+              },
+              ...(data.market_alternatives || []).map((alt: any) => ({
+                name: alt.name,
+                price: alt.price,
+                link: alt.link,
+                isMain: false
+              }))
+            ].map((prod, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  if (!prod.isMain && onSearch) {
+                    onSearch(prod.link || prod.name);
+                  }
+                }}
+                className={`flex-shrink-0 w-64 text-left p-4 rounded-2xl border transition-all duration-300 ${
+                  prod.isMain 
+                    ? 'bg-primary/5 border-primary/20 ring-1 ring-primary/20 shadow-sm' 
+                    : 'bg-surface hover:bg-surface-hover border-border hover:border-black/10'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                    prod.isMain ? 'bg-primary text-white' : 'bg-surface-light text-muted'
+                  }`}>
+                    {idx === 0 ? <ShieldCheck className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+                  </div>
+                  {prod.isMain && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      Buscado
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-semibold text-sm text-foreground line-clamp-2 mb-1 h-10">
+                  {prod.name}
+                </h3>
+                <p className="font-mono font-bold text-lg text-foreground">
+                  {prod.price ? `R$ ${prod.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '---'}
+                </p>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Features Grid */}
@@ -104,12 +155,7 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <PriceForecastCard data={data} />
           </div>
 
-          {/* MARKET ALTERNATIVES (Replaces MOCKED ProductFlawsCard) */}
-          <div className="lg:col-span-6">
-            <MarketAlternativesCard data={data} />
-          </div>
-
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-12">
             <CostPerUseCard data={data} />
           </div>
 
