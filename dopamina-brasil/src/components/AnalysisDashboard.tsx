@@ -122,13 +122,13 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${
-                        isActive ? 'bg-white border-primary/20 border' : 'bg-surface-light text-muted border border-border'
+                      <div className={`w-14 h-14 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${
+                        isActive ? 'bg-white border-primary/20 border' : 'bg-white border border-border'
                       }`}>
                         {prod.image ? (
-                          <img src={prod.image} alt={prod.name} className="w-full h-full object-contain" />
+                          <img src={prod.image} alt={prod.name} className="w-full h-full object-contain p-1" />
                         ) : (
-                          isActive ? <ShieldCheck className="w-5 h-5 text-primary" /> : <Search className="w-5 h-5" />
+                          isActive ? <ShieldCheck className="w-6 h-6 text-primary" /> : <Search className="w-6 h-6 text-muted" />
                         )}
                       </div>
                     </div>
