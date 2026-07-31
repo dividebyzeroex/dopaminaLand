@@ -69,7 +69,7 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
       </div>
 
       <div className="relative">
-        <svg viewBox="0 0 500 190" className="w-full h-48" preserveAspectRatio="none">
+        <svg viewBox="0 0 500 190" className="w-full h-48 overflow-visible" preserveAspectRatio="none">
           {/* Grid lines */}
           {[0.25, 0.5, 0.75].map(pct => (
             <line
@@ -150,8 +150,9 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
         </svg>
 
         {/* X labels */}
-        <div className="flex justify-between px-1 mt-2">
+        <div className="relative h-8 mt-2 w-full">
           {points.map((p, i) => {
+            const pct = (i / (points.length - 1)) * 100;
             const formatCompactBRL = (v: number) => {
               if (v >= 1000) {
                 return `R$ ${(v / 1000).toFixed(1).replace('.', ',').replace(',0', '')}k`;
@@ -159,7 +160,7 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
               return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
             };
             return (
-              <div key={i} className="text-center">
+              <div key={i} className="absolute top-0 text-center" style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}>
                 <span className="text-[10px] text-muted block">{p.month}</span>
                 <span className="text-[10px] font-medium text-foreground/70">{formatCompactBRL(p.price)}</span>
               </div>
