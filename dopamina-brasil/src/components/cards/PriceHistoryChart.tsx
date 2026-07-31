@@ -89,7 +89,7 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
           {points.map((p, i) => {
             const x = (i / (points.length - 1)) * 500;
             const y = toY(p.price);
-            let textAnchor = "middle";
+            let textAnchor: "middle" | "start" | "end" = "middle";
             let xOffset = 0;
             if (i === 0) { textAnchor = "start"; xOffset = -2; }
             else if (i === points.length - 1) { textAnchor = "end"; xOffset = 2; }
