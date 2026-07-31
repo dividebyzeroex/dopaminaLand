@@ -133,13 +133,10 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
               {(() => {
                 const str = data.scraped_name || data.query || "produto";
                 return str
-                  .replace(/[^a-zA-Z0-9À-ÿ\s]/g, '')
+                  .toLowerCase()
                   .split(/\s+/)
-                  .map((word: string, index: number) => {
-                    if (index === 0) return word.toLowerCase();
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                  })
-                  .join('');
+                  .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ');
               })()}
             </span>
           </h1>
