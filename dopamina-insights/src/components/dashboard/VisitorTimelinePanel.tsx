@@ -34,15 +34,15 @@ export function VisitorTimelinePanel({ session, onClose }: VisitorTimelinePanelP
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-surface-light  cursor-pointer"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity"
         onClick={onClose}
       />
 
       {/* Slide-over Panel */}
-      <div className="relative w-full max-w-xl h-full bg-surface-light border-l border-border shadow-md flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="relative w-full max-w-xl h-full bg-background/95 backdrop-blur-3xl border-l border-white/10 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         
         {/* Header */}
-        <div className="p-6 border-b border-border flex items-center justify-between bg-surface-light">
+        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/20">
           <div>
             <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
               Explorador de Sessão
@@ -54,18 +54,18 @@ export function VisitorTimelinePanel({ session, onClose }: VisitorTimelinePanelP
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-surface-light rounded-full transition-colors text-muted hover:text-foreground"
+            className="p-2 hover:bg-white/10 rounded-full transition-colors text-muted hover:text-foreground"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 hide-scrollbar">
           
           {/* DNA Section (Location & Device) */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-surface-light border border-border p-4 rounded-xl">
+            <div className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-inner">
               <div className="flex items-center gap-2 text-muted mb-2">
                 <MapPin className="w-4 h-4" />
                 <span className="text-xs font-bold uppercase tracking-widest">Localização</span>
@@ -73,7 +73,7 @@ export function VisitorTimelinePanel({ session, onClose }: VisitorTimelinePanelP
               <p className="text-sm text-foreground font-medium">{session.location.city || 'Desconhecido'}, {session.location.country}</p>
               <p className="text-xs text-muted-light mt-1 font-mono">IP: {session.location.ip || 'Oculto'}</p>
             </div>
-            <div className="bg-surface-light border border-border p-4 rounded-xl">
+            <div className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-inner">
               <div className="flex items-center gap-2 text-muted mb-2">
                 <Monitor className="w-4 h-4" />
                 <span className="text-xs font-bold uppercase tracking-widest">Dispositivo</span>

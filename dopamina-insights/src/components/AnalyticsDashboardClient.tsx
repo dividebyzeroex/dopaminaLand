@@ -355,6 +355,8 @@ export default function AnalyticsDashboardClient() {
                 funnelData={funnelData}
                 topProducts={topProducts}
                 timelineData={timelineData}
+                rawEvents={rawEvents}
+                rawSessions={rawSessions}
               />
             </>
           )}

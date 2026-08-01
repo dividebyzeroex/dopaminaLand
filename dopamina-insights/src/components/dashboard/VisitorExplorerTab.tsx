@@ -15,7 +15,8 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
   // Process sessions to add smart metrics
   const processedSessions = useMemo(() => {
     return sessions.map(session => {
-      const sessionEvents = events.filter(e => e.session_id === session.id);
+      const sessionId = session.session_id || session.id;
+      const sessionEvents = events.filter(e => e.session_id === sessionId);
       
       // Calculate duration
       const firstEvent = sessionEvents[0];
@@ -58,6 +59,7 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
 
       return {
         ...session,
+        id: sessionId,
         events: sessionEvents,
         durationSeconds,
         searchCount,
@@ -101,145 +103,146 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
   return (
     <div className="space-y-6">
       
-      {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface-light p-4 rounded-xl border border-border">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+      {/* Filters & Search - Premium Glassmorphism */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface/40 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-lg">
+        <div className="relative w-full md:w-96 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within:text-cyan-400 transition-colors" />
           <input 
             type="text" 
             placeholder="Buscar por ID, localização ou dispositivo..."
-            className="w-full bg-surface-light border border-border rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#ccff00]/50 text-foreground"
+            className="w-full bg-black/20 border border-white/5 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 text-foreground placeholder:text-muted/70 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
+        <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
           <button 
             onClick={() => setFilterType('all')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${filterType === 'all' ? 'bg-indigo-500 text-foreground' : 'bg-surface-light text-muted hover:text-foreground'}`}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 border ${
+              filterType === 'all' 
+                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                : 'bg-black/20 text-muted border-white/5 hover:border-white/20 hover:text-foreground'
+            }`}
           >
             Todas as Sessões
           </button>
           <button 
             onClick={() => setFilterType('frustrated')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${filterType === 'frustrated' ? 'bg-rose-500 text-foreground' : 'bg-surface-light text-muted hover:text-foreground'}`}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 border flex items-center gap-2 ${
+              filterType === 'frustrated' 
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' 
+                : 'bg-black/20 text-muted border-white/5 hover:border-white/20 hover:text-foreground'
+            }`}
           >
-            <Activity className="w-3 h-3" /> Alta Frustração
+            <Activity className="w-3.5 h-3.5" /> Alta Frustração
           </button>
           <button 
             onClick={() => setFilterType('hunters')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${filterType === 'hunters' ? 'bg-emerald-500 text-foreground' : 'bg-surface-light text-muted hover:text-foreground'}`}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 border flex items-center gap-2 ${
+              filterType === 'hunters' 
+                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
+                : 'bg-black/20 text-muted border-white/5 hover:border-white/20 hover:text-foreground'
+            }`}
           >
-            <Target className="w-3 h-3" /> Caçadores de Pechincha
+            <Target className="w-3.5 h-3.5" /> Caçadores de Pechincha
           </button>
         </div>
       </div>
 
-      {/* Smart Table */}
-      <div className="bg-surface-light border border-border rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-light border-b border-border text-xs uppercase tracking-wider text-muted">
-                <th className="p-4 font-semibold">Visitante / Arquétipo</th>
-                <th className="p-4 font-semibold">Localização & GA4</th>
-                <th className="p-4 font-semibold">Dispositivo</th>
-                <th className="p-4 font-semibold">Comportamento</th>
-                <th className="p-4 font-semibold text-right">Dinheiro Salvo</th>
-                <th className="p-4 font-semibold"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredSessions.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-light text-sm">
-                    Nenhum visitante encontrado com estes filtros.
-                  </td>
-                </tr>
-              ) : (
-                filteredSessions.map((session) => (
-                  <tr 
-                    key={session.id} 
-                    className="hover:bg-surface-light/[0.02] transition-colors cursor-pointer group"
-                    onClick={() => setSelectedSession(session)}
-                  >
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-mono text-xs text-muted">
-                          {session.id.substring(0, 8)}...
-                        </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${session.archetypeColor}`}>
-                            {session.archetype}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-sm text-muted">
-                          <MapPin className="w-3.5 h-3.5 text-muted-light" />
-                          {session.location.city || 'Desconhecido'}, {session.location.country}
-                        </div>
-                        {session.utm_tags?.source && (
-                          <div className="text-[10px] text-muted-light flex items-center gap-1">
-                            <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded">
-                              {session.utm_tags.source} / {session.utm_tags.medium}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </td>
+      {/* Styled List (Grid of Rows) */}
+      <div className="space-y-3">
+        {filteredSessions.length === 0 ? (
+          <div className="p-12 text-center border border-dashed border-white/10 rounded-2xl bg-surface/20 backdrop-blur-sm">
+            <p className="text-muted text-sm">Nenhum visitante encontrado com estes filtros.</p>
+          </div>
+        ) : (
+          filteredSessions.map((session) => (
+            <div 
+              key={session.id} 
+              onClick={() => setSelectedSession(session)}
+              className="group relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 bg-surface/40 backdrop-blur-md border border-white/5 hover:border-cyan-500/30 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] overflow-hidden"
+            >
+              {/* Subtle hover gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                    <td className="p-4">
-                      <div className="flex items-center gap-2 text-sm text-muted">
-                        {session.deviceType === 'mobile' ? (
-                          <Smartphone className="w-4 h-4" />
-                        ) : (
-                          <Monitor className="w-4 h-4" />
-                        )}
-                        <span className="capitalize">{session.os}</span>
-                      </div>
-                    </td>
+              {/* Archetype & ID */}
+              <div className="flex items-center gap-4 min-w-[240px]">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border shadow-inner ${session.archetypeColor.replace('text-', 'border-').replace('/20', '/30')}`}>
+                  {session.archetype === 'Caçador de Pechinchas' && <Target className="w-5 h-5" />}
+                  {session.archetype === 'Usuário Frustrado' && <Activity className="w-5 h-5" />}
+                  {session.archetype === 'Comprador Focado' && <Search className="w-5 h-5" />}
+                  {session.archetype === 'Explorador Neutro' && <MousePointer2 className="w-5 h-5" />}
+                </div>
+                <div>
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${session.archetypeColor.split(' ')[1]}`}>
+                    {session.archetype}
+                  </span>
+                  <p className="font-mono text-xs text-muted-light mt-0.5">
+                    {session.id.substring(0, 12)}...
+                  </p>
+                </div>
+              </div>
 
-                    <td className="p-4">
-                      <div className="flex items-center gap-4 text-xs">
-                        <div className="flex items-center gap-1.5 text-muted" title="Duração da Sessão">
-                          <Clock className="w-3.5 h-3.5" />
-                          {formatDuration(session.durationSeconds)}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-muted" title="Buscas Realizadas">
-                          <Search className="w-3.5 h-3.5" />
-                          {session.searchCount}
-                        </div>
-                        {session.frustrationScore > 0 && (
-                          <div className="flex items-center gap-1.5 text-rose-400" title="Frustration Score">
-                            <Activity className="w-3.5 h-3.5" />
-                            {session.frustrationScore}
-                          </div>
-                        )}
-                      </div>
-                    </td>
+              {/* Location & GA4 */}
+              <div className="flex-1 min-w-[200px]">
+                <div className="flex items-center gap-1.5 text-sm text-foreground font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-muted" />
+                  {session.location.city || 'Desconhecido'}, {session.location.country}
+                </div>
+                {session.utm_tags?.source && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] rounded-full uppercase tracking-widest font-semibold">
+                      {session.utm_tags.source}
+                    </span>
+                    <span className="text-muted-light text-[10px]">— {session.utm_tags.medium}</span>
+                  </div>
+                )}
+              </div>
 
-                    <td className="p-4 text-right">
-                      <span className={`text-sm font-bold ${session.walletSaved > 0 ? 'text-emerald-400' : 'text-gray-600'}`}>
-                        {formatCurrency(session.walletSaved)}
-                      </span>
-                    </td>
+              {/* Device & OS */}
+              <div className="flex-shrink-0 w-32">
+                <div className="flex items-center gap-2 text-sm text-muted-light">
+                  {session.deviceType === 'mobile' ? <Smartphone className="w-4 h-4 text-muted" /> : <Monitor className="w-4 h-4 text-muted" />}
+                  <span className="capitalize">{session.os}</span>
+                </div>
+              </div>
 
-                    <td className="p-4 text-right">
-                      <button className="p-2 bg-surface-light rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-surface-light text-foreground">
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              {/* Behavior Metrics */}
+              <div className="flex items-center gap-5 w-48">
+                <div className="flex flex-col gap-0.5" title="Duração da Sessão">
+                  <span className="text-[10px] text-muted uppercase tracking-wider">Tempo</span>
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                    <Clock className="w-3.5 h-3.5 text-muted-light" />
+                    {formatDuration(session.durationSeconds)}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-0.5" title="Buscas Realizadas">
+                  <span className="text-[10px] text-muted uppercase tracking-wider">Buscas</span>
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                    <Search className="w-3.5 h-3.5 text-muted-light" />
+                    {session.searchCount}
+                  </div>
+                </div>
+              </div>
+
+              {/* Wallet Saved */}
+              <div className="text-right w-36 pr-4">
+                <span className="text-[10px] text-muted uppercase tracking-wider block mb-0.5">Dinheiro Salvo</span>
+                <span className={`text-lg font-bold tracking-tight ${session.walletSaved > 0 ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]' : 'text-muted-light'}`}>
+                  {formatCurrency(session.walletSaved)}
+                </span>
+              </div>
+
+              {/* Action Button */}
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 group-hover:text-cyan-400 transition-all duration-300">
+                  <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Slide-over Panel */}
@@ -249,7 +252,6 @@ export function VisitorExplorerTab({ sessions, events }: VisitorExplorerTabProps
           onClose={() => setSelectedSession(null)} 
         />
       )}
-
     </div>
   );
 }
