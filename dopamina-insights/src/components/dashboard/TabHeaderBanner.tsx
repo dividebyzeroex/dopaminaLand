@@ -1,7 +1,9 @@
 'use client';
 
+import { ReactNode } from 'react';
+
 interface TabHeaderBannerProps {
-  icon: string;
+  icon: ReactNode;
   title: string;
   subtitle: string;
   badgeText: string;
@@ -19,71 +21,71 @@ export function TabHeaderBanner({
   badgeColor = 'cyan',
   highlightLabel,
   highlightValue,
-  highlightColor = 'text-emerald-600'
+  highlightColor = 'text-emerald-400'
 }: TabHeaderBannerProps) {
   const colorStyles = {
     orange: {
-      box: 'border-orange-500/30 bg-orange-500/10 text-orange-600',
-      badge: 'border-orange-500/40 bg-orange-500/20 text-orange-600',
-      gradient: 'from-white via-surface-light to-orange-500/10 border-orange-500/30'
+      box: 'border-orange-500/50 bg-orange-900/20 text-orange-400',
+      badge: 'border-orange-500 bg-orange-500/10 text-orange-400',
+      borderTop: 'border-t-orange-500'
     },
     cyan: {
-      box: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-600',
-      badge: 'border-cyan-500/40 bg-cyan-500/20 text-cyan-600',
-      gradient: 'from-white via-surface-light to-cyan-500/10 border-cyan-500/30'
+      box: 'border-cyan-500/50 bg-cyan-900/20 text-cyan-400',
+      badge: 'border-cyan-500 bg-cyan-500/10 text-cyan-400',
+      borderTop: 'border-t-cyan-500'
     },
     purple: {
-      box: 'border-purple-500/30 bg-purple-500/10 text-purple-600',
-      badge: 'border-purple-500/40 bg-purple-500/20 text-purple-600',
-      gradient: 'from-white via-surface-light to-purple-500/10 border-purple-500/30'
+      box: 'border-purple-500/50 bg-purple-900/20 text-purple-400',
+      badge: 'border-purple-500 bg-purple-500/10 text-purple-400',
+      borderTop: 'border-t-purple-500'
     },
     emerald: {
-      box: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600',
-      badge: 'border-emerald-500/40 bg-emerald-500/20 text-emerald-600',
-      gradient: 'from-white via-surface-light to-emerald-500/10 border-emerald-500/30'
+      box: 'border-emerald-500/50 bg-emerald-900/20 text-emerald-400',
+      badge: 'border-emerald-500 bg-emerald-500/10 text-emerald-400',
+      borderTop: 'border-t-emerald-500'
     },
     rose: {
-      box: 'border-rose-500/30 bg-rose-500/10 text-rose-600',
-      badge: 'border-rose-500/40 bg-rose-500/20 text-rose-600',
-      gradient: 'from-white via-surface-light to-rose-500/10 border-rose-500/30'
+      box: 'border-rose-500/50 bg-rose-900/20 text-rose-400',
+      badge: 'border-rose-500 bg-rose-500/10 text-rose-400',
+      borderTop: 'border-t-rose-500'
     },
     amber: {
-      box: 'border-amber-500/30 bg-amber-500/10 text-amber-600',
-      badge: 'border-amber-500/40 bg-amber-500/20 text-amber-600',
-      gradient: 'from-white via-surface-light to-amber-500/10 border-amber-500/30'
+      box: 'border-amber-500/50 bg-amber-900/20 text-amber-400',
+      badge: 'border-amber-500 bg-amber-500/10 text-amber-400',
+      borderTop: 'border-t-amber-500'
     },
     blue: {
-      box: 'border-blue-500/30 bg-blue-500/10 text-blue-600',
-      badge: 'border-blue-500/40 bg-blue-500/20 text-blue-600',
-      gradient: 'from-white via-surface-light to-blue-500/10 border-blue-500/30'
+      box: 'border-blue-500/50 bg-blue-900/20 text-blue-400',
+      badge: 'border-blue-500 bg-blue-500/10 text-blue-400',
+      borderTop: 'border-t-blue-500'
     },
   };
 
   const style = colorStyles[badgeColor] || colorStyles.cyan;
 
   return (
-    <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border bg-gradient-to-r p-6 md:p-8 shadow-md text-foreground mb-6 ${style.gradient}`}>
+    <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-sm border border-[#2a2e37] border-t-[3px] bg-[#181b1f] p-4 md:p-6 shadow-none text-foreground mb-4 ${style.borderTop}`}>
       <div className="flex items-center gap-4">
-        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-3xl shadow-inner ${style.box}`}>
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border ${style.box}`}>
           {icon}
         </div>
         <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-black tracking-tight text-foreground font-[var(--font-display)]">{title}</h1>
-            <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${style.badge}`}>
+          <div className="flex items-center gap-3 flex-wrap mb-1">
+            <h1 className="text-lg font-mono font-bold tracking-wider text-[#e4e4e7] uppercase">{title}</h1>
+            <span className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest ${style.badge}`}>
               <span className="h-1.5 w-1.5 rounded-full bg-current animate-ping" />
               {badgeText}
             </span>
           </div>
-          <p className="text-xs text-slate-600 mt-0.5">{subtitle}</p>
+          <p className="text-[11px] font-mono text-[#a1a1aa] uppercase tracking-wider">{subtitle}</p>
         </div>
       </div>
 
       {highlightLabel && (
         <div className="flex items-center gap-3 shrink-0">
-          <div className="rounded-xl border border-border bg-surface-light px-4 py-2 text-right shadow-inner">
-            <span className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider">{highlightLabel}</span>
-            <span className={`text-lg font-black ${highlightColor}`}>{highlightValue}</span>
+          <div className="rounded-sm border border-[#2a2e37] bg-[#111217] px-4 py-2 text-right shadow-none">
+            <span className="block text-[9px] font-mono font-bold text-[#71717a] uppercase tracking-wider">{highlightLabel}</span>
+            <span className={`text-xl font-mono font-bold ${highlightColor}`}>{highlightValue}</span>
           </div>
         </div>
       )}

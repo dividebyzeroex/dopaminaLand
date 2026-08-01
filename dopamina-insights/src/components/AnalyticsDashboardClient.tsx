@@ -196,13 +196,13 @@ export default function AnalyticsDashboardClient() {
   }
 
   const TABS = [
-    { id: 'overview', label: '🚀 Cockpit de Auditoria', icon: LayoutDashboard },
-    { id: 'audit_intelligence', label: '📊 Audit Intelligence', icon: BarChart3 },
-    { id: 'search_analytics', label: '🔍 Search Analytics', icon: Search },
-    { id: 'leads', label: '📧 Base de Leads', icon: Users },
-    { id: 'visitors', label: '🕵️‍♂️ Explorador de Visitantes', icon: Users },
-    { id: 'intent', label: '🎯 Perfis de Auditor', icon: Target },
-    { id: 'ux', label: '🧪 Telemetria UX', icon: MousePointer2 },
+    { id: 'overview', label: 'System Overview', icon: LayoutDashboard },
+    { id: 'audit_intelligence', label: 'Audit Metrics', icon: BarChart3 },
+    { id: 'search_analytics', label: 'Query Analyzer', icon: Search },
+    { id: 'leads', label: 'Lead Database', icon: Users },
+    { id: 'visitors', label: 'Session Tracing', icon: Activity },
+    { id: 'intent', label: 'Behavioral Profiling', icon: Target },
+    { id: 'ux', label: 'RUM Telemetry', icon: MousePointer2 },
   ];
 
   return (
@@ -327,12 +327,12 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'overview' && (
             <>
               <TabHeaderBanner
-                icon="🚀"
-                title="Cockpit de Auditoria"
-                subtitle="Visão consolidada de sessões, auditorias executadas, sobrepreço médio e comportamento de busca em tempo real"
+                icon={<LayoutDashboard className="w-5 h-5" />}
+                title="System Overview"
+                subtitle="Real-time aggregation of session metrics, defect ratios, and system interaction logs"
                 badgeText="REALTIME"
                 badgeColor="cyan"
-                highlightLabel="Sessões Gravadas"
+                highlightLabel="Recorded Sessions"
                 highlightValue={rawSessions.length.toLocaleString('pt-BR')}
                 highlightColor="text-cyan-400"
               />
@@ -370,12 +370,12 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'audit_intelligence' && (
             <>
               <TabHeaderBanner
-                icon="📊"
-                title="Audit Intelligence"
-                subtitle="Métricas de auditorias executadas, sobrepreço médio detectado, lojas auditadas e defeitos encontrados"
-                badgeText="H53 AUDITOR"
+                icon={<BarChart3 className="w-5 h-5" />}
+                title="Audit Metrics"
+                subtitle="Aggregated metrics for executed audits, mean overprice vectors, and defect rates"
+                badgeText="ENGINE METRICS"
                 badgeColor="cyan"
-                highlightLabel="Total Auditorias"
+                highlightLabel="Total Audits"
                 highlightValue={auditInsights.totalAudits.toLocaleString('pt-BR')}
                 highlightColor="text-cyan-400"
               />
@@ -386,12 +386,12 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'search_analytics' && (
             <>
               <TabHeaderBanner
-                icon="🔍"
-                title="Search Analytics"
-                subtitle="Análise das buscas realizadas no motor H53, termos em alta, buscas por hora e taxa de sucesso"
-                badgeText="MOTOR H53"
+                icon={<Search className="w-5 h-5" />}
+                title="Query Analyzer"
+                subtitle="Analytical distribution of query payloads, volume per minute, and success ratios"
+                badgeText="H53 ENGINE"
                 badgeColor="purple"
-                highlightLabel="Queries Únicas"
+                highlightLabel="Unique Queries"
                 highlightValue={auditInsights.topAuditedProducts.length.toLocaleString('pt-BR')}
                 highlightColor="text-purple-400"
               />
@@ -404,12 +404,12 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'visitors' && (
             <>
               <TabHeaderBanner
-                icon="🕵️‍♂️"
-                title="Explorador de Visitantes & Leads"
-                subtitle="Mergulho profundo em sessões individuais cruzando Telemetria, HubSpot CRM e GA4"
-                badgeText="REVOPS & PRODUCT"
+                icon={<Activity className="w-5 h-5" />}
+                title="Session Tracing"
+                subtitle="Distributed tracing of visitor sessions and third-party data correlation"
+                badgeText="REVOPS TRACING"
                 badgeColor="cyan"
-                highlightLabel="Visitantes Únicos (Sessões)"
+                highlightLabel="Unique Traces"
                 highlightValue={rawSessions.length.toLocaleString('pt-BR')}
                 highlightColor="text-cyan-400"
               />
@@ -420,12 +420,12 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'intent' && (
             <>
               <TabHeaderBanner
-                icon="💼"
-                title="Leads & Sinais de Compra B2B"
-                subtitle="Identificação inteligente de visitantes com alta propensão de conversão comercial"
-                badgeText="HIGH INTENT"
+                icon={<Target className="w-5 h-5" />}
+                title="Behavioral Profiling"
+                subtitle="Algorithmic scoring of user interaction paths and intent classification"
+                badgeText="INTENT SCORING"
                 badgeColor="emerald"
-                highlightLabel="Leads Mapeados"
+                highlightLabel="Profiled Leads"
                 highlightValue={intentData.topLeads.length}
                 highlightColor="text-emerald-400"
               />
@@ -443,10 +443,10 @@ export default function AnalyticsDashboardClient() {
           {activeTab === 'ux' && (
             <>
               <TabHeaderBanner
-                icon="🧪"
-                title="Telemetria UX & Fricção"
-                subtitle="Mapeamento de Rage Clicks, cliques mortos, erros de JavaScript e Core Web Vitals"
-                badgeText="FRICÇÃO CORE"
+                icon={<MousePointer2 className="w-5 h-5" />}
+                title="RUM Telemetry"
+                subtitle="Real User Monitoring: DOM anomalies, JS Exceptions, and Core Web Vitals"
+                badgeText="UX TRACING"
                 badgeColor="rose"
                 highlightLabel="Rage Clicks"
                 highlightValue={uxMetrics.rageClicksCount || 0}

@@ -35,17 +35,28 @@ export default function OverviewTab({ kpis, funnelData, topProducts, timelineDat
 }) {
   const [logFilter, setLogFilter] = useState<'ALL' | 'ERROR' | 'INFO'>('ALL');
 
-  // Sparkline Mock Data (for visual density)
-  const sparklineData = useMemo(() => Array.from({length: 20}).map(() => ({ value: Math.random() * 100 })), []);
-
-  // Multi-axis Volumetry Data (mocking errors based on timeline)
-  const apmTimeline = useMemo(() => {
-    return timelineData.map(t => ({
-      ...t,
-      errors: Math.floor(t.sessions * (Math.random() * 0.15)), // 0-15% error rate mock
-      latency: Math.floor(Math.random() * 200) + 20
-    }));
+  // Real sparkline data based on recent timeline trends
+  const sparklineData = useMemo(() => {
+    if (!timelineData || timelineData.length === 0) return [];
+    return timelineData.slice(-20).map(t => ({ value: t.sessions }));
   }, [timelineData]);
+
+  // Multi-axis Volumetry Data (using real errors and latency)
+  const apmTimeline = useMemo(() => {
+    return timelineData.map(t => {
+      const dateEvents = rawEvents?.filter(e => new Date(e.created_at).toLocaleDateString('pt-BR') === t.date) || [];
+      const errorCount = dateEvents.filter(e => e.event_type === 'error' || e.event_type === 'js_error' || e.metadata?.flaws_count > 0).length;
+      
+      const vitals = dateEvents.filter(e => e.event_type === 'web_vitals' && e.metadata?.name === 'LCP');
+      const latency = vitals.length > 0 ? (vitals.reduce((acc, v) => acc + (v.metadata?.value || 0), 0) / vitals.length) : 0;
+      
+      return {
+        ...t,
+        errors: errorCount, 
+        latency: Math.floor(latency)
+      };
+    });
+  }, [timelineData, rawEvents]);
 
   // Real-time Telemetry Calculations
   const telemetry = useMemo(() => {
