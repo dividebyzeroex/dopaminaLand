@@ -18,13 +18,14 @@ import { VisitorExplorerTab } from './dashboard/VisitorExplorerTab';
 import { StoreAuditAnalyticsTab } from './dashboard/StoreAuditAnalyticsTab';
 import { TabHeaderBanner } from './dashboard/TabHeaderBanner';
 import LeadsTab from './dashboard/LeadsTab';
-import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users, Activity } from 'lucide-react';
+import AdsManagerTab from './dashboard/AdsManagerTab';
+import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users, Activity, Megaphone } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'audit_intelligence' | 'search_analytics' | 'leads' | 'intent' | 'ux' | 'visitors'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'audit_intelligence' | 'search_analytics' | 'leads' | 'intent' | 'ux' | 'visitors'>('overview');
 
   // Time selector state
   const [timeRange, setTimeRange] = useState<string>('all');
@@ -197,6 +198,7 @@ export default function AnalyticsDashboardClient() {
 
   const TABS = [
     { id: 'overview', label: 'System Overview', icon: LayoutDashboard },
+    { id: 'campaigns', label: 'Ads Manager', icon: Megaphone },
     { id: 'audit_intelligence', label: 'Audit Metrics', icon: BarChart3 },
     { id: 'search_analytics', label: 'Query Analyzer', icon: Search },
     { id: 'leads', label: 'Lead Database', icon: Users },
@@ -364,6 +366,22 @@ export default function AnalyticsDashboardClient() {
                 rawEvents={rawEvents}
                 rawSessions={rawSessions}
               />
+            </>
+          )}
+
+          {activeTab === 'campaigns' && (
+            <>
+              <TabHeaderBanner
+                icon={<Megaphone className="w-5 h-5" />}
+                title="Ads Manager"
+                subtitle="Sponsored campaigns, keyword bidding, and wallet balance management"
+                badgeText="ADS NETWORK"
+                badgeColor="orange"
+                highlightLabel="Wallet Balance"
+                highlightValue="R$ 1.250,00"
+                highlightColor="text-orange-400"
+              />
+              <AdsManagerTab products={topProducts} />
             </>
           )}
 
