@@ -203,7 +203,7 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <NetPriceCard data={data} />
           </div>
 
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-8">
             <PriceHistoryChart data={data} />
           </div>
           
@@ -211,12 +211,17 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <PriceForecastCard data={data} />
           </div>
 
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-4">
             <CostPerUseCard data={data} />
           </div>
           
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-4">
             <TrustScoreCard data={data} />
+          </div>
+
+          {/* Buscapé Style Full Width Store List */}
+          <div className="lg:col-span-12 mt-8 mb-16">
+            <MarketAlternativesCard data={data} />
           </div>
 
         </div>
