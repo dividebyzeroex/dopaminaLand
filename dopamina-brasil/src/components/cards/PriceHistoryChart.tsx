@@ -89,32 +89,36 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
       
       <div className="flex flex-col lg:flex-row gap-8 flex-1">
         {/* Chart Column */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col pl-12 pr-4"> {/* Added padding for absolute Y-axis and right tooltip */}
           <div className="relative flex-1 min-h-[220px]">
-            <svg viewBox="0 0 600 200" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+            
+            {/* Y Axis HTML Labels (Absolute positioned) */}
+            {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
+              const priceAtGrid = max - (range * pct);
+              return (
+                <div 
+                  key={`y-label-${i}`}
+                  className="absolute left-[-50px] w-[42px] text-right text-[10px] text-muted-foreground/60"
+                  style={{ top: `${pct * 100}%`, transform: 'translateY(-50%)' }}
+                >
+                  {formatBRL(priceAtGrid).replace(',00', '')}
+                </div>
+              );
+            })}
+
+            <svg viewBox="0 0 600 200" className="w-full h-full" preserveAspectRatio="none">
               {/* Y Axis Grid lines */}
-              {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => {
-                const priceAtGrid = max - (range * pct);
-                return (
-                  <g key={i}>
-                    <line
-                      x1={0} y1={pct * 180} x2={600} y2={pct * 180}
-                      stroke="#f1f5f9" strokeWidth={1}
-                    />
-                    <text
-                      x={-10} y={(pct * 180) + 4}
-                      textAnchor="end"
-                      className="text-[10px] fill-muted-foreground/60"
-                    >
-                      {formatBRL(priceAtGrid).replace(',00', '')}
-                    </text>
-                  </g>
-                );
-              })}
+              {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => (
+                <line
+                  key={`y-grid-${i}`}
+                  x1={0} y1={pct * 200} x2={600} y2={pct * 200}
+                  stroke="#f1f5f9" strokeWidth={1}
+                />
+              ))}
 
               {/* Area fill */}
               <path 
-                d={`${pathD} L 600 180 L 0 180 Z`} 
+                d={`${pathD} L 600 200 L 0 200 Z`} 
                 fill="url(#buscapeAreaGradient)" 
               />
 
@@ -122,29 +126,11 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
               <path 
                 d={pathD} 
                 fill="none" 
-                stroke="#00C853" // Buscapé green
+                stroke="#00C853" 
                 strokeWidth={2.5} 
                 strokeLinejoin="round" 
               />
-
-              {/* Current Price Floating Badge (End of line) */}
-              {points.length > 0 && (
-                <g transform={`translate(600, ${toY(points[points.length - 1].price)})`}>
-                  {/* Floating tooltip box */}
-                  <rect x="-90" y="-55" width="85" height="45" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.05))" />
-                  <text x="-47.5" y="-30" textAnchor="middle" className="text-sm font-black fill-foreground">
-                    {formatBRL(currentPrice)}
-                  </text>
-                  <text x="-47.5" y="-18" textAnchor="middle" className="text-[9px] font-medium fill-muted-foreground">
-                    AGORA
-                  </text>
-                  
-                  {/* Marker dot */}
-                  <circle cx="0" cy="0" r="4" fill="black" />
-                  <rect x="-6" y="-3" width="12" height="6" rx="3" fill="black" transform="rotate(-15)" />
-                </g>
-              )}
-
+              
               <defs>
                 <linearGradient id="buscapeAreaGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#00C853" stopOpacity={0.15} />
@@ -153,13 +139,38 @@ export default function PriceHistoryChart({ data }: PriceHistoryChartProps) {
               </defs>
             </svg>
 
+            {/* Current Price Floating Badge (HTML positioned over SVG) */}
+            {points.length > 0 && (
+              <div 
+                className="absolute right-0 flex items-center justify-end pointer-events-none"
+                style={{ 
+                  top: `${(toY(points[points.length - 1].price) / 200) * 100}%`,
+                  transform: 'translate(10px, -50%)' // Slightly offset to the right, centered vertically on the line
+                }}
+              >
+                <div className="relative mr-3 bg-white border border-[#e2e8f0] rounded-lg shadow-[0_4px_6px_rgba(0,0,0,0.05)] px-3 py-1.5 flex flex-col items-center min-w-[85px]">
+                  <span className="text-sm font-black text-foreground">{formatBRL(currentPrice)}</span>
+                  <span className="text-[9px] font-medium text-muted-foreground uppercase">Agora</span>
+                  
+                  {/* Little triangle pointing to the dot */}
+                  <div className="absolute top-1/2 -right-[5px] -mt-[5px] w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[5px] border-l-white" />
+                  <div className="absolute top-1/2 -right-[6px] -mt-[5px] w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[5px] border-l-[#e2e8f0] -z-10" />
+                </div>
+                
+                {/* Marker Dot (Black circle) */}
+                <div className="w-2.5 h-2.5 bg-black rounded-full shrink-0 relative">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-1.5 bg-black rounded-full -rotate-12" />
+                </div>
+              </div>
+            )}
+
             {/* X Axis Labels */}
-            <div className="absolute -bottom-6 left-0 right-0 flex justify-between text-[11px] text-muted-foreground/70 px-1">
+            <div className="absolute -bottom-6 left-0 right-0 flex justify-between text-[11px] text-muted-foreground/70">
               {points.map((p, i) => {
                 // Show roughly 6 labels
                 if (points.length > 6 && i % Math.ceil(points.length / 6) !== 0 && i !== points.length - 1 && i !== 0) return null;
                 return (
-                  <span key={i} style={{ position: 'absolute', left: `${(i / (points.length - 1)) * 100}%`, transform: 'translateX(-50%)' }}>
+                  <span key={`x-label-${i}`} style={{ position: 'absolute', left: `${(i / (points.length - 1)) * 100}%`, transform: 'translateX(-50%)' }}>
                     {i === points.length - 1 ? "Hoje" : p.month}
                   </span>
                 );
