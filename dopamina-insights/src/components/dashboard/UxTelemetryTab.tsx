@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { MousePointer2, AlertTriangle, Clock, Target, Activity, Zap, ShieldAlert, CheckCircle2, Monitor, Smartphone } from 'lucide-react';
+import { MousePointer2, AlertTriangle, Clock, Target, Activity, Zap, ShieldAlert, CheckCircle2, Monitor, Smartphone, LayoutDashboard } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface UxMetrics {
@@ -72,66 +72,69 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
   const containerWidthClass = device === 'desktop' ? 'w-full max-w-[1024px]' : 'w-full max-w-[375px]';
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-4 font-sans animate-fade-in py-2 pb-12">
       {/* Top KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
-          <div className="flex items-center gap-3 text-emerald-500">
-            <Clock className="h-5 w-5" />
-            <h3 className="font-semibold">Avg. Dwell Time</h3>
+        <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none border-t-[3px] border-t-blue-500">
+          <div className="flex items-center gap-2 text-blue-400">
+            <Clock className="h-4 w-4" />
+            <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider">Avg. Dwell Time</h3>
           </div>
-          <p className="mt-4 text-3xl font-bold text-foreground">
+          <p className="mt-3 text-2xl font-mono font-bold text-[#e4e4e7]">
             {uxMetrics.avgDwellTime}s
           </p>
-          <p className="mt-1 text-sm text-muted">Tempo médio na página</p>
+          <p className="mt-1 font-mono text-[9px] text-[#52525b] uppercase tracking-wider">Average Session Length</p>
         </div>
         
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
-          <div className="flex items-center gap-3 text-orange-500">
-            <MousePointer2 className="h-5 w-5" />
-            <h3 className="font-semibold">Rage Clicks</h3>
+        <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none border-t-[3px] border-t-orange-500">
+          <div className="flex items-center gap-2 text-orange-400">
+            <MousePointer2 className="h-4 w-4" />
+            <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider">Rage Clicks</h3>
           </div>
-          <p className="mt-4 text-3xl font-bold text-foreground">
+          <p className="mt-3 text-2xl font-mono font-bold text-[#e4e4e7]">
             {uxMetrics.rageClicksCount}
           </p>
-          <p className="mt-1 text-sm text-muted">Cliques múltiplos rápidos</p>
+          <p className="mt-1 font-mono text-[9px] text-[#52525b] uppercase tracking-wider">High Frequency Clicks</p>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
-          <div className="flex items-center gap-3 text-amber-500">
-            <Target className="h-5 w-5" />
-            <h3 className="font-semibold">Dead Clicks</h3>
+        <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none border-t-[3px] border-t-amber-500">
+          <div className="flex items-center gap-2 text-amber-400">
+            <Target className="h-4 w-4" />
+            <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider">Dead Clicks</h3>
           </div>
-          <p className="mt-4 text-3xl font-bold text-foreground">
+          <p className="mt-3 text-2xl font-mono font-bold text-[#e4e4e7]">
             {uxMetrics.deadClicksCount}
           </p>
-          <p className="mt-1 text-sm text-muted">Cliques em elementos neutros</p>
+          <p className="mt-1 font-mono text-[9px] text-[#52525b] uppercase tracking-wider">Unresponsive Targets</p>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
-          <div className="flex items-center gap-3 text-rose-500">
-            <Activity className="h-5 w-5" />
-            <h3 className="font-semibold">Mouse Frustration</h3>
+        <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none border-t-[3px] border-t-rose-500">
+          <div className="flex items-center gap-2 text-rose-400">
+            <Activity className="h-4 w-4" />
+            <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider">Mouse Frustration</h3>
           </div>
-          <p className="mt-4 text-3xl font-bold text-foreground">
+          <p className="mt-3 text-2xl font-mono font-bold text-[#e4e4e7]">
             {uxMetrics.frustrationCount}
           </p>
-          <p className="mt-1 text-sm text-muted">Mouse Jiggle (Confusão)</p>
+          <p className="mt-1 font-mono text-[9px] text-[#52525b] uppercase tracking-wider">Erratic Mouse Jiggles</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Heatmap Section - Takes full width now */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-              <h3 className="text-lg font-bold text-foreground">Mapa de Calor Real</h3>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Heatmap Section */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+              <div className="flex items-center gap-2">
+                <LayoutDashboard className="h-4 w-4 text-blue-400" />
+                <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa]">Real-time Session Heatmap</h3>
+              </div>
               
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <select 
                   value={selectedPath} 
                   onChange={(e) => setSelectedPath(e.target.value)}
-                  className="bg-background border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                  className="bg-[#111217] border border-[#2a2e37] rounded-sm py-1.5 px-3 font-mono text-[10px] text-[#e4e4e7] uppercase tracking-wider outline-none focus:border-blue-500 cursor-pointer"
                 >
                   {uniquePaths.map(p => (
                     <option key={p} value={p}>{p}</option>
@@ -139,26 +142,26 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                   {uniquePaths.length === 0 && <option value="/">/</option>}
                 </select>
 
-                <div className="flex bg-background rounded border border-border overflow-hidden p-1 gap-1">
+                <div className="flex bg-[#111217] rounded-sm border border-[#2a2e37] overflow-hidden">
                   <button 
                     onClick={() => setDevice('desktop')}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'desktop' ? 'bg-primary text-black' : 'text-muted hover:text-foreground'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors ${device === 'desktop' ? 'bg-blue-900/20 text-blue-400' : 'text-[#71717a] hover:bg-[#2a2e37] hover:text-[#e4e4e7]'}`}
                   >
-                    <Monitor className="w-4 h-4" /> Desktop
+                    <Monitor className="w-3.5 h-3.5" /> Desktop
                   </button>
                   <button 
                     onClick={() => setDevice('mobile')}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${device === 'mobile' ? 'bg-primary text-black' : 'text-muted hover:text-foreground'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors border-l border-[#2a2e37] ${device === 'mobile' ? 'bg-blue-900/20 text-blue-400' : 'text-[#71717a] hover:bg-[#2a2e37] hover:text-[#e4e4e7]'}`}
                   >
-                    <Smartphone className="w-4 h-4" /> Mobile
+                    <Smartphone className="w-3.5 h-3.5" /> Mobile
                   </button>
                 </div>
               </div>
             </div>
             
-            <div className="flex justify-center bg-surface-light p-4 rounded-xl border border-border relative overflow-hidden">
+            <div className="flex justify-center bg-[#111217] p-2 rounded-sm border border-[#2a2e37] relative overflow-hidden">
               {/* This wrapper limits the height so we can scroll the heatmap naturally */}
-              <div className={`relative bg-background overflow-y-auto overflow-x-hidden border border-border/50 rounded shadow-md h-[700px] custom-scrollbar ${containerWidthClass}`}>
+              <div className={`relative bg-white overflow-y-auto overflow-x-hidden border border-[#2a2e37] h-[600px] custom-scrollbar ${containerWidthClass}`}>
                 
                 {/* The Iframe of the real site */}
                 <iframe 
@@ -171,79 +174,79 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
                 {/* The Overlay where points are plotted */}
                 <div className="absolute top-0 left-0 w-full" style={{ height: '5000px', pointerEvents: 'none' }}>
                   {heatmapNodes.length > 0 ? heatmapNodes : (
-                    <div className="flex items-center justify-center h-[500px] text-muted text-sm bg-background/80 ">
-                      Nenhum dado capturado para esta tela neste dispositivo.
+                    <div className="flex items-center justify-center h-[500px] font-mono text-[11px] text-[#52525b] uppercase tracking-wider bg-black/80">
+                      No telemetry data available for this viewport.
                     </div>
                   )}
                 </div>
               </div>
             </div>
             
-            <div className="flex justify-center gap-6 mt-4 text-xs font-medium">
-              <span className="flex items-center gap-2 text-red-400"><div className="w-3 h-3 rounded-full bg-red-500 blur-[1px]"></div> Cliques</span>
-              <span className="flex items-center gap-2 text-blue-400"><div className="w-3 h-3 rounded-full bg-blue-500 blur-[2px]"></div> Movimentos / Pausas</span>
+            <div className="flex justify-center gap-6 mt-4 font-mono text-[10px] font-bold uppercase tracking-wider">
+              <span className="flex items-center gap-2 text-rose-400"><div className="w-2.5 h-2.5 rounded-full bg-rose-500 blur-[1px]"></div> Interactions</span>
+              <span className="flex items-center gap-2 text-blue-400"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 blur-[2px]"></div> Trajectories</span>
             </div>
           </div>
         </div>
 
         {/* Web Vitals and Others */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              <h3 className="text-lg font-bold text-foreground">Core Web Vitals</h3>
+        <div className="lg:col-span-1 space-y-4">
+          <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none">
+            <div className="flex items-center gap-2 mb-4 border-b border-[#2a2e37] pb-3">
+              <Zap className="h-4 w-4 text-amber-400" />
+              <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa]">Core Web Vitals</h3>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-surface-lighter">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center p-2.5 rounded-sm bg-[#111217] border border-[#2a2e37]">
                 <div>
-                  <p className="font-semibold text-foreground">LCP</p>
-                  <p className="text-xs text-muted">Largest Contentful Paint</p>
+                  <p className="font-mono text-[10px] font-bold text-[#e4e4e7] uppercase tracking-wider">LCP</p>
+                  <p className="font-mono text-[9px] text-[#52525b] uppercase mt-0.5">Largest Contentful Paint</p>
                 </div>
-                <div className={`font-mono font-bold ${uxMetrics.webVitals.lcp > 2500 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                <div className={`font-mono text-xs font-bold ${uxMetrics.webVitals.lcp > 2500 ? 'text-rose-400' : 'text-emerald-400'}`}>
                   {formatMs(uxMetrics.webVitals.lcp)}
                 </div>
               </div>
 
-              <div className="flex justify-between items-center p-3 rounded-lg bg-surface-lighter">
+              <div className="flex justify-between items-center p-2.5 rounded-sm bg-[#111217] border border-[#2a2e37]">
                 <div>
-                  <p className="font-semibold text-foreground">CLS</p>
-                  <p className="text-xs text-muted">Cumulative Layout Shift</p>
+                  <p className="font-mono text-[10px] font-bold text-[#e4e4e7] uppercase tracking-wider">CLS</p>
+                  <p className="font-mono text-[9px] text-[#52525b] uppercase mt-0.5">Cumulative Layout Shift</p>
                 </div>
-                <div className={`font-mono font-bold ${uxMetrics.webVitals.cls > 0.1 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                <div className={`font-mono text-xs font-bold ${uxMetrics.webVitals.cls > 0.1 ? 'text-rose-400' : 'text-emerald-400'}`}>
                   {uxMetrics.webVitals.cls > 0 ? uxMetrics.webVitals.cls.toFixed(3) : 'N/A'}
                 </div>
               </div>
 
-              <div className="flex justify-between items-center p-3 rounded-lg bg-surface-lighter">
+              <div className="flex justify-between items-center p-2.5 rounded-sm bg-[#111217] border border-[#2a2e37]">
                 <div>
-                  <p className="font-semibold text-foreground">FID / INP</p>
-                  <p className="text-xs text-muted">Input Delay</p>
+                  <p className="font-mono text-[10px] font-bold text-[#e4e4e7] uppercase tracking-wider">FID / INP</p>
+                  <p className="font-mono text-[9px] text-[#52525b] uppercase mt-0.5">Input Delay</p>
                 </div>
-                <div className={`font-mono font-bold ${uxMetrics.webVitals.fid > 100 || uxMetrics.webVitals.inp > 200 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                <div className={`font-mono text-xs font-bold ${uxMetrics.webVitals.fid > 100 || uxMetrics.webVitals.inp > 200 ? 'text-rose-400' : 'text-emerald-400'}`}>
                   {formatMs(uxMetrics.webVitals.inp || uxMetrics.webVitals.fid)}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <ShieldAlert className="h-5 w-5 text-rose-500" />
-              <h3 className="text-lg font-bold text-foreground">JS Errors</h3>
+          <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none">
+            <div className="flex items-center gap-2 mb-4 border-b border-[#2a2e37] pb-3">
+              <ShieldAlert className="h-4 w-4 text-rose-400" />
+              <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa]">JS Exceptions</h3>
             </div>
             {uxMetrics.jsErrors.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-muted">
-                <CheckCircle2 className="h-8 w-8 text-emerald-500 mb-2 opacity-50" />
-                <p className="text-sm">Nenhum erro reportado.</p>
+              <div className="flex flex-col items-center justify-center py-6 text-[#52525b]">
+                <CheckCircle2 className="h-6 w-6 text-emerald-400/50 mb-2" />
+                <p className="font-mono text-[10px] uppercase tracking-wider">0 Exceptions detected</p>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                 {uxMetrics.jsErrors.map((err, i) => (
-                  <div key={i} className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs">
-                    <p className="font-bold text-rose-400 mb-1 truncate">{err.message}</p>
-                    <p className="text-muted truncate">Path: {err.path}</p>
-                    <p className="text-muted/50 mt-1">{new Date(err.time).toLocaleTimeString()}</p>
+                  <div key={i} className="p-2.5 rounded-sm bg-[#111217] border-l-2 border-l-rose-500 border border-[#2a2e37]">
+                    <p className="font-mono text-[10px] font-bold text-rose-400 mb-1 truncate">{err.message}</p>
+                    <p className="font-mono text-[9px] text-[#71717a] truncate">Target: {err.path}</p>
+                    <p className="font-mono text-[9px] text-[#52525b] mt-1">@ {new Date(err.time).toISOString()}</p>
                   </div>
                 ))}
               </div>
@@ -251,39 +254,39 @@ export default function UxTelemetryTab({ uxMetrics }: { uxMetrics: UxMetrics }) 
           </div>
         </div>
 
-        <div className="lg:col-span-2 space-y-6">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-foreground mb-4">Profundidade de Scroll</h3>
+        <div className="lg:col-span-2 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none">
+              <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa] mb-4 border-b border-[#2a2e37] pb-3">Scroll Depth Distribution</h3>
               <div className="h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={uxMetrics.scrollDepthMap}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                    <XAxis dataKey="name" stroke="#666" tick={{ fill: '#888', fontSize: 12 }} />
-                    <YAxis stroke="#666" tick={{ fill: '#888', fontSize: 12 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2e37" vertical={false} />
+                    <XAxis dataKey="name" stroke="#52525b" tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} />
+                    <YAxis stroke="#52525b" tick={{ fill: '#71717a', fontSize: 10, fontFamily: 'monospace' }} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#1A1A1A', borderColor: '#333', borderRadius: '8px' }}
-                      itemStyle={{ color: '#CCFF00' }}
+                      contentStyle={{ backgroundColor: '#111217', borderColor: '#2a2e37', borderRadius: '2px', fontFamily: 'monospace', fontSize: '10px' }}
+                      itemStyle={{ color: '#60a5fa', fontWeight: 'bold' }}
                     />
-                    <Bar dataKey="value" fill="#CCFF00" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" fill="#60a5fa" radius={[2, 2, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-foreground mb-4">Impressões (Visibilidade)</h3>
-              <div className="space-y-3 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+            <div className="rounded-sm border border-[#2a2e37] bg-[#181b1f] p-4 shadow-none">
+              <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa] mb-4 border-b border-[#2a2e37] pb-3">Visibility Telemetry</h3>
+              <div className="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
                 {uxMetrics.visibilityImpressions.length === 0 ? (
-                  <p className="text-sm text-muted">Nenhum CTAs monitorado.</p>
+                  <p className="font-mono text-[10px] text-[#52525b] uppercase tracking-wider">No elements tracked.</p>
                 ) : (
                   uxMetrics.visibilityImpressions.map((imp, i) => (
-                    <div key={i} className="flex justify-between items-center p-3 rounded-lg bg-surface-lighter">
-                      <span className="text-sm font-medium text-foreground truncate max-w-[70%]">
+                    <div key={i} className="flex justify-between items-center p-2.5 rounded-sm bg-[#111217] border border-[#2a2e37]">
+                      <span className="font-mono text-[10px] text-[#e4e4e7] truncate max-w-[70%]">
                         {imp.name}
                       </span>
-                      <span className="text-sm font-bold text-primary bg-primary px-2 py-1 rounded">
-                        {imp.count} views
+                      <span className="font-mono text-[9px] font-bold text-blue-400 bg-blue-900/20 border border-blue-900/50 px-1.5 py-0.5 rounded-sm uppercase tracking-wider">
+                        {imp.count} hits
                       </span>
                     </div>
                   ))

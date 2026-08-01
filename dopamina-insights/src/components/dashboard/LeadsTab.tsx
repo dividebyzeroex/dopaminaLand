@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Smartphone, Send, Search, Filter, Loader2, CheckCircle2 } from 'lucide-react';
-import { TabHeaderBanner } from './TabHeaderBanner';
+import { Mail, Smartphone, Send, Search, Filter, Loader2, CheckCircle2, Terminal } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface Lead {
@@ -87,103 +86,104 @@ export default function LeadsTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <TabHeaderBanner 
-        title="Base de Leads & Alertas" 
-        subtitle="Gerencie os contatos capturados pelos Alertas de Menor Preço e dispare testes de integração (Zernio)."
-        icon="📧"
-        badgeText="ZERNIO ALERTS"
-        badgeColor="emerald"
-      />
-
+    <div className="space-y-4 font-sans animate-fade-in py-2">
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-surface-light p-4 rounded-2xl border border-border">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-[#181b1f] p-3 rounded-sm border border-[#2a2e37]">
         <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71717a]" />
           <input 
             type="text" 
-            placeholder="Buscar lead ou produto..." 
+            placeholder="Search endpoint / contact..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-surface border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:border-primary transition"
+            className="w-full bg-[#111217] border border-[#2a2e37] rounded-sm pl-9 pr-4 py-1.5 text-[11px] font-mono text-[#e4e4e7] outline-none focus:border-blue-500 transition-colors"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border text-foreground text-sm font-medium rounded-xl hover:bg-surface-dark transition">
-          <Filter className="w-4 h-4" />
-          Filtrar Status
+        <button className="flex items-center gap-2 px-3 py-1.5 bg-[#111217] border border-[#2a2e37] text-[#e4e4e7] text-[11px] font-mono font-bold uppercase tracking-wider rounded-sm hover:bg-[#2a2e37] transition-colors">
+          <Filter className="w-3.5 h-3.5" />
+          Filter Data
         </button>
       </div>
 
       {/* Leads Table */}
-      <div className="bg-surface-light border border-border rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-surface border-b border-border">
+      <div className="bg-[#111217] border border-[#2a2e37] rounded-sm overflow-hidden flex flex-col min-h-[500px]">
+        <div className="border-b border-[#2a2e37] px-4 py-3 bg-[#181b1f] flex justify-between items-center">
+          <h3 className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#a1a1aa] flex items-center gap-2">
+            <Terminal className="w-3.5 h-3.5" /> Webhook Targets (Zernio)
+          </h3>
+          <span className="font-mono text-[10px] text-[#71717a] uppercase">
+            {filteredLeads.length} records active
+          </span>
+        </div>
+        
+        <div className="overflow-x-auto flex-1">
+          <table className="w-full text-left font-mono text-[11px]">
+            <thead className="bg-[#181b1f] text-[#71717a] border-b border-[#2a2e37] sticky top-0">
               <tr>
-                <th className="px-6 py-4 font-semibold text-muted uppercase tracking-wider text-xs">Lead / Contato</th>
-                <th className="px-6 py-4 font-semibold text-muted uppercase tracking-wider text-xs">Produto Monitorado</th>
-                <th className="px-6 py-4 font-semibold text-muted uppercase tracking-wider text-xs">Preço Alvo</th>
-                <th className="px-6 py-4 font-semibold text-muted uppercase tracking-wider text-xs text-right">Ações (Testar API)</th>
+                <th className="px-4 py-2 font-bold uppercase tracking-wider">Contact / Target</th>
+                <th className="px-4 py-2 font-bold uppercase tracking-wider">Monitored Resource</th>
+                <th className="px-4 py-2 font-bold uppercase tracking-wider">Trigger Threshold</th>
+                <th className="px-4 py-2 font-bold uppercase tracking-wider text-right">Dispatch (Test API)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#2a2e37]">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-muted">
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    Carregando leads do Supabase...
+                  <td colSpan={4} className="px-4 py-12 text-center text-[#52525b]">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-500" />
+                    Fetching records...
                   </td>
                 </tr>
               ) : filteredLeads.map((lead) => (
-                <tr key={lead.id} className="hover:bg-surface/50 transition">
-                  <td className="px-6 py-4">
+                <tr key={lead.id} className="hover:bg-[#181b1f] transition-colors">
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${lead.channel === 'whatsapp' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
-                        {lead.channel === 'whatsapp' ? <Smartphone className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
+                      <div className={`flex items-center justify-center w-6 h-6 rounded-sm border ${lead.channel === 'whatsapp' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-900/50' : 'bg-blue-900/20 text-blue-400 border-blue-900/50'}`}>
+                        {lead.channel === 'whatsapp' ? <Smartphone className="w-3 h-3" /> : <Mail className="w-3 h-3" />}
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">{lead.contact}</p>
-                        <p className="text-xs text-muted">
-                          Adicionado em {new Date(lead.dateAdded).toLocaleDateString('pt-BR')}
+                        <p className="font-bold text-[#e4e4e7]">{lead.contact}</p>
+                        <p className="text-[9px] text-[#71717a] uppercase mt-0.5">
+                          T: {new Date(lead.dateAdded).toISOString().split('T')[0]}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-foreground truncate max-w-[200px]" title={lead.productName}>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-[#e4e4e7] truncate max-w-[250px]" title={lead.productName}>
                       {lead.productName}
                     </p>
-                    <p className="text-xs text-muted">Preço ao criar: {formatBRL(lead.currentPrice)}</p>
+                    <p className="text-[9px] text-[#71717a] uppercase mt-0.5">Base: {formatBRL(lead.currentPrice)}</p>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-blue-900/20 text-blue-400 border border-blue-900/50">
                       {formatBRL(lead.targetPrice)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => handleTestSend(lead)}
                       disabled={sendingId === lead.id || sentId === lead.id}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[10px] font-bold transition-colors border uppercase ${
                         sentId === lead.id
-                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200 cursor-default'
-                          : 'bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm disabled:opacity-50'
+                          ? 'bg-emerald-900/20 text-emerald-400 border-emerald-900/50 cursor-default'
+                          : 'bg-[#181b1f] text-[#e4e4e7] border-[#2a2e37] hover:bg-[#2a2e37] hover:text-white disabled:opacity-50'
                       }`}
                     >
                       {sendingId === lead.id ? (
                         <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Enviando...
+                          <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+                          POSTing...
                         </>
                       ) : sentId === lead.id ? (
                         <>
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Enviado
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          200 OK
                         </>
                       ) : (
                         <>
-                          <Send className="w-3.5 h-3.5" />
-                          Disparar Teste
+                          <Send className="w-3 h-3 text-blue-400" />
+                          Run Test
                         </>
                       )}
                     </button>
@@ -192,8 +192,8 @@ export default function LeadsTab() {
               ))}
               {!loading && filteredLeads.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-muted">
-                    Nenhum lead encontrado.
+                  <td colSpan={4} className="px-4 py-12 text-center text-[#52525b] uppercase tracking-wider text-[11px]">
+                    No records found
                   </td>
                 </tr>
               )}

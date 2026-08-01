@@ -18,7 +18,7 @@ import { VisitorExplorerTab } from './dashboard/VisitorExplorerTab';
 import { StoreAuditAnalyticsTab } from './dashboard/StoreAuditAnalyticsTab';
 import { TabHeaderBanner } from './dashboard/TabHeaderBanner';
 import LeadsTab from './dashboard/LeadsTab';
-import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users } from 'lucide-react';
+import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users, Activity } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -206,92 +206,98 @@ export default function AnalyticsDashboardClient() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
+    <div className="bg-[#0b0f19] text-[#e4e4e7] min-h-screen font-sans">
       {/* Toast notification */}
       {successToast && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-foreground text-background px-5 py-3.5 font-bold text-sm shadow-md animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 rounded-sm bg-emerald-500 text-white px-4 py-3 font-mono text-[11px] uppercase font-bold shadow-md animate-bounce border border-emerald-400">
           {successToast}
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-6 border-b border-border">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-            H53 Market Intelligence
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            Telemetria de Auditorias, Sobrepreços e Anomalias de Mercado em Tempo Real.
-          </p>
+      {/* APM Header (TopNav) */}
+      <div className="bg-[#181b1f] border-b border-[#2a2e37] px-4 py-3 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sticky top-0 z-40 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded border border-[#2a2e37] bg-[#111217] text-blue-500">
+            <Activity className="w-4 h-4" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold font-mono tracking-wider text-white uppercase">
+              H53 Market Intelligence
+            </h1>
+            <p className="text-[10px] font-mono text-[#a1a1aa] uppercase tracking-widest mt-0.5">
+              TELEMETRIA • AUDITORIAS • MERCADO
+            </p>
+          </div>
         </div>
 
         {/* Time Selector */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-muted uppercase tracking-wider">Período</label>
+        <div className="flex flex-wrap items-center gap-3 font-mono">
+          <div className="flex items-center gap-2">
+            <label className="text-[10px] font-bold text-[#71717a] uppercase">Time</label>
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:border-primary transition"
+              className="rounded-sm border border-[#2a2e37] bg-[#111217] px-2 py-1 text-[11px] text-white focus:outline-none focus:border-blue-500 transition cursor-pointer"
             >
-              <option value="all">Todas as Datas</option>
-              <option value="2h">Últimas 2 Horas</option>
-              <option value="6h">Últimas 6 Horas</option>
-              <option value="12h">Últimas 12 Horas</option>
-              <option value="24h">Últimas 24 Horas</option>
-              <option value="7d">Últimos 7 Dias</option>
-              <option value="15d">Últimos 15 Dias</option>
-              <option value="custom">Personalizado</option>
+              <option value="all">ALL TIME</option>
+              <option value="2h">LAST 2 HOURS</option>
+              <option value="6h">LAST 6 HOURS</option>
+              <option value="12h">LAST 12 HOURS</option>
+              <option value="24h">LAST 24 HOURS</option>
+              <option value="7d">LAST 7 DAYS</option>
+              <option value="15d">LAST 15 DAYS</option>
+              <option value="custom">CUSTOM</option>
             </select>
           </div>
 
           {timeRange === 'custom' && (
             <>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-muted uppercase tracking-wider">Início</label>
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] font-bold text-[#71717a] uppercase">From</label>
                 <input
                   type="datetime-local"
                   value={customStart}
                   onChange={(e) => setCustomStart(e.target.value)}
                   max={new Date().toISOString().slice(0, 16)}
-                  className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:border-primary transition"
+                  className="rounded-sm border border-[#2a2e37] bg-[#111217] px-2 py-1 text-[11px] text-white focus:outline-none focus:border-blue-500 transition"
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-semibold text-muted uppercase tracking-wider">Fim</label>
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] font-bold text-[#71717a] uppercase">To</label>
                 <input
                   type="datetime-local"
                   value={customEnd}
                   onChange={(e) => setCustomEnd(e.target.value)}
                   max={new Date().toISOString().slice(0, 16)}
-                  className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:border-primary transition"
+                  className="rounded-sm border border-[#2a2e37] bg-[#111217] px-2 py-1 text-[11px] text-white focus:outline-none focus:border-blue-500 transition"
                 />
               </div>
             </>
           )}
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 pt-4">
+          <div className="flex items-center gap-3 border-l border-[#2a2e37] pl-3">
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover transition disabled:opacity-50 shadow-sm"
-              title="Atualiza os dados referentes à aba ativa para otimizar requisições"
+              className="flex items-center gap-1.5 rounded-sm border border-[#2a2e37] bg-[#181b1f] px-3 py-1 text-[11px] font-bold text-[#e4e4e7] hover:bg-[#2a2e37] hover:text-white transition disabled:opacity-50"
+              title="Refresh Data"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-primary' : ''}`} />
-              <span>Atualizar ({TABS.find(t => t.id === activeTab)?.label})</span>
+              <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+              <span>SYNC</span>
             </button>
             {lastUpdated && (
-              <span className="text-[11px] font-medium text-muted bg-surface/60 border border-border/60 px-3 py-1.5 rounded-lg shrink-0 flex items-center gap-1.5">
+              <span className="text-[10px] text-[#71717a] flex items-center gap-1.5 shrink-0">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Última atualização: {lastUpdated.toLocaleDateString('pt-BR')} às {lastUpdated.toLocaleTimeString('pt-BR')}</span>
+                <span>{lastUpdated.toLocaleTimeString('pt-BR')}</span>
               </span>
             )}
           </div>
         </div>
       </div>
 
-        {/* Nav Tabs */}
-        <div className="mt-8 flex flex-wrap gap-2 overflow-x-auto no-scrollbar pb-2">
+      <div className="max-w-[1400px] mx-auto px-4 mt-6">
+        {/* Nav Tabs - IDE Style */}
+        <div className="flex flex-wrap gap-1 border-b border-[#2a2e37] overflow-x-auto no-scrollbar">
           {TABS.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -299,25 +305,25 @@ export default function AnalyticsDashboardClient() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all
+                className={`flex shrink-0 items-center gap-2 px-4 py-2.5 text-[11px] font-mono font-bold transition-colors border-b-2
                   ${isActive 
-                    ? 'bg-primary text-foreground shadow-sm' 
-                    : 'bg-surface-light border border-border text-foreground hover:bg-surface-light hover:border-border'
+                    ? 'border-blue-500 text-white bg-[#181b1f]' 
+                    : 'border-transparent text-[#71717a] hover:text-[#e4e4e7] hover:bg-[#181b1f]'
                   }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? 'text-foreground' : 'text-primary'}`} />
-                {tab.label}
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-blue-500' : 'text-[#71717a]'}`} />
+                {tab.label.toUpperCase()}
               </button>
             );
           })}
         </div>
 
       {loading && timelineData.length === 0 ? (
-        <div className="flex py-20 justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted" />
+        <div className="flex py-20 justify-center h-[500px] items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       ) : (
-        <div className="min-h-[500px] space-y-6">
+        <div className="min-h-[500px] py-6">
           {activeTab === 'overview' && (
             <>
               <TabHeaderBanner
@@ -453,6 +459,8 @@ export default function AnalyticsDashboardClient() {
 
         </div>
       )}
+
+      </div>
 
       {/* Drawer */}
       {selectedLead && (
