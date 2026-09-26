@@ -1,242 +1,101 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, ArrowRight, X, TrendingUp } from "lucide-react";
-import { H53NeuralEngine } from "@/lib/H53NeuralEngine";
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, BarChart3, Download, Loader2, Search, Sparkles } from "lucide-react";
 import AnalysisDashboard from "./AnalysisDashboard";
 import { trackEvent } from "@/lib/tracking";
+import { isBlockedSearch } from "@/lib/search-policy";
+
+type Offer = { name: string; price: number; link: string; image?: string };
+export type SearchResult = {
+  success: boolean;
+  query: string;
+  scraped_name: string;
+  scraped_price: number;
+  current_price: number;
+  url: string;
+  checked_at: string;
+  market_alternatives: Offer[];
+};
+
+const suggestions = ["iPhone 15", "PlayStation 5", "Notebook Samsung"];
 
 export default function SuperSearchHero() {
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "result" | "error">("idle");
-  const [resultData, setResultData] = useState<any>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<SearchResult | null>(null);
 
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
-  const [recentSearches, setRecentSearches] = useState<string[]>([
-    "iPhone 15 Pro Max 256GB",
-    "PlayStation 5 Slim 1TB",
-    "Samsung Galaxy S24 Ultra",
-    "Smart TV LG OLED 55\"",
-    "MacBook Air M3 16GB",
-  ]);
-
-  useEffect(() => {
-    fetch('/api/recent-searches')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.searches && data.searches.length > 0) {
-          setRecentSearches(data.searches);
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  const handleSearch = async (e?: React.FormEvent, customQuery?: string) => {
-    if (e) e.preventDefault();
-    const searchQuery = customQuery || query;
-    if (!searchQuery.trim()) return;
-
-    setStatus("loading");
-    setQuery(searchQuery);
-
+  async function search(value: string) {
+    const term = value.trim();
+    if (!term || loading) return;
+    if (isBlockedSearch(term)) { setError("Esta pesquisa não é permitida. Busque outro produto."); return; }
+    setQuery(term);
+    setError("");
+    setLoading(true);
     try {
-      const isUrl = searchQuery.startsWith("http");
-      const apiUrl = isUrl
-        ? `/api/price-history?url=${encodeURIComponent(searchQuery)}`
-        : `/api/price-history?q=${encodeURIComponent(searchQuery)}`;
-
-      const res = await fetch(apiUrl);
-      const data = await res.json();
-
-      if (!data.success) {
-        setStatus("error");
-        return;
+      const parameter = /^https?:\/\//i.test(term) ? "url" : "q";
+      const response = await fetch(`/api/price-history?${parameter}=${encodeURIComponent(term)}`);
+      const payload = await response.json();
+      if (!response.ok || !payload.success || !Number.isFinite(payload.scraped_price)) {
+        throw new Error("Não conseguimos consultar preços verificáveis agora. Tente outro produto em instantes.");
       }
-
-      const neuralPrediction = H53NeuralEngine.predict(data.current_price, data.scraped_price);
-
-      setResultData({
-        ...data,
-        neuralPrediction
-      });
-
-      setTimeout(() => {
-        setStatus("result");
-      }, 1200);
-
-      try {
-        const isUrlSearch = /^https?:\/\//.test(searchQuery);
-        trackEvent("super_search", "search_executed", data.current_price, {
-          query: searchQuery,
-          search_type: isUrlSearch ? "url" : "text",
-          current_price: data.current_price || 0,
-          scraped_price: data.scraped_price || 0,
-          overprice_percentage: data.overprice_percentage || 0,
-          price_verdict: data.future_price_prediction?.recommendation || "unknown",
-          market_alternatives_count: data.market_alternatives?.length || 0,
-          store_detected: data.net_price_breakdown?.storeName || "unknown",
-          has_coupon: !!data.net_price_breakdown?.suggestedCoupon,
-          coupon_code: data.coupon_code || null,
-          profit_margin: data.profit_margin_percentage || 0,
-          neural_confidence: neuralPrediction?.confidenceScore || 0,
-        });
-      } catch (err) {}
-    } catch (e) {
-      setStatus("error");
+      setResult(payload);
+      trackEvent("super_search", "search_executed", payload.scraped_price, { query: term, results: 1 + (payload.market_alternatives?.length || 0) });
+    } catch {
+      setError("Não conseguimos consultar preços verificáveis agora. Tente outro produto em instantes.");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleReset = () => {
-    setStatus("idle");
-    setQuery("");
-    setResultData(null);
-    setTimeout(() => inputRef.current?.focus(), 100);
-  };
-
-  if ((status === "result" || status === "loading") && resultData) {
-    return (
-      <AnalysisDashboard 
-        data={resultData} 
-        onReset={handleReset} 
-        onSearch={(q) => handleSearch(undefined, q)}
-        isReloading={status === "loading"}
-      />
-    );
   }
 
-  return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center px-4 sm:px-6 max-w-3xl mx-auto z-10">
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-center w-full relative z-20"
-      >
-        {/* Logo */}
-        <div className="mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold font-[var(--font-display)] tracking-tight text-foreground">
-            dopamina
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            Descubra se o preço é justo.
-          </p>
-        </div>
+  if (result) {
+    return <AnalysisDashboard data={result} onReset={() => { setResult(null); setError(""); }} onSearch={search} isReloading={loading} error={error} />;
+  }
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto w-full">
-          <div className="relative flex items-center bg-white rounded-2xl border border-black/10 shadow-[0_2px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.1)] focus-within:shadow-[0_4px_30px_rgba(0,113,227,0.12)] focus-within:border-primary/30 transition-all duration-300">
-            <div className="pl-5 sm:pl-6 text-muted-light">
-              {status === "loading" ? (
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              ) : (
-                <Search className="w-5 h-5" />
-              )}
-            </div>
-            
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              disabled={status === "loading"}
-              placeholder="Pesquise um produto ou cole o link..."
-              className="w-full bg-transparent text-foreground text-base sm:text-lg px-4 py-5 sm:py-6 outline-none placeholder:text-black/25 tracking-tight"
-            />
+  return <main className="relative min-h-[100dvh] overflow-hidden bg-[#080914] text-white selection:bg-violet-400/40">
+    <div aria-hidden className="pointer-events-none absolute -left-44 top-10 h-[450px] w-[450px] rounded-full bg-violet-700/25 blur-[110px]" />
+    <div aria-hidden className="pointer-events-none absolute -right-48 top-60 h-[450px] w-[450px] rounded-full bg-cyan-500/15 blur-[110px]" />
+    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.18)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
 
-            <div className="pr-3">
-              <button
-                type="submit"
-                disabled={!query.trim() || status === "loading"}
-                className="bg-primary hover:bg-primary-light text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 active:scale-95"
-              >
-                {status === "loading" ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <span className="hidden sm:inline">Analisar</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
+    <div className="relative mx-auto flex min-h-[100dvh] max-w-6xl flex-col px-5 pb-12 pt-7 sm:px-8 sm:pt-10">
+      <header className="flex items-center justify-between">
+        <Link href="/" className="font-[var(--font-display)] text-xl font-bold tracking-[-.06em]">dopamina<span className="text-violet-400">.</span></Link>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-white/65">Comparador aberto · relatório grátis</span>
+      </header>
 
-        {/* Loading State */}
-        <AnimatePresence>
-          {status === "loading" && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-8"
-            >
-              <div className="inline-flex flex-col items-center gap-3">
-                <div className="w-64 h-1 bg-surface-lighter rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-primary rounded-full"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 1.2, ease: "easeInOut" }}
-                  />
-                </div>
-                <span className="text-sm text-muted">
-                  Analisando preço...
-                </span>
-              </div>
-            </motion.div>
-          )}
-          
-          {status === "error" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-6 text-danger text-sm border border-danger/15 bg-danger/5 py-3 px-5 rounded-xl inline-flex items-center gap-2"
-            >
-              <X className="w-4 h-4" />
-              Não encontramos este produto. Tente outro termo ou link.
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Trending Chips */}
-        {status === "idle" && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="mt-10 sm:mt-14 w-full max-w-2xl mx-auto"
-          >
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <TrendingUp className="w-3.5 h-3.5 text-muted-light" />
-              <span className="text-xs text-muted tracking-wide">
-                Pesquisas populares
-              </span>
-            </div>
-            
-            <div className="flex flex-wrap justify-center gap-2">
-              {recentSearches.map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSearch(undefined, item)}
-                  className="bg-surface-light hover:bg-surface-lighter border border-black/[0.04] hover:border-black/10 px-4 py-2.5 rounded-full text-sm text-foreground/70 hover:text-foreground transition-all duration-200 active:scale-95"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
+      <div className="grid flex-1 items-center gap-12 py-14 lg:grid-cols-[1.12fr_.88fr] lg:gap-20">
+        <section>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}>
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-200"><Sparkles size={14} /> Sua próxima compra começa com clareza</div>
+            <h1 className="max-w-2xl font-[var(--font-display)] text-[clamp(3.2rem,9vw,6.6rem)] font-semibold leading-[.96] tracking-[-.075em]">Preço bom é <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">preço conferido.</span></h1>
+            <p className="mt-7 max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg">Compare resultados encontrados agora, entenda a diferença entre eles e leve um relatório gratuito para decidir com calma.</p>
           </motion.div>
-        )}
 
-      </motion.div>
+          <form onSubmit={event => { event.preventDefault(); void search(query); }} className="mt-9 rounded-[24px] border border-white/15 bg-white/[.08] p-2 shadow-[0_22px_80px_rgba(76,29,149,.22)] backdrop-blur-xl sm:flex sm:items-center">
+            <label htmlFor="product-search" className="sr-only">Nome do produto ou link</label>
+            <div className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 sm:py-0"><Search size={20} className="shrink-0 text-violet-300" /><input id="product-search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Produto ou link da oferta" className="min-w-0 w-full bg-transparent text-base text-white outline-none placeholder:text-slate-400" /></div>
+            <button type="submit" disabled={loading || !query.trim()} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 font-semibold text-white shadow-lg shadow-violet-700/30 transition hover:brightness-110 disabled:opacity-50 sm:w-auto">{loading ? <Loader2 size={19} className="animate-spin" /> : <>Analisar agora <ArrowRight size={18} /></>}</button>
+          </form>
+          {error && <p role="alert" className="mt-4 rounded-xl border border-rose-400/30 bg-rose-400/10 p-3 text-sm text-rose-200">{error}</p>}
+          <div className="mt-6 flex flex-wrap items-center gap-2"><span className="mr-1 text-xs text-slate-400">Experimente:</span>{suggestions.map(item => <button key={item} type="button" onClick={() => void search(item)} className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200 transition hover:border-violet-300/50 hover:bg-violet-300/10">{item}</button>)}</div>
+        </section>
+
+        <motion.section initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, delay: .15 }} className="relative rounded-[30px] border border-white/10 bg-gradient-to-br from-white/[.13] to-white/[.035] p-5 shadow-[0_30px_90px_rgba(0,0,0,.28)] backdrop-blur-2xl sm:p-7" aria-label="Como funciona a análise">
+          <div className="flex items-center justify-between"><span className="text-xs font-semibold uppercase tracking-[.2em] text-violet-200">Sua análise</span><BarChart3 className="text-violet-300" size={19} /></div>
+          <h2 className="mt-7 font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">Números que ajudam a escolher.</h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-300">Um retrato claro dos resultados da sua busca, sem previsões inventadas.</p>
+          <div className="mt-8 space-y-6">{[
+            { label: "Preços encontrados", width: "84%", gradient: "from-violet-400 to-fuchsia-400" },
+            { label: "Amplitude da amostra", width: "58%", gradient: "from-cyan-400 to-blue-400" },
+            { label: "Links para conferir", width: "70%", gradient: "from-fuchsia-400 to-violet-400" },
+          ].map(row => <div key={row.label}><div className="mb-2 flex justify-between text-xs text-slate-300"><span>{row.label}</span><span className="text-white/45">disponível na busca</span></div><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full bg-gradient-to-r ${row.gradient}`} style={{ width: row.width }} /></div></div>)}</div>
+          <div className="mt-9 flex items-center gap-3 rounded-2xl border border-white/10 bg-[#11152a] p-4"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-400/15 text-violet-200"><Download size={19} /></span><div><p className="text-sm font-semibold">PDF para levar com você</p><p className="text-xs text-slate-400">Gratuito, com fonte e horário da consulta.</p></div></div>
+        </motion.section>
+      </div>
+      <p className="text-xs leading-relaxed text-slate-500">Os resultados podem incluir modelos diferentes. Confirme especificações, frete e condições no site de origem antes de comprar.</p>
     </div>
-  );
+  </main>;
 }

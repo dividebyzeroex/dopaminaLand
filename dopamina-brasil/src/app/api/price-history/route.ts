@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
-import { H53NeuralEngine } from '@/lib/H53NeuralEngine';
+import { isBlockedSearch } from '@/lib/search-policy';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,44 +30,10 @@ function extractQueryFromUrl(inputUrl: string): string {
       .trim();
 
     return clean || 'iPhone 17 Apple';
-  } catch (e) {
+  } catch {
     return inputUrl;
   }
 }
-
-function getDynamicPastMonths(count = 6): string[] {
-  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const result: string[] = [];
-  for (let i = count - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), currentMonth - i, 1);
-    result.push(i === 0 ? "Hoje" : monthNames[d.getMonth()]);
-  }
-  return result;
-}
-
-// Real Market Coupon Database per Store
-function getRealStoreCoupon(urlOrQuery: string): { coupon: string; discountPercent: number; storeName: string } {
-  const lower = urlOrQuery.toLowerCase();
-  if (lower.includes('fastshop') || lower.includes('fast shop')) {
-    return { coupon: 'FAST10', discountPercent: 10, storeName: 'Fast Shop' };
-  } else if (lower.includes('amazon')) {
-    return { coupon: 'PRIME10', discountPercent: 10, storeName: 'Amazon Brasil' };
-  } else if (lower.includes('mercadolivre') || lower.includes('mercado livre')) {
-    return { coupon: 'MELI10', discountPercent: 10, storeName: 'Mercado Livre' };
-  } else if (lower.includes('kabum')) {
-    return { coupon: 'NINJA10', discountPercent: 10, storeName: 'Kabum!' };
-  } else if (lower.includes('shopee')) {
-    return { coupon: 'SHOPEE10', discountPercent: 10, storeName: 'Shopee' };
-  } else if (lower.includes('magazineluiza') || lower.includes('magalu')) {
-    return { coupon: 'MAGALU10', discountPercent: 10, storeName: 'Magalu' };
-  }
-  return { coupon: 'CUPOM10', discountPercent: 10, storeName: 'E-Commerce' };
-}
-
-// We removed fetchRealRedditFlaws because it was mocked.
-// Now using market_alternatives.
 
 export async function GET(req: NextRequest) {
   try {
@@ -82,6 +48,10 @@ export async function GET(req: NextRequest) {
 
     if (!query) {
       return NextResponse.json({ error: 'Missing parameter "q" or "url"' }, { status: 400, headers: corsHeaders });
+    }
+
+    if (isBlockedSearch(query)) {
+      return NextResponse.json({ success: false, error: 'Esta pesquisa não é permitida.' }, { status: 400, headers: corsHeaders });
     }
 
     let currentPrice = currentPriceStr ? parseFloat(currentPriceStr) : null;
@@ -105,15 +75,15 @@ export async function GET(req: NextRequest) {
     const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
     const firstName = firstCard.find('[data-testid="product-card::name"]').text();
     let firstUrl = firstCard.attr('href');
-    let firstImage = firstCard.find('[data-testid="product-card::image"] img').attr('src') || firstCard.find('img').first().attr('src');
+    const firstImage = firstCard.find('[data-testid="product-card::image"] img').attr('src') || firstCard.find('img').first().attr('src');
     
     // Scrape real market alternatives from the next 3 cards
-    const market_alternatives: any[] = [];
+    const market_alternatives: { name: string; price: number; link: string; image?: string }[] = [];
     $('[data-testid="product-card::card"]').slice(1, 4).each((i, el) => {
       const name = $(el).find('[data-testid="product-card::name"]').text();
-      let priceStr = $(el).find('[data-testid="product-card::price"]').text();
+      const priceStr = $(el).find('[data-testid="product-card::price"]').text();
       let link = $(el).attr('href');
-      let image = $(el).find('[data-testid="product-card::image"] img').attr('src') || $(el).find('img').first().attr('src');
+      const image = $(el).find('[data-testid="product-card::image"] img').attr('src') || $(el).find('img').first().attr('src');
 
       if (link && !link.startsWith('http')) {
         link = `https://www.buscape.com.br${link}`;
@@ -126,7 +96,7 @@ export async function GET(req: NextRequest) {
       }
       
       if (name && price > 0) {
-        market_alternatives.push({ name, price, link, image });
+        if (link && /^https:\/\//i.test(link)) market_alternatives.push({ name, price, link, image });
       }
     });
     
@@ -142,109 +112,24 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    if (!scrapedPrice) {
-      const priceMatches = html.match(/R\$\s*[\d\.]+(?:,\d{2})?/g);
-      if (priceMatches && priceMatches.length > 0) {
-        const firstNum = priceMatches[0].replace(/[^0-9,]/g, '').replace(',', '.');
-        scrapedPrice = parseFloat(firstNum) || 1999.0;
-      } else {
-        scrapedPrice = 1999.0;
-      }
+    // A search result is not evidence of a price when its card cannot be parsed.
+    if (!scrapedPrice || !firstName || !firstUrl) {
+      return NextResponse.json({ success: false, error: 'Preço verificável indisponível para esta busca.' }, { status: 404, headers: corsHeaders });
     }
 
-    if (!currentPrice || isNaN(currentPrice)) {
-      currentPrice = Math.round(scrapedPrice * 1.35);
-    }
+    const hasComparison = currentPrice !== null && Number.isFinite(currentPrice) && currentPrice > 0;
+    if (!hasComparison) currentPrice = scrapedPrice;
 
-    // Dynamic past months
-    const pastMonths = getDynamicPastMonths(6);
-    const pBase = Math.round(scrapedPrice * 0.95);
-    const pInflated = Math.round(currentPrice * 1.25);
-    const pPromo = Math.round(currentPrice);
-    const pLowest = Math.round(scrapedPrice);
+    const observedPrice = currentPrice ?? scrapedPrice;
+    const diff = hasComparison ? Math.max(0, ((observedPrice - scrapedPrice) / observedPrice) * 100) : 0;
+    const isFomoAlert = hasComparison && observedPrice > scrapedPrice;
+    const savings = hasComparison ? Math.max(0, observedPrice - scrapedPrice) : 0;
 
-    const priceHistoryData = [
-      { month: pastMonths[0], price: pBase, label: "Preço Base Mapeado", status: "normal" },
-      { month: pastMonths[1], price: Math.round(pBase * 1.03), label: "Variação Regular", status: "normal" },
-      { month: pastMonths[2], price: Math.round(pInflated * 0.8), label: "Preço Pré-Aumento", status: "warning" },
-      { month: pastMonths[3], price: pInflated, label: "Pico Inflado (Metade do Dobro)", status: "danger" },
-      { month: pastMonths[4], price: pPromo, label: "Desconto Anunciado", status: "fake" },
-      { month: pastMonths[5], price: pLowest, label: "Piso Real (Buscapé Sync)", status: "real" },
-    ];
-
-    const diff = Math.max(0, ((currentPrice - scrapedPrice) / currentPrice) * 100);
-    const isFomoAlert = currentPrice > scrapedPrice;
-    const savings = Math.max(0, currentPrice - scrapedPrice);
-
-    // ============= REAL VALID MARKET INTELLIGENCE DATA =============
-
-    // Real Coupon Match
-    const realCouponInfo = getRealStoreCoupon(inputUrl || query);
-
-    // Net Price Mathematical Calculation (Pix 10% off + Coupon + 5% Buscapé Cashback)
-    const pixPrice = Math.round(scrapedPrice * 0.9);
-    const cashback = Math.round(scrapedPrice * 0.05);
-    const finalNetPrice = Math.max(1, Math.round(pixPrice - cashback));
-
-    const netPriceBreakdown = {
-      storePrice: currentPrice,
-      bestMarketPrice: scrapedPrice,
-      suggestedCoupon: realCouponInfo.coupon,
-      couponDiscountPercent: realCouponInfo.discountPercent,
-      storeName: realCouponInfo.storeName,
-      pixPrice: pixPrice,
-      cashbackAmount: cashback,
-      finalNetPrice: finalNetPrice,
-    };
-
-    // Review Authenticity
-    const reviewAuthenticity = {
-      score: 78,
-      botPercentage: 22,
-      verdict: "Autêntico: 78% das avaliações são de compradores reais verificados.",
-      realSummary: "Compradores reais destacam entrega rápida e excelente acabamento, mas alertam para manual apenas em inglês."
-    };
-
-    // Future Price Prediction (Powered by H53 Neural Engine)
-    await H53NeuralEngine.loadModel();
-    const neuralPrediction = H53NeuralEngine.predict(currentPrice, scrapedPrice);
-    
-    // Anomaly percent tells us how much overpriced it is.
-    // If it's negative or very small, it's a good time to buy.
-    const isGoodTimeToBuy = neuralPrediction.anomalyPercent <= 5; 
-    
-    // Dynamic Drop and Wait time based on H53 Model
-    const dynamicDrop = isGoodTimeToBuy ? 0 : Math.min(30, Math.max(5, Math.round(neuralPrediction.anomalyPercent * 0.85)));
-    const dynamicDaysToWait = isGoodTimeToBuy ? 0 : Math.max(3, Math.ceil(dynamicDrop * 0.7));
-
-    const futurePricePrediction = {
-      recommendation: isGoodTimeToBuy ? "COMPRE AGORA 🟢" : "ESPERE " + dynamicDaysToWait + " DIAS 🛑",
-      daysToWait: dynamicDaysToWait,
-      predictedDropPercent: dynamicDrop,
-      reason: isGoodTimeToBuy
-        ? "Preço validado pelo modelo H53 como excelente oportunidade de compra."
-        : `A IA detectou sobrepreço e estima uma correção de ${dynamicDrop}% para o próximo ciclo.`
-    };
-
-    // Cost Per Use
-    const dailyCost30d = (scrapedPrice / 30).toFixed(2);
-    const dailyCost365d = (scrapedPrice / 365).toFixed(2);
-    const costPerUseCalc = {
-      dailyCost30d: `R$ ${dailyCost30d} / dia`,
-      dailyCost365d: `R$ ${dailyCost365d} / dia`,
-      rationalityRating: scrapedPrice > 4000 ? "Alto Investimento" : "Excelente Custo-Benefício"
-    };
-
-    // Freight Audit
-    const freightAudit = {
-      freightPrice: "R$ 19,90",
-      isInflatedFreight: false,
-      verdict: "Frete regular dentro do padrão de mercado."
-    };
-
-    let message = isFomoAlert
-      ? `🚨 Cuidado! Este produto está ${diff.toFixed(1)}% mais barato no mercado. Não caia no FOMO!`
-      : `✅ Preço Justo. O valor está alinhado com o piso do mercado.`;
+    const message = !hasComparison
+      ? 'Preço encontrado nesta consulta. Confira o produto, frete e condições na loja antes de comprar.'
+      : isFomoAlert
+        ? `Encontramos um resultado ${diff.toFixed(1)}% mais barato nesta consulta. Confira se é o mesmo produto e as condições da oferta.`
+        : 'O preço informado está próximo do resultado encontrado nesta consulta.';
 
     return NextResponse.json({
       success: true,
@@ -252,27 +137,26 @@ export async function GET(req: NextRequest) {
       scraped_name: firstName || query,
       image: firstImage,
       scraped_price: scrapedPrice,
-      current_price: currentPrice,
+      current_price: observedPrice,
       overpriced_percent: parseFloat(diff.toFixed(1)),
       savings: parseFloat(savings.toFixed(2)),
+      has_comparison: hasComparison,
+      checked_at: new Date().toISOString(),
       url: firstUrl || buscapeUrl,
       is_fomo_alert: isFomoAlert,
       message,
-      price_history: priceHistoryData,
-      review_authenticity: reviewAuthenticity,
-      net_price_breakdown: netPriceBreakdown,
-      future_price_prediction: futurePricePrediction,
-      cost_per_use_calc: costPerUseCalc,
-      freight_audit: freightAudit,
+      // These estimates are not measured market facts and must not be sold as such.
+      price_history: [],
+      review_authenticity: null,
+      net_price_breakdown: null,
+      future_price_prediction: null,
+      cost_per_use_calc: null,
+      freight_audit: null,
       market_alternatives: market_alternatives,
-      detected_triggers: [
-        "🚨 Falsa Escassez: O contador 'Restam poucas unidades' é gerado por rotina local na página.",
-        "⚠️ Ancoragem Inflada: O valor riscado 'De R$' está acima da média dos últimos 90 dias.",
-        "⭐ Prova Social Induzida: Selo de popularidade para acelerar a tomada de decisão.",
-      ]
+      detected_triggers: []
     }, { headers: corsHeaders });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao consultar preços.' }, { status: 500, headers: corsHeaders });
   }
 }
