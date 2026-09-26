@@ -25,7 +25,7 @@ const outfit = Outfit({
 });
 
 export const viewport = {
-  themeColor: "#080914",
+  themeColor: "#f5f5f0",
 };
 
 export const metadata: Metadata = {

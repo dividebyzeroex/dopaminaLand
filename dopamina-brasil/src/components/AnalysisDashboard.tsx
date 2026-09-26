@@ -1,57 +1,55 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowUpRight, Clock3, Download, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Search, Download } from "lucide-react";
 import type { SearchResult } from "./SuperSearchHero";
+import ProductVisual from "./ProductVisual";
+import styles from "./studio.module.css";
 
 const currency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-
 type Props = { data: SearchResult; onReset: () => void; onSearch?: (query: string) => void; isReloading?: boolean; error?: string };
 
 export default function AnalysisDashboard({ data, onReset, onSearch, isReloading, error }: Props) {
   const [input, setInput] = useState("");
-  const offers = useMemo(() => [
-    { name: data.scraped_name, price: data.scraped_price, link: data.url },
-    ...(data.market_alternatives || []),
-  ].filter(offer => offer.name && Number.isFinite(offer.price) && offer.price > 0 && /^https:\/\//i.test(offer.link)).sort((a, b) => a.price - b.price), [data]);
-  const prices = offers.map(offer => offer.price);
-  const min = prices[0] ?? 0;
-  const max = prices.at(-1) ?? 0;
-  const median = prices.length ? prices.length % 2 ? prices[(prices.length - 1) / 2] : (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2 : 0;
+  const [selected, setSelected] = useState(0);
+  const offers = [{ name: data.scraped_name, price: data.scraped_price, link: data.url, image: data.image }, ...(data.market_alternatives || [])]
+    .filter(offer => offer.name && Number.isFinite(offer.price) && offer.price > 0 && /^https:\/\//i.test(offer.link)).sort((a, b) => a.price - b.price);
+  const min = offers[0]?.price ?? 0;
+  const max = offers.at(-1)?.price ?? 0;
+  const count = offers.length;
+  const median = count ? count % 2 ? offers[(count - 1) / 2].price : (offers[count / 2 - 1].price + offers[count / 2].price) / 2 : 0;
   const spread = max - min;
+  const selectedOffer = offers[Math.min(selected, Math.max(0, count - 1))];
+  const heroOffer = offers[0];
   const timestamp = new Date(data.checked_at);
-  const checked = Number.isNaN(timestamp.getTime()) ? "agora" : timestamp.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  const checked = Number.isNaN(timestamp.getTime()) ? "Horário não informado" : timestamp.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  const reportHref = `/relatorio?q=${encodeURIComponent(data.query || data.scraped_name)}`;
 
-  return <main className="min-h-[100dvh] bg-[#080914] text-white selection:bg-violet-400/40">
-    <div aria-hidden className="pointer-events-none fixed -left-40 top-12 h-[450px] w-[450px] rounded-full bg-violet-800/25 blur-[110px]" />
-    <div aria-hidden className="pointer-events-none fixed -right-48 top-72 h-[400px] w-[400px] rounded-full bg-cyan-700/15 blur-[100px]" />
-    <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-6 sm:px-8 sm:pt-9">
-      <header className="flex flex-wrap items-center justify-between gap-4"><button onClick={onReset} className="flex items-center gap-2 font-[var(--font-display)] text-xl font-bold tracking-[-.06em]">dopamina<span className="text-violet-400">.</span></button><button onClick={onReset} className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white"><ArrowLeft size={16} /> Nova busca</button></header>
-
-      <div className="mt-10 max-w-3xl"><span className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1.5 text-xs font-semibold text-violet-200"><Sparkles size={13} /> ANÁLISE DA BUSCA</span><h1 className="mt-5 font-[var(--font-display)] text-4xl font-semibold leading-[1.05] tracking-[-.055em] sm:text-6xl">Uma visão mais clara <span className="bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">do preço.</span></h1><p className="mt-5 text-sm leading-relaxed text-slate-300 sm:text-base">{data.query || data.scraped_name} · {offers.length} {offers.length === 1 ? "resultado observado" : "resultados observados"}</p><p className="mt-2 flex items-center gap-2 text-xs text-slate-400"><Clock3 size={14} /> Consulta: {checked} · Fonte: Buscapé</p></div>
-
-      <form className="mt-8 flex max-w-xl gap-2 rounded-2xl border border-white/10 bg-white/[.07] p-2" onSubmit={event => { event.preventDefault(); if (input.trim()) onSearch?.(input.trim()); }}><label className="sr-only" htmlFor="another-product">Pesquisar outro produto</label><div className="flex min-w-0 flex-1 items-center gap-2 px-2"><Search size={17} className="text-violet-300" /><input id="another-product" value={input} onChange={event => setInput(event.target.value)} placeholder="Pesquisar outro produto" className="min-w-0 w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-400" /></div><button disabled={!input.trim() || isReloading} className="rounded-xl bg-violet-500 px-4 py-2.5 text-sm font-semibold disabled:opacity-50">Buscar</button></form>
-      {error && <p role="alert" className="mt-3 text-sm text-rose-300">{error}</p>}
-
-      <section aria-label="Indicadores desta busca" className="mt-9 grid gap-3 sm:grid-cols-3">
-        {[
-          { label: "Menor valor da amostra", value: currency(min), note: "Entre os resultados exibidos", shade: "from-violet-500/20" },
-          { label: "Mediana da amostra", value: currency(median), note: `${offers.length} ${offers.length === 1 ? "resultado" : "resultados"} nesta consulta`, shade: "from-fuchsia-500/20" },
-          { label: "Amplitude observada", value: currency(spread), note: "Maior valor menos menor valor", shade: "from-cyan-500/20" },
-        ].map((metric, index) => <motion.div key={metric.label} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .08 }} className={`rounded-[24px] border border-white/10 bg-gradient-to-br ${metric.shade} to-white/[.03] p-5 backdrop-blur-sm sm:p-6`}><p className="text-xs font-medium text-slate-300">{metric.label}</p><p className="mt-3 font-[var(--font-display)] text-[clamp(1.7rem,4vw,2.65rem)] font-semibold tracking-tight">{metric.value}</p><p className="mt-2 text-xs text-slate-400">{metric.note}</p></motion.div>)}
-      </section>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
-        <section className="rounded-[26px] border border-white/10 bg-white/[.055] p-5 sm:p-7" aria-labelledby="comparison-title"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 id="comparison-title" className="font-[var(--font-display)] text-xl font-semibold">Mapa de preços</h2><p className="mt-1 text-xs text-slate-400">Cada barra representa um resultado encontrado agora.</p></div><span className="rounded-full bg-violet-400/10 px-3 py-1 text-xs text-violet-200">{offers.length} observações</span></div>
-          <div className="mt-8 space-y-6">{offers.map((offer, index) => <div key={`${offer.link}-${index}`}><div className="mb-2 flex items-start justify-between gap-3 text-sm"><span className="min-w-0 max-w-[65%] truncate text-slate-200" title={offer.name}>{index + 1}. {offer.name}</span><strong className="shrink-0 font-semibold">{currency(offer.price)}</strong></div><div role="img" aria-label={`${offer.name}: ${currency(offer.price)}`} className="h-3 overflow-hidden rounded-full bg-white/10"><motion.div initial={{ width: 0 }} animate={{ width: `${Math.max(8, max ? (offer.price / max) * 100 : 0)}%` }} transition={{ duration: .65, delay: index * .1 }} className={`h-full rounded-full bg-gradient-to-r ${index === 0 ? "from-violet-400 via-fuchsia-400 to-pink-400" : "from-sky-500/80 to-cyan-300/80"}`} /></div></div>)}</div>
-          <div className="mt-8 rounded-xl border border-white/10 bg-black/20 p-3 text-xs leading-relaxed text-slate-400">A escala compara preços de resultados da busca. Modelos, especificações e vendedores podem ser diferentes; a diferença entre barras não representa economia garantida.</div>
+  return <main className={styles.shell} aria-busy={isReloading}>
+    <div className={styles.wrap}>
+      <header className={styles.nav}><button onClick={onReset} className={styles.brand}>dopamina</button><button onClick={onReset} className={styles.back}><ArrowLeft size={15} /> Nova pesquisa</button></header>
+      <div className={isReloading ? styles.loading : styles.reveal}>
+        <section className={styles.resultHero}>
+          <div className={styles.resultVisual}><span className={styles.eyebrow}>Em foco · Menor valor da amostra</span><ProductVisual key={heroOffer?.image || data.query} src={heroOffer?.image} name={heroOffer?.name || data.scraped_name} priority /></div>
+          <div><span className={styles.eyebrow}>Sua pesquisa, em perspectiva</span><h1 className={styles.resultTitle}>{heroOffer?.name || data.scraped_name}</h1><p className={styles.caption}>Busca: {data.query} · {count} resultados encontrados</p><p className={styles.heroPrice}>{currency(min)}</p><p className={styles.caption}>Menor preço entre os resultados desta consulta.</p>{heroOffer && <a href={heroOffer.link} target="_blank" rel="noopener noreferrer" className={styles.blueLink}>Conferir na fonte <ArrowUpRight size={16} /></a>}<p className={styles.note}>Fonte: Buscapé · {checked}<br />Confira modelo, vendedor, frete e condições de pagamento.</p></div>
         </section>
-        <section className="flex flex-col justify-between rounded-[26px] border border-violet-300/20 bg-gradient-to-br from-violet-500/20 via-[#18122e] to-[#10182b] p-6 sm:p-7"><div><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-300/15 text-violet-200"><Download size={22} /></div><h2 className="mt-7 font-[var(--font-display)] text-2xl font-semibold leading-tight">Seu relatório, sem custo.</h2><p className="mt-3 text-sm leading-relaxed text-slate-300">Leve a análise em PDF com resultados, fonte e horário. Uma nova consulta é feita ao abrir o relatório.</p></div><a href={`/relatorio?q=${encodeURIComponent(data.query || data.scraped_name)}`} className="mt-8 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-[#141026] transition hover:bg-violet-100">Abrir e baixar PDF <ArrowUpRight size={17} /></a></section>
+        <section className={styles.metrics} aria-label="Indicadores da amostra">
+          <div className={styles.metric}><label>Valor central</label><strong>{currency(median)}</strong><p className={styles.caption}>Mediana dos resultados</p></div>
+          <div className={styles.metric}><label>Amplitude</label><strong>{currency(spread)}</strong><p className={styles.caption}>Maior menos menor preço</p></div>
+          <div className={styles.metric}><label>Resultados observados</label><strong>{String(count).padStart(2, "0")}</strong><p className={styles.caption}>Nesta consulta</p></div>
+        </section>
+        <div className={styles.sectionHead}><div><span className={styles.eyebrow}>Leitura de preços</span><h2>O detalhe faz<br />a diferença.</h2></div><p>Os gráficos retratam esta busca. Compare as especificações: os resultados podem incluir modelos diferentes.</p></div>
+        <section className={styles.charts} aria-label="Análise gráfica de preços">
+          <div className={styles.panel}><div className={styles.panelTop}><h3>Comparativo de valores</h3><span>BRL · consulta atual</span></div><div className={styles.chart}>{offers.map((offer, index) => <button key={`${offer.link}-${index}`} className={styles.chartItem} aria-pressed={selected === index} aria-label={`Resultado ${index + 1}: ${offer.name}, ${currency(offer.price)}`} onClick={() => setSelected(index)}><strong>{currency(offer.price)}</strong><span className={styles.bar} style={{ height: `${max ? offer.price / max * 82 : 0}%`, animationDelay: `${index * .08}s` }} /></button>)}</div><div className={styles.chartLabels}>{offers.map((offer, index) => <span key={`${offer.link}-${index}`}>0{index + 1}</span>)}</div><div className={styles.chartDetail} aria-live="polite">{selectedOffer ? <><strong>{currency(selectedOffer.price)}</strong> · {selectedOffer.name}</> : "Nenhum resultado disponível."}</div><p className={styles.note}>Toque em uma barra para ver o resultado correspondente. Escala linear a partir de zero.</p></div>
+          <div className={styles.panel}><div className={styles.panelTop}><h3>Distribuição da amostra</h3><span>{count} observações</span></div><p className={styles.rangeValue}>{min > 0 ? `${((spread / min) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : "—"}</p><p className={styles.caption}>Variação do menor ao maior valor observado.</p><div className={styles.rangeTrack} role="img" aria-label={`Preços entre ${currency(min)} e ${currency(max)}. Amplitude ${currency(spread)}.`}>{offers.map((offer, index) => <span key={`${offer.link}-${index}`} className={styles.rangeDot} title={`${offer.name}: ${currency(offer.price)}`} style={{ left: `${spread ? (offer.price - min) / spread * 100 : 50}%`, top: `${17 + (index % 2) * 7}px` }} />)}<div className={styles.rangeEnds}><span>{currency(min)}</span><span>{currency(max)}</span></div></div><p className={styles.note}>{count < 2 ? "Um único resultado não permite avaliar a dispersão dos preços." : "Pontos próximos indicam valores semelhantes. Cada ponto corresponde a um resultado da consulta."}</p><p className={styles.note}>A variação não representa economia garantida nem histórico de preços.</p></div>
+        </section>
+        <div className={styles.sectionHead}><div><span className={styles.eyebrow}>Da análise à escolha</span><h2>Explore os resultados.</h2></div><p>Ordenados por preço. Imagens e informações fornecidas pela fonte da pesquisa.</p></div>
+        <section className={styles.offers} aria-label="Resultados encontrados">{offers.map((offer, index) => <article key={`${offer.link}-${index}`} className={styles.offer}><div className={styles.offerVisual}><span className={styles.tag}>{index === 0 ? "Menor nesta amostra" : `Resultado 0${index + 1}`}</span><ProductVisual src={offer.image} name={offer.name} /></div><h3>{offer.name}</h3><strong>{currency(offer.price)}</strong><a href={offer.link} target="_blank" rel="noopener noreferrer">Ver resultado <ArrowUpRight size={15} /></a></article>)}</section>
+        <section className={styles.feature}><div><span className={styles.eyebrow}>Para guardar. Para compartilhar.</span><h2>Sua análise.<br />No seu tempo.</h2><p>Baixe gratuitamente o relatório em PDF com preços, horário e links. Uma nova consulta será feita ao abri-lo.</p><Link href={reportHref} className={styles.textLink}><Download size={15} /> Abrir relatório gratuito <ArrowUpRight size={15} /></Link></div><div className={styles.diagram} aria-hidden="true"><div className={styles.diagramInner}><strong>dopamina.</strong><i /><i /><i /><span>RELATÓRIO DE PREÇOS</span></div></div></section>
       </div>
-
-      <section className="mt-10" aria-labelledby="offers-title"><div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><h2 id="offers-title" className="font-[var(--font-display)] text-2xl font-semibold sm:text-3xl">Resultados para conferir</h2><p className="mt-1 text-sm text-slate-400">Ordenados pelo valor exibido na consulta.</p></div><span className="flex items-center gap-1.5 text-xs text-emerald-300"><ShieldCheck size={16} /> Links da fonte</span></div><div className="grid gap-3 sm:grid-cols-2">{offers.map((offer, index) => <article key={`${offer.link}-${index}`} className="group rounded-[22px] border border-white/10 bg-white/[.055] p-5 transition hover:border-violet-300/30 hover:bg-white/[.09]"><div className="flex items-start justify-between gap-4"><span className="rounded-lg bg-white/10 px-2 py-1 text-[11px] text-slate-300">Resultado {index + 1}</span>{index === 0 && <span className="text-[11px] font-medium text-violet-200">Menor nesta amostra</span>}</div><h3 className="mt-5 min-h-10 line-clamp-2 text-sm font-medium leading-snug text-slate-200">{offer.name}</h3><p className="mt-4 font-[var(--font-display)] text-2xl font-semibold">{currency(offer.price)}</p><a href={offer.link} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-violet-200 hover:text-white">Conferir na fonte <ArrowUpRight size={16} /></a></article>)}</div></section>
-      <p className="mt-8 max-w-3xl text-xs leading-relaxed text-slate-500">Consulta pontual, sem histórico ou previsão de preços. Confira modelo, frete, disponibilidade e forma de pagamento antes da compra.</p>
+      <section style={{ marginBottom: 45 }}><span className={styles.eyebrow}>Outra ideia em mente?</span><div className={styles.resultSearch}><form className={styles.search} onSubmit={event => { event.preventDefault(); if (input.trim()) { setSelected(0); onSearch?.(input.trim()); } }}><Search size={17} /><label htmlFor="another-product" className="sr-only">Pesquisar outro produto</label><input id="another-product" value={input} onChange={event => setInput(event.target.value)} placeholder="Pesquisar outro produto" /><button aria-label="Pesquisar" disabled={!input.trim() || isReloading}><ArrowRight size={18} /></button></form></div>{isReloading && <p role="status" className={styles.status}>Consultando preços…</p>}{error && <p role="alert" className={styles.error}>{error}</p>}</section>
+      <footer className={styles.footer}><span>© Dopamina · Comprar com clareza.</span><span>Consulta pontual. Preços e disponibilidade podem mudar.</span></footer>
     </div>
   </main>;
 }
