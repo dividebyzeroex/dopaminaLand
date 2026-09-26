@@ -75,7 +75,11 @@ export async function GET(req: NextRequest) {
     const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
     const firstName = firstCard.find('[data-testid="product-card::name"]').text();
     let firstUrl = firstCard.attr('href');
-    const firstImage = firstCard.find('[data-testid="product-card::image"] img').attr('src') || firstCard.find('img').first().attr('src');
+    const imageUrl = (value?: string) => {
+      if (!value || value.startsWith('data:')) return undefined;
+      try { const url = new URL(value, buscapeUrl); return url.protocol === 'https:' ? url.href : undefined; } catch { return undefined; }
+    };
+    const firstImage = imageUrl(firstCard.find('img').first().attr('data-src') || firstCard.find('img').first().attr('src'));
     
     // Scrape real market alternatives from the next 3 cards
     const market_alternatives: { name: string; price: number; link: string; image?: string }[] = [];
@@ -83,7 +87,7 @@ export async function GET(req: NextRequest) {
       const name = $(el).find('[data-testid="product-card::name"]').text();
       const priceStr = $(el).find('[data-testid="product-card::price"]').text();
       let link = $(el).attr('href');
-      const image = $(el).find('[data-testid="product-card::image"] img').attr('src') || $(el).find('img').first().attr('src');
+      const image = imageUrl($(el).find('img').first().attr('data-src') || $(el).find('img').first().attr('src'));
 
       if (link && !link.startsWith('http')) {
         link = `https://www.buscape.com.br${link}`;
