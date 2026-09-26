@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
 
     if (dbError) {
       console.error("Erro ao inserir alerta no Supabase:", dbError);
+      return NextResponse.json({ error: "Não foi possível salvar o alerta. Tente novamente mais tarde." }, { status: 503 });
     }
 
     // 2. Enviar confirmação de alerta criado via Zernio API
@@ -57,12 +58,9 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error("Erro ao enviar mensagem via Zernio:", err);
       }
-    } else {
-      // Simulate delay if no API key is present for local dev
-      await new Promise((resolve) => setTimeout(resolve, 800));
     }
 
-    return NextResponse.json({ success: true, message: "Alerta criado e integração Zernio acionada!" }, { status: 201 });
+    return NextResponse.json({ success: true, message: "Alerta salvo. O envio da confirmação depende do canal estar configurado." }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Erro ao processar alerta" }, { status: 500 });
   }

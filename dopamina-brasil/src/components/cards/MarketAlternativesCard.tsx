@@ -1,4 +1,4 @@
-import { ArrowRight, Tag, Search, ShoppingBag } from "lucide-react";
+import { Search, ShoppingBag } from "lucide-react";
 
 interface Alternative {
   name: string;
@@ -40,31 +40,16 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-foreground font-[var(--font-display)] flex items-center gap-2">
-          Compare preços em {sorted.length} lojas
-          <span className="text-xs font-semibold px-3 py-1 bg-slate-100 rounded-md border border-slate-200 text-slate-600 flex items-center gap-1">
-            <Tag className="w-3 h-3" /> calcular frete
-          </span>
+          Outros {sorted.length} resultados encontrados
         </h2>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Ordenar por</span>
-          <select className="border border-[#e2e8f0] rounded-md px-3 py-1.5 bg-white font-medium outline-none focus:border-black cursor-pointer">
-            <option>Menor preço com cashback</option>
-            <option>Menor preço</option>
-            <option>Maior desconto</option>
-          </select>
-        </div>
+        <span className="text-xs text-muted-foreground">Preços consultados agora; verifique as condições no destino.</span>
       </div>
 
       <div className="flex flex-col gap-4">
         {sorted.map((alt, i) => {
           const isLowest = i === 0;
           
-          // Fallback mocks if API doesn't have these fields yet
-          const storeName = alt.storeName || (alt.link.includes('mercadolivre') ? 'Mercado Livre' : alt.link.includes('amazon') ? 'Amazon' : alt.link.includes('magazineluiza') ? 'Magazine Luiza' : 'Loja Parceira');
-          const installments = alt.installments || 10;
-          const installmentValue = alt.price / installments;
-          const cashbackPct = alt.cashbackPct || (isLowest ? 1 : 0.5);
-          const cashbackValue = alt.price * (cashbackPct / 100);
+          const storeName = 'Buscapé';
 
           return (
             <div 
@@ -75,7 +60,7 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
             >
               {isLowest && (
                 <div className="absolute -top-[1.5px] -left-[1.5px] bg-[#00C853] text-white text-[11px] font-bold px-3 py-0.5 rounded-tl-xl rounded-br-lg z-10">
-                  Menor preço
+                  Menor preço nesta lista
                 </div>
               )}
 
@@ -97,18 +82,9 @@ export default function MarketAlternativesCard({ data }: MarketAlternativesCardP
                       <span className="text-xs font-semibold text-muted-foreground">à vista</span>
                     </div>
                     <span className="text-sm text-muted-foreground mt-0.5">
-                      ou {installments}x de {formatBRL(installmentValue)}
+                      Confira frete e pagamento no site de origem.
                     </span>
                     
-                    {/* Cashback Badge */}
-                    <div className="mt-3 inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md w-fit">
-                      <div className="w-3.5 h-3.5 rounded-full bg-black text-white flex items-center justify-center font-bold text-[9px]">
-                        b
-                      </div>
-                      <span className="text-[11px] font-semibold text-foreground">
-                        {cashbackPct}% na loja toda • <span className="font-bold">{formatBRL(cashbackValue)}</span>
-                      </span>
-                    </div>
                   </div>
                 </div>
 

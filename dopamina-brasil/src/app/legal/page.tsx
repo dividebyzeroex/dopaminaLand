@@ -6,10 +6,10 @@ export default function LegalIndexPage() {
         Você está navegando pelo projeto Dopamina Brasil. Esta plataforma é uma loja de simulação construída para explorar como nosso cérebro reage ao consumismo digital e às dinâmicas de e-commerce.
       </p>
       <p className="text-muted leading-relaxed">
-        Como os nossos produtos são falsos e tudo custa R$ 0,00, a nossa preocupação número um é proteger <strong>as suas informações de verdade</strong>.
+        As compras na loja gamificada são simuladas. O relatório de preços e as contribuições voluntárias têm pagamento real, claramente indicado antes do checkout.
       </p>
       <p className="text-muted leading-relaxed">
-        Utilize o menu lateral para entender como tratamos seus dados (spoiler: nós praticamente não tratamos), quais são as regras do jogo e como funciona o resgate de recompensas físicas para os usuários que atingem o nível máximo no nosso programa de XP.
+        Utilize o menu lateral para entender o tratamento dos seus dados, as regras da experiência e as condições do relatório pago.
       </p>
       <div className="mt-8 p-4 bg-neon/10 border border-neon/20 rounded-lg">
         <p className="text-sm font-bold text-neon uppercase tracking-wider text-center">

@@ -13,6 +13,7 @@ interface PriceOverviewCardProps {
     savings: number;
     overpriced_percent: number;
     is_fomo_alert: boolean;
+    has_comparison?: boolean;
     url?: string;
     message?: string;
   };
@@ -38,7 +39,7 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
             {isFair ? (
               <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full">
                 <ShieldCheck className="w-4 h-4" strokeWidth={1.5} />
-                <span className="text-sm font-semibold">Preço Justo</span>
+                <span className="text-sm font-semibold">{data.has_comparison ? 'Sem sobrepreço detectado nesta busca' : 'Preço encontrado nesta busca'}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-full">
@@ -50,13 +51,13 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
 
           <div className="flex items-baseline gap-4 flex-wrap">
             <div>
-              <p className="text-xs text-muted mb-1">Melhor preço encontrado</p>
+              <p className="text-xs text-muted mb-1">Preço do primeiro resultado</p>
               <div className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
                 <AnimatedNumber value={data.scraped_price} />
               </div>
             </div>
 
-            {data.savings > 0 && (
+            {data.has_comparison && data.savings > 0 && (
               <div>
                 <p className="text-xs text-muted mb-1">Preço na loja</p>
                 <p className="text-lg text-muted line-through">
@@ -66,7 +67,7 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
             )}
           </div>
 
-          {data.savings > 0 && (
+          {data.has_comparison && data.savings > 0 && (
             <div className="mt-4 flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />
               <span className="text-sm font-medium text-emerald-700 flex items-center gap-1">
@@ -78,7 +79,7 @@ export default function PriceOverviewCard({ data }: PriceOverviewCardProps) {
 
         {/* Right: Savings Visual */}
         <div className="flex flex-col items-end gap-3">
-          {data.savings > 0 && (
+          {data.has_comparison && data.savings > 0 && (
             <div className="w-48">
               <div className="flex justify-between text-xs text-muted mb-1.5">
                 <span>Melhor preço</span>

@@ -17,7 +17,7 @@ export default function TermosPage() {
         <section>
           <h3 className="text-lg font-bold text-foreground">1. Aceitação do Irreal</h3>
           <p className="text-muted leading-relaxed mt-2">
-            Ao acessar o <strong>Dopamina Brasil</strong>, você entende e concorda que este site é uma <strong>paródia, um experimento social e uma simulação gamificada</strong>. Nenhum dos produtos exibidos aqui existe no nosso estoque (não temos estoque), e nenhuma compra será processada ou entregue.
+            A loja gamificada simula compras e não entrega produtos. A ferramenta de pesquisa de preços é informativa; o relatório opcional é um produto digital pago, entregue nesta plataforma após confirmação do pagamento.
           </p>
         </section>
 
@@ -41,9 +41,9 @@ export default function TermosPage() {
         </section>
 
         <section>
-          <h3 className="text-lg font-bold text-foreground">4. Pagamentos Falsos e Gateway de Mentira</h3>
+          <h3 className="text-lg font-bold text-foreground">4. Compras simuladas e relatório pago</h3>
           <p className="text-muted leading-relaxed mt-2">
-            Nosso processo de checkout não é integrado a nenhum banco ou sistema de cartão de crédito. É estritamente proibido inserir dados de cartões de crédito reais em qualquer formulário de pagamento falso dentro do site, se os houver. Use sempre o nosso bom e velho "Cartão Clonado da Dopamina", que já vem preenchido.
+            O checkout da loja simulada não cobra dinheiro. O relatório de compra consciente custa R$ 9,90 por consulta e usa o checkout real do Stripe. O relatório contém os resultados e preços encontrados no momento da busca e pode ser impresso ou salvo como PDF. Preços, frete, estoque e condições podem mudar; resultados de busca podem apresentar modelos diferentes. Confira a oferta na loja antes de comprar.
           </p>
         </section>
         

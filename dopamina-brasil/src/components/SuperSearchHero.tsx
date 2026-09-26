@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, ArrowRight, X, TrendingUp } from "lucide-react";
-import { H53NeuralEngine } from "@/lib/H53NeuralEngine";
 import AnalysisDashboard from "./AnalysisDashboard";
 import { trackEvent } from "@/lib/tracking";
 
@@ -60,12 +59,7 @@ export default function SuperSearchHero() {
         return;
       }
 
-      const neuralPrediction = H53NeuralEngine.predict(data.current_price, data.scraped_price);
-
-      setResultData({
-        ...data,
-        neuralPrediction
-      });
+      setResultData(data);
 
       setTimeout(() => {
         setStatus("result");
@@ -85,7 +79,6 @@ export default function SuperSearchHero() {
           has_coupon: !!data.net_price_breakdown?.suggestedCoupon,
           coupon_code: data.coupon_code || null,
           profit_margin: data.profit_margin_percentage || 0,
-          neural_confidence: neuralPrediction?.confidenceScore || 0,
         });
       } catch (err) {}
     } catch (e) {

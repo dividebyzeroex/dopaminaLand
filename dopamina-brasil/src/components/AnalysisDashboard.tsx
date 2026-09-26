@@ -1,14 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowLeft, ShieldCheck, AlertTriangle } from "lucide-react";
 import PriceOverviewCard from "./cards/PriceOverviewCard";
 import PriceHistoryChart from "./cards/PriceHistoryChart";
-import NetPriceCard from "./cards/NetPriceCard";
-import PriceForecastCard from "./cards/PriceForecastCard";
 import MarketAlternativesCard from "./cards/MarketAlternativesCard";
-import CostPerUseCard from "./cards/CostPerUseCard";
-import TrustScoreCard from "./cards/TrustScoreCard";
 import { useState, useEffect } from "react";
 import { Search, Loader2 } from "lucide-react";
 
@@ -101,30 +96,6 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
         </div>
       </div>
 
-      {/* Ticker Marquee */}
-      <div className="fixed top-14 left-0 w-full z-[50] bg-white/50 backdrop-blur-md text-foreground text-xs py-2 overflow-hidden flex items-center border-b border-black/5 shadow-sm">
-        <motion.div
-          className="flex whitespace-nowrap"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ ease: "linear", duration: 30, repeat: Infinity }}
-        >
-          {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="flex items-center gap-6 pr-6 font-medium">
-              <span className="text-foreground/80">⚡ 42 pessoas analisaram produtos parecidos hoje</span>
-              <span className="text-black/10">•</span>
-              {data.is_fomo_alert ? (
-                <span className="text-red-600/90">🛑 Alerta de sobrepreço nas lojas detectado</span>
-              ) : (
-                <span className="text-emerald-600/90">🟢 Monitoramento do piso do mercado ativo</span>
-              )}
-              <span className="text-black/10">•</span>
-              <span className="text-foreground/80">👀 Vendedores alteraram preços nas últimas 24h</span>
-              <span className="text-black/10">•</span>
-            </div>
-          ))}
-        </motion.div>
-      </div>
-
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6">
         
         <div className="mt-8 mb-4">
@@ -198,25 +169,19 @@ export default function AnalysisDashboard({ data, onReset, onSearch, isReloading
             <PriceOverviewCard data={data} />
           </div>
 
-          {/* Second Row */}
-          <div className="lg:col-span-4">
-            <NetPriceCard data={data} />
-          </div>
+          {data.price_history?.length > 1 && <div className="lg:col-span-12"><PriceHistoryChart data={data} /></div>}
 
-          <div className="lg:col-span-8">
-            <PriceHistoryChart data={data} />
-          </div>
-          
-          <div className="lg:col-span-4">
-            <PriceForecastCard data={data} />
-          </div>
-
-          <div className="lg:col-span-4">
-            <CostPerUseCard data={data} />
-          </div>
-          
-          <div className="lg:col-span-4">
-            <TrustScoreCard data={data} />
+          <div className="lg:col-span-12 rounded-2xl border border-border bg-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold text-lg">Relatório de compra consciente</h2>
+              <p className="text-sm text-muted">Uma cópia imprimível das ofertas verificadas nesta consulta, com links e horário da pesquisa. Pagamento único de R$ 9,90.</p>
+            </div>
+            <button onClick={async () => {
+              const response = await fetch('/api/checkout-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: data.query }) });
+              const result = await response.json();
+              if (response.ok && result.url) window.location.assign(result.url);
+              else alert(result.error || 'Não foi possível abrir o pagamento agora.');
+            }} className="bg-primary text-white rounded-xl px-5 py-3 text-sm font-semibold whitespace-nowrap">Obter relatório · R$ 9,90</button>
           </div>
 
           {/* Buscapé Style Full Width Store List */}
