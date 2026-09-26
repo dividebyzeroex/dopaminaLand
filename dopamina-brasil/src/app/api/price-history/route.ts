@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { isBlockedSearch } from '@/lib/search-policy';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +30,7 @@ function extractQueryFromUrl(inputUrl: string): string {
       .trim();
 
     return clean || 'iPhone 17 Apple';
-  } catch (e) {
+  } catch {
     return inputUrl;
   }
 }
@@ -47,6 +48,10 @@ export async function GET(req: NextRequest) {
 
     if (!query) {
       return NextResponse.json({ error: 'Missing parameter "q" or "url"' }, { status: 400, headers: corsHeaders });
+    }
+
+    if (isBlockedSearch(query)) {
+      return NextResponse.json({ success: false, error: 'Esta pesquisa não é permitida.' }, { status: 400, headers: corsHeaders });
     }
 
     let currentPrice = currentPriceStr ? parseFloat(currentPriceStr) : null;
@@ -70,15 +75,15 @@ export async function GET(req: NextRequest) {
     const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
     const firstName = firstCard.find('[data-testid="product-card::name"]').text();
     let firstUrl = firstCard.attr('href');
-    let firstImage = firstCard.find('[data-testid="product-card::image"] img').attr('src') || firstCard.find('img').first().attr('src');
+    const firstImage = firstCard.find('[data-testid="product-card::image"] img').attr('src') || firstCard.find('img').first().attr('src');
     
     // Scrape real market alternatives from the next 3 cards
-    const market_alternatives: any[] = [];
+    const market_alternatives: { name: string; price: number; link: string; image?: string }[] = [];
     $('[data-testid="product-card::card"]').slice(1, 4).each((i, el) => {
       const name = $(el).find('[data-testid="product-card::name"]').text();
-      let priceStr = $(el).find('[data-testid="product-card::price"]').text();
+      const priceStr = $(el).find('[data-testid="product-card::price"]').text();
       let link = $(el).attr('href');
-      let image = $(el).find('[data-testid="product-card::image"] img').attr('src') || $(el).find('img').first().attr('src');
+      const image = $(el).find('[data-testid="product-card::image"] img').attr('src') || $(el).find('img').first().attr('src');
 
       if (link && !link.startsWith('http')) {
         link = `https://www.buscape.com.br${link}`;
@@ -91,7 +96,7 @@ export async function GET(req: NextRequest) {
       }
       
       if (name && price > 0) {
-        market_alternatives.push({ name, price, link, image });
+        if (link && /^https:\/\//i.test(link)) market_alternatives.push({ name, price, link, image });
       }
     });
     
@@ -120,7 +125,7 @@ export async function GET(req: NextRequest) {
     const isFomoAlert = hasComparison && observedPrice > scrapedPrice;
     const savings = hasComparison ? Math.max(0, observedPrice - scrapedPrice) : 0;
 
-    let message = !hasComparison
+    const message = !hasComparison
       ? 'Preço encontrado nesta consulta. Confira o produto, frete e condições na loja antes de comprar.'
       : isFomoAlert
         ? `Encontramos um resultado ${diff.toFixed(1)}% mais barato nesta consulta. Confira se é o mesmo produto e as condições da oferta.`
@@ -151,7 +156,7 @@ export async function GET(req: NextRequest) {
       detected_triggers: []
     }, { headers: corsHeaders });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao consultar preços.' }, { status: 500, headers: corsHeaders });
   }
 }

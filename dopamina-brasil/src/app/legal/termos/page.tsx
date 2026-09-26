@@ -17,7 +17,7 @@ export default function TermosPage() {
         <section>
           <h3 className="text-lg font-bold text-foreground">1. Aceitação do Irreal</h3>
           <p className="text-muted leading-relaxed mt-2">
-            A loja gamificada simula compras e não entrega produtos. A ferramenta de pesquisa de preços é informativa; o relatório opcional é um produto digital pago, entregue nesta plataforma após confirmação do pagamento.
+            A loja gamificada simula compras e não entrega produtos. A pesquisa de preços e o relatório compartilhável são gratuitos e têm finalidade informativa.
           </p>
         </section>
 
@@ -41,9 +41,9 @@ export default function TermosPage() {
         </section>
 
         <section>
-          <h3 className="text-lg font-bold text-foreground">4. Compras simuladas e relatório pago</h3>
+          <h3 className="text-lg font-bold text-foreground">4. Compras simuladas e pesquisa de preços</h3>
           <p className="text-muted leading-relaxed mt-2">
-            O checkout da loja simulada não cobra dinheiro. O relatório de compra consciente custa R$ 9,90 por consulta e usa o checkout real do Stripe. O relatório contém os resultados e preços encontrados no momento da busca e pode ser impresso ou salvo como PDF. Preços, frete, estoque e condições podem mudar; resultados de busca podem apresentar modelos diferentes. Confira a oferta na loja antes de comprar.
+            O checkout da loja simulada não cobra dinheiro. O relatório de preços pode ser impresso ou salvo como PDF gratuitamente. Cada abertura do link faz uma nova consulta. Preços, frete, estoque e condições podem mudar; resultados de busca podem apresentar modelos diferentes. Confira a oferta na loja antes de comprar. Contribuições voluntárias, quando disponíveis, são identificadas separadamente como pagamentos reais.
           </p>
         </section>
         

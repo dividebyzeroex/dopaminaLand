@@ -17,7 +17,7 @@ export default function PrivacidadePage() {
         <section>
           <h3 className="text-lg font-bold text-foreground">1. Pagamentos reais</h3>
           <p className="text-muted leading-relaxed mt-2">
-            As compras simuladas não cobram valores. O relatório de compra consciente e as contribuições voluntárias são pagamentos reais processados pelo Stripe. Os dados de cartão são informados diretamente no checkout do Stripe; usamos o identificador e o estado do pagamento para liberar o relatório.
+            A pesquisa e o relatório de preços são gratuitos, assim como as compras simuladas. Contribuições voluntárias, quando disponíveis, são pagamentos reais processados pelo Stripe. Os dados de cartão são informados diretamente no checkout do Stripe.
           </p>
         </section>
 
@@ -29,7 +29,7 @@ export default function PrivacidadePage() {
           <ul className="list-disc pl-5 mt-2 space-y-2 text-muted">
             <li><strong>Nome e E-mail:</strong> Usados exclusivamente para criar o seu perfil no Supabase e manter o seu ranking.</li>
             <li><strong>XP e Nível:</strong> Registramos suas interações no site (adicionar ao carrinho, simular checkout) para calcular sua pontuação de dopamina.</li>
-            <li><strong>Relatório pago:</strong> A busca, os resultados encontrados e o horário da consulta ficam associados à sessão de pagamento no Stripe para permitir acesso ao relatório depois da compra.</li>
+            <li><strong>Pesquisa de preços:</strong> O termo pesquisado é usado para consultar ofertas. O link do relatório contém esse termo e pode ser compartilhado por você.</li>
             <li><strong>Endereço Físico (Apenas sob demanda):</strong> Se você atingir os níveis mais altos (Top Levels) e for elegível para receber um brinde físico (swag), pediremos o seu endereço de entrega. Esse endereço é usado de forma isolada, exclusiva para o envio do prêmio, e não é compartilhado com terceiros além dos correios/transportadoras parceiras.</li>
           </ul>
         </section>

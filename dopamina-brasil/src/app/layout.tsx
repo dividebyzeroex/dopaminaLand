@@ -25,14 +25,14 @@ const outfit = Outfit({
 });
 
 export const viewport = {
-  themeColor: "#FAFAFA",
+  themeColor: "#080914",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dopaminado.com.br'),
-  title: "Dopamina — Auditoria e Alertas de Menor Preço",
+  title: "Dopamina — Compare preços e baixe seu relatório gratuito",
   description:
-    "Pesquise qualquer produto, descubra as melhores alternativas de mercado, analise o histórico e crie alertas para comprar sempre no menor preço.",
+    "Compare resultados de produtos, veja os preços encontrados e baixe gratuitamente um relatório com links e horário da consulta.",
   keywords: [
     "dopamina",
     "auditoria de preços",
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   ],
   robots: "index, follow",
   openGraph: {
-    title: "Dopamina — Auditoria e Alertas de Menor Preço",
+    title: "Dopamina — Compare preços e baixe seu relatório gratuito",
     description:
-      "Descubra as melhores alternativas de mercado, analise o histórico e crie alertas para comprar sempre no menor preço.",
+      "Compare resultados encontrados agora e baixe gratuitamente seu relatório de preços.",
     locale: "pt_BR",
     type: "website",
   },
