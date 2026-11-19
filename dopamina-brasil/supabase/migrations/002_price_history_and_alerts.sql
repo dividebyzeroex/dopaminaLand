@@ -24,20 +24,19 @@ ALTER TABLE price_observations ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public read price observations" ON price_observations;
 CREATE POLICY "Public read price observations" ON price_observations FOR SELECT USING (true);
 
--- Alertas de preço (a rota /api/price-alerts já usa esta tabela, mas ela não estava versionada).
+-- Alertas de preço: a tabela já existe em produção (criada fora das migrations).
+-- Definição espelhando o esquema real, para ambientes novos. Em produção o IF NOT EXISTS não altera nada.
 CREATE TABLE IF NOT EXISTS price_alerts (
-  id BIGSERIAL PRIMARY KEY,
-  contact TEXT NOT NULL CHECK (char_length(contact) <= 200),
-  channel TEXT NOT NULL CHECK (channel IN ('email', 'whatsapp')),
-  product_name TEXT CHECK (char_length(product_name) <= 300),
-  product_path TEXT,
-  current_price NUMERIC(12,2) DEFAULT 0,
-  target_price NUMERIC(12,2) NOT NULL CHECK (target_price > 0),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  notified_at TIMESTAMPTZ
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  contact TEXT,
+  channel TEXT,
+  product_name TEXT,
+  current_price NUMERIC,
+  target_price NUMERIC,
+  is_triggered BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 ALTER TABLE price_alerts ENABLE ROW LEVEL SECURITY;
--- Cadastro anônimo permitido; ninguém lê contatos com a chave pública.
-DROP POLICY IF EXISTS "Anonymous can create alerts" ON price_alerts;
-CREATE POLICY "Anonymous can create alerts" ON price_alerts FOR INSERT WITH CHECK (true);
+-- Mantém a policy de INSERT que produção já tem ("Allow public insert").
+-- A policy de leitura pública ("Allow public read") expõe contatos e é removida na 003 (pendente).
