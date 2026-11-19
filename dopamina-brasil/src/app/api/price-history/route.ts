@@ -1,166 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server';
-import * as cheerio from 'cheerio';
-import { isBlockedSearch } from '@/lib/search-policy';
+import { NextRequest, NextResponse } from "next/server";
+import { isBlockedSearch } from "@/lib/search-policy";
+import { getProduct, normalizeQuery, queryFromUrl, searchProducts } from "@/lib/buscape";
+import { computeVerdict } from "@/lib/price-verdict";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
+/**
+ * API pública usada pelo site, pelo relatório em PDF e pela extensão do navegador.
+ * O CORS continua aberto porque a extensão roda dentro das páginas das lojas;
+ * a proteção contra abuso é o limite por IP e o cache das consultas.
+ */
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
 };
+const SITE = "https://www.dopaminado.com.br";
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
 }
 
-function extractQueryFromUrl(inputUrl: string): string {
-  try {
-    const parsed = new URL(inputUrl);
-    const pathname = parsed.pathname;
-    const parts = pathname.split('/').filter(Boolean);
-    const lastPart = parts[parts.length - 1] || '';
-    
-    const clean = lastPart
-      .replace(/[-_]/g, ' ')
-      .replace(/\.html?$/i, '')
-      .replace(/\b(dp|p|pd|produto)\b/gi, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    return clean || 'iPhone 17 Apple';
-  } catch {
-    return inputUrl;
-  }
+function fail(error: string, status: number, extra: Record<string, string> = {}) {
+  return NextResponse.json({ success: false, error }, { status, headers: { ...corsHeaders, ...extra } });
 }
 
 export async function GET(req: NextRequest) {
+  const limit = rateLimit(`ph:${clientIp(req.headers)}`, 30, 60_000);
+  if (!limit.ok) return fail("Muitas consultas em pouco tempo. Tente novamente em instantes.", 429, { "Retry-After": String(limit.retryAfter) });
+
+  const { searchParams } = req.nextUrl;
+  const inputUrl = searchParams.get("url");
+  const raw = searchParams.get("q") || searchParams.get("query") || (inputUrl ? queryFromUrl(inputUrl) : null);
+  const query = raw ? normalizeQuery(raw) : "";
+  if (query.length < 2) return fail('Informe o parâmetro "q" ou "url".', 400);
+  if (isBlockedSearch(query)) return fail("Esta pesquisa não é permitida.", 400);
+
+  const informed = Number.parseFloat(searchParams.get("current_price") || searchParams.get("storePrice") || "");
+
   try {
-    const { searchParams } = new URL(req.url);
-    let query = searchParams.get('q') || searchParams.get('query');
-    const inputUrl = searchParams.get('url');
-    const currentPriceStr = searchParams.get('current_price') || searchParams.get('storePrice');
+    const hits = await searchProducts(query.toLowerCase());
+    const [first, ...rest] = hits;
+    if (!first) return fail("Preço verificável indisponível para esta busca.", 404);
 
-    if (!query && inputUrl) {
-      query = extractQueryFromUrl(inputUrl);
-    }
+    const detail = first.path ? await getProduct(first.path).catch(() => null) : null;
+    const scrapedPrice = detail?.bestPrice ?? first.price;
+    const verdict = detail ? computeVerdict(detail.history, scrapedPrice) : null;
 
-    if (!query) {
-      return NextResponse.json({ error: 'Missing parameter "q" or "url"' }, { status: 400, headers: corsHeaders });
-    }
-
-    if (isBlockedSearch(query)) {
-      return NextResponse.json({ success: false, error: 'Esta pesquisa não é permitida.' }, { status: 400, headers: corsHeaders });
-    }
-
-    let currentPrice = currentPriceStr ? parseFloat(currentPriceStr) : null;
-
-    // 1. Live Real Scraper on Buscapé / Bondfaro Engine
-    const buscapeUrl = `https://www.buscape.com.br/search?q=${encodeURIComponent(query)}`;
-    const res = await fetch(buscapeUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Failed to fetch external Buscapé data' }, { status: 500, headers: corsHeaders });
-    }
-
-    const html = await res.text();
-    const $ = cheerio.load(html);
-
-    const firstCard = $('[data-testid="product-card::card"]').first();
-    const firstPriceStr = firstCard.find('[data-testid="product-card::price"]').text();
-    const firstName = firstCard.find('[data-testid="product-card::name"]').text();
-    let firstUrl = firstCard.attr('href');
-    const imageUrl = (value?: string) => {
-      if (!value || value.startsWith('data:')) return undefined;
-      try { const url = new URL(value, buscapeUrl); return url.protocol === 'https:' ? url.href : undefined; } catch { return undefined; }
-    };
-    const firstImage = imageUrl(firstCard.find('img').first().attr('data-src') || firstCard.find('img').first().attr('src'));
-    
-    // Scrape real market alternatives from the next 3 cards
-    const market_alternatives: { name: string; price: number; link: string; image?: string }[] = [];
-    $('[data-testid="product-card::card"]').slice(1, 4).each((i, el) => {
-      const name = $(el).find('[data-testid="product-card::name"]').text();
-      const priceStr = $(el).find('[data-testid="product-card::price"]').text();
-      let link = $(el).attr('href');
-      const image = imageUrl($(el).find('img').first().attr('data-src') || $(el).find('img').first().attr('src'));
-
-      if (link && !link.startsWith('http')) {
-        link = `https://www.buscape.com.br${link}`;
-      }
-      
-      let price = 0;
-      if (priceStr) {
-        const num = priceStr.replace(/[^0-9,]/g, '').replace(',', '.');
-        if (num) price = parseFloat(num);
-      }
-      
-      if (name && price > 0) {
-        if (link && /^https:\/\//i.test(link)) market_alternatives.push({ name, price, link, image });
-      }
-    });
-    
-    if (firstUrl && !firstUrl.startsWith('http')) {
-      firstUrl = `https://www.buscape.com.br${firstUrl}`;
-    }
-
-    let scrapedPrice = 0;
-    if (firstPriceStr) {
-      const numericMatch = firstPriceStr.replace(/[^0-9,]/g, '').replace(',', '.');
-      if (numericMatch) {
-        scrapedPrice = parseFloat(numericMatch);
-      }
-    }
-
-    // A search result is not evidence of a price when its card cannot be parsed.
-    if (!scrapedPrice || !firstName || !firstUrl) {
-      return NextResponse.json({ success: false, error: 'Preço verificável indisponível para esta busca.' }, { status: 404, headers: corsHeaders });
-    }
-
-    const hasComparison = currentPrice !== null && Number.isFinite(currentPrice) && currentPrice > 0;
-    if (!hasComparison) currentPrice = scrapedPrice;
-
-    const observedPrice = currentPrice ?? scrapedPrice;
-    const diff = hasComparison ? Math.max(0, ((observedPrice - scrapedPrice) / observedPrice) * 100) : 0;
-    const isFomoAlert = hasComparison && observedPrice > scrapedPrice;
-    const savings = hasComparison ? Math.max(0, observedPrice - scrapedPrice) : 0;
-
-    const message = !hasComparison
-      ? 'Preço encontrado nesta consulta. Confira o produto, frete e condições na loja antes de comprar.'
-      : isFomoAlert
-        ? `Encontramos um resultado ${diff.toFixed(1)}% mais barato nesta consulta. Confira se é o mesmo produto e as condições da oferta.`
-        : 'O preço informado está próximo do resultado encontrado nesta consulta.';
+    const hasComparison = Number.isFinite(informed) && informed > 0;
+    const observed = hasComparison ? informed : scrapedPrice;
+    const diff = hasComparison ? Math.max(0, ((observed - scrapedPrice) / observed) * 100) : 0;
+    const isAlert = hasComparison && observed > scrapedPrice;
 
     return NextResponse.json({
       success: true,
       query,
-      scraped_name: firstName || query,
-      image: firstImage,
+      scraped_name: detail?.name ?? first.name,
+      image: detail?.image ?? first.image,
       scraped_price: scrapedPrice,
-      current_price: observedPrice,
-      overpriced_percent: parseFloat(diff.toFixed(1)),
-      savings: parseFloat(savings.toFixed(2)),
+      current_price: observed,
+      overpriced_percent: Number(diff.toFixed(1)),
+      savings: hasComparison ? Number(Math.max(0, observed - scrapedPrice).toFixed(2)) : 0,
       has_comparison: hasComparison,
-      checked_at: new Date().toISOString(),
-      url: firstUrl || buscapeUrl,
-      is_fomo_alert: isFomoAlert,
-      message,
-      // These estimates are not measured market facts and must not be sold as such.
-      price_history: [],
-      review_authenticity: null,
-      net_price_breakdown: null,
-      future_price_prediction: null,
-      cost_per_use_calc: null,
-      freight_audit: null,
-      market_alternatives: market_alternatives,
-      detected_triggers: []
-    }, { headers: corsHeaders });
-
-  } catch (error: unknown) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro ao consultar preços.' }, { status: 500, headers: corsHeaders });
+      checked_at: detail?.checkedAt ?? new Date().toISOString(),
+      url: first.sourceUrl,
+      product_url: first.path ? `${SITE}/produto/${first.path}` : null,
+      is_fomo_alert: isAlert,
+      message: !hasComparison
+        ? "Preço encontrado nesta consulta. Confira o produto, frete e condições na loja antes de comprar."
+        : isAlert
+          ? `Encontramos um resultado ${diff.toFixed(1)}% mais barato. Confira se é o mesmo produto e as condições da oferta.`
+          : "O preço informado está próximo do resultado encontrado nesta consulta.",
+      verdict: verdict && { kind: verdict.kind, label: verdict.label, headline: verdict.headline, detail: verdict.detail, days: verdict.days, median: verdict.median, min: verdict.min },
+      price_history: detail?.history ?? [],
+      market_alternatives: rest.slice(0, 5).map(hit => ({ name: hit.name, price: hit.price, link: hit.sourceUrl, image: hit.image })),
+    }, { headers: { ...corsHeaders, "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600" } });
+  } catch {
+    return fail("Não foi possível consultar preços agora.", 502);
   }
 }

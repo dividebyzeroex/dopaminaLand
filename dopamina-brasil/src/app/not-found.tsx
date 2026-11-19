@@ -1,30 +1,16 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import Link from "next/link";
+import styles from "@/components/studio.module.css";
 
 export default function NotFound() {
-  return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="relative mb-8 h-48 w-48 overflow-hidden rounded-full border-4 border-neon shadow-[0_0_30px_rgba(204,255,0,0.3)] animate-float">
-        <Image 
-          src="/cleiton_nobg2.png" 
-          alt="Cleiton Mascot" 
-          fill
-          className="object-cover"
-          style={{ transform: 'scale(1.2) translateY(10%) rotate(-10deg)' }} 
-        />
-      </div>
-      <h1 className="font-[var(--font-display)] text-5xl font-black text-foreground">
-        Eita! 404 🗺️
-      </h1>
-      <p className="mt-4 max-w-md text-lg text-muted">
-        O Cleiton olhou pro mapa de cabeça pra baixo e acabou se perdendo. Essa página não existe no nosso estoque!
-      </p>
-      <Link 
-        href="/"
-        className="mt-8 rounded-full bg-neon px-8 py-4 font-bold text-background transition-transform hover:scale-105 active:scale-95"
-      >
-        Ajudar o Cleiton a voltar pra Home
-      </Link>
+  return <main className={styles.shell}>
+    <div className={styles.wrap}>
+      <header className={styles.nav}><Link href="/" className={styles.brand}>dopamina</Link></header>
+      <section className={styles.reportHero}>
+        <span className={styles.eyebrow}>Erro 404</span>
+        <h1>Esta página<br />não existe.</h1>
+        <p className={styles.intro}>O link pode ter mudado. Que tal pesquisar o produto que você procura e ver o histórico de preço?</p>
+        <Link href="/" className={styles.blueLink}>Voltar para a busca</Link>
+      </section>
     </div>
-  );
+  </main>;
 }

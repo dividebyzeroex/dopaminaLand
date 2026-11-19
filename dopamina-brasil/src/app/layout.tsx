@@ -4,11 +4,6 @@ import { Inter, Outfit } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
-import { GameProvider } from "@/contexts/GameContext";
-import { DailyProvider } from "@/contexts/DailyContext";
-import Footer from "@/components/Footer";
-import AchievementToast from "@/components/AchievementToast";
-import FomoToast from "@/components/FomoToast";
 import TrackingProvider from "@/components/TrackingProvider";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
 
@@ -29,12 +24,18 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://dopaminado.com.br'),
-  title: "Dopamina — Compare preços e baixe seu relatório gratuito",
+  metadataBase: new URL('https://www.dopaminado.com.br'),
+  title: {
+    default: "Dopamina — Black Friday: desconto de verdade ou maquiagem?",
+    template: "%s · Dopamina",
+  },
   description:
-    "Compare resultados de produtos, veja os preços encontrados e baixe gratuitamente um relatório com links e horário da consulta.",
+    "Veja o histórico de preços de qualquer produto e descubra se o desconto da Black Friday é real. Compare lojas e baixe um relatório gratuito.",
   keywords: [
     "dopamina",
+    "black friday",
+    "histórico de preço",
+    "desconto falso",
     "auditoria de preços",
     "comparador de preços",
     "preço justo",
@@ -47,9 +48,9 @@ export const metadata: Metadata = {
   ],
   robots: "index, follow",
   openGraph: {
-    title: "Dopamina — Compare preços e baixe seu relatório gratuito",
+    title: "Dopamina — Black Friday: desconto de verdade ou maquiagem?",
     description:
-      "Compare resultados encontrados agora e baixe gratuitamente seu relatório de preços.",
+      "Histórico de preços e veredito honesto: descubra se o desconto é real antes de comprar.",
     locale: "pt_BR",
     type: "website",
   },
@@ -66,15 +67,11 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <GameProvider>
-            <DailyProvider>
-              <TrackingProvider>
-                <CSPostHogProvider>
-                  <main className="flex-1 overflow-x-clip">{children}</main>
-                </CSPostHogProvider>
-              </TrackingProvider>
-            </DailyProvider>
-        </GameProvider>
+        <TrackingProvider>
+          <CSPostHogProvider>
+            <main className="flex-1 overflow-x-clip">{children}</main>
+          </CSPostHogProvider>
+        </TrackingProvider>
         <Analytics />
         <SpeedInsights />
         
