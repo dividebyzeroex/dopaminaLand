@@ -1,62 +1,85 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { Check } from "lucide-react";
 import studio from "@/components/studio.module.css";
-import styles from "@/components/bf.module.css";
+import styles from "@/components/home.module.css";
 import SiteHeader from "@/components/price/SiteHeader";
 import SiteFooter from "@/components/price/SiteFooter";
 import SearchBox from "@/components/price/SearchBox";
-import ProductVisual from "@/components/ProductVisual";
-import Thermometer, { ThermometerSkeleton } from "@/components/price/Thermometer";
+import VerdictBadge from "@/components/price/VerdictBadge";
+import HeroExample, { pickExample } from "@/components/price/HeroExample";
+import ThermometerGrid from "@/components/price/ThermometerGrid";
+import { ThermometerSkeleton } from "@/components/price/Thermometer";
+import { getThermometer } from "@/lib/featured";
+import { blackFridayLabel } from "@/lib/black-friday";
 
 export const revalidate = 10800;
+
+async function Example() {
+  const items = await getThermometer().catch(() => []);
+  const item = items.length ? pickExample(items) : null;
+  return item ? <HeroExample item={item} /> : null;
+}
+
+async function Thermometer() {
+  const items = await getThermometer().catch(() => []);
+  if (!items.length) return <p className={styles.footnote}>Não foi possível montar o termômetro agora. Pesquise um produto acima.</p>;
+  const date = items[0].history.at(-1)?.date;
+  return <>
+    <ThermometerGrid items={items} limit={8} />
+    <p className={styles.footnote}>
+      Preços e históricos reais{date ? ` de ${new Date(`${date}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })}` : ""}. A linha mostra o menor preço do dia entre as lojas.{" "}
+      <Link href="/black-friday" style={{ color: "inherit" }}>Ver todos os {items.length} produtos</Link>
+    </p>
+  </>;
+}
 
 export default function HomePage() {
   return <main className={studio.shell}>
     <div className={studio.wrap}>
       <SiteHeader />
-      <Link href="/black-friday" className={styles.ribbon} style={{ textDecoration: "none" }}>
-        <span><span className={styles.ribbonDot} aria-hidden="true" /><strong>Black Friday 27/11.</strong> Antes de comprar, veja se o desconto é real.</span>
-        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>Abrir termômetro <ArrowUpRight size={14} /></span>
-      </Link>
 
-      <section className={studio.hero}>
-        <div className={studio.reveal}>
-          <span className={studio.eyebrow}>Histórico de preços · Veredito honesto</span>
-          <h1 className={studio.title}>O desconto é real?<br /><em>A gente checa<br />o histórico.</em></h1>
-          <p className={studio.intro}>Digite o produto ou cole o link da oferta. Mostramos quanto ele costuma custar, o menor preço do período e onde está mais barato agora.</p>
-          <SearchBox suggestions={["iPhone 15", "PlayStation 5 Slim", "Smart TV 55 4K"]} />
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <Link href="/black-friday" className={styles.pill}><span className={styles.pillDot} aria-hidden="true" />{blackFridayLabel()}</Link>
+          <h1 className={styles.title}>Desconto de verdade <span>ou maquiagem?</span></h1>
+          <p className={styles.lead}>Cole o link ou digite o produto. Mostramos quanto ele costuma custar, se subiu antes de “cair” e onde está mais barato agora.</p>
+          <div id="busca"><SearchBox placeholder="Ex.: PlayStation 5 Slim ou link da loja" suggestions={["iPhone 16", "PlayStation 5", "Air Fryer", "Kindle"]} /></div>
+          <ul className={styles.trust}>
+            {["Histórico diário de 40 dias", "Regras abertas", "Nenhum veredito pago"].map(text => <li key={text}><Check size={16} color="#1d7a4b" strokeWidth={2.2} aria-hidden="true" />{text}</li>)}
+          </ul>
         </div>
-        <div className={`${studio.heroArt} ${studio.reveal}`} style={{ animationDelay: ".12s" }}>
-          <div className={studio.artTop}><span>Exemplo de veredito</span><span>Black Friday 2026</span></div>
-          <div className={studio.artCircle} aria-hidden="true" />
-          <ProductVisual priority src="/produtos/macbook-pro-14-m4-pro-12cpu-16gpu-48gb-r-2.png" name="MacBook Pro visto de frente" />
-          <div className={studio.artBottom}>
-            <div><h2>Desconto maquiado?</h2><p>Detectamos quando o preço sobe antes de “cair”.</p></div>
-            <Link className={studio.roundButton} href="/black-friday#como-julgamos" aria-label="Como julgamos os preços"><ArrowUpRight size={21} strokeWidth={1.25} /></Link>
-          </div>
-        </div>
+        <Suspense fallback={<div className={`${styles.example}`} aria-hidden="true" style={{ minHeight: 420 }} />}><Example /></Suspense>
       </section>
 
-      <section id="como-funciona" className={studio.strip} aria-label="Como funciona">
+      <section className={styles.questions} aria-label="O que respondemos">
         {[
-          { n: "01", title: "Busque o modelo exato", text: "Separamos as versões: PS5 Slim não é comparado com PS5 Pro." },
-          { n: "02", title: "Veja o histórico real", text: "Gráfico diário do menor preço entre as lojas, com o preço típico e o mínimo." },
-          { n: "03", title: "Decida com um veredito", text: "Desconto real, preço comum, acima do normal ou desconto maquiado." },
-        ].map(item => <article key={item.n}><span>{item.n}</span><div><h3>{item.title}</h3><p>{item.text}</p></div></article>)}
+          ["01", "Está barato hoje?", "Comparamos com o preço típico do próprio produto, não com o “de” riscado da loja."],
+          ["02", "Já esteve mais barato?", "Mostramos o menor preço do período e quanto falta para chegar nele."],
+          ["03", "Subiu antes de cair?", "Se o preço foi inflado nas semanas anteriores, o selo avisa: desconto maquiado."],
+        ].map(([n, title, text]) => <div key={n} className={styles.question}><span>{n}</span><h2>{title}</h2><p>{text}</p></div>)}
       </section>
 
-      <div className={studio.sectionHead}><div><span className={studio.eyebrow}>Termômetro da Black Friday</span><h2>Os mais buscados,<br />com veredito.</h2></div><p>Atualizado a cada 3 horas. <Link href="/black-friday" style={{ color: "inherit" }}>Ver todos os produtos e a metodologia →</Link></p></div>
-      <Suspense fallback={<ThermometerSkeleton count={4} />}><Thermometer limit={4} /></Suspense>
+      <div className={styles.head} id="termometro">
+        <div><span className={styles.kicker}>Termômetro · atualizado a cada 3 h</span><h2>Os mais buscados, com veredito.</h2></div>
+        <p>Toque num produto para ver o gráfico completo e as lojas.</p>
+      </div>
+      <Suspense fallback={<ThermometerSkeleton count={8} />}><Thermometer /></Suspense>
 
-      <section className={studio.feature}>
+      <div className={styles.head} id="regras"><h2>Como julgamos, sem letra miúda.</h2></div>
+      <section className={styles.rules}>
+        <div className={styles.rule}><VerdictBadge tone="good" label="Desconto real" /><p>No menor preço do período e pelo menos 3% abaixo do preço típico (mediana).</p></div>
+        <div className={styles.rule}><VerdictBadge tone="bad" label="Desconto maquiado" /><p>Subiu 8% ou mais nas duas semanas anteriores e hoje só voltou ao patamar normal.</p></div>
+        <div className={styles.rule}><VerdictBadge tone="warn" label="Acima do normal" /><p>Pelo menos 5% acima do preço típico. Vale esperar ou procurar outra loja.</p></div>
+      </section>
+      <Link href="/black-friday#como-julgamos" className={styles.more}>Ver as 6 regras e a fonte dos dados →</Link>
+
+      <section className={styles.cta}>
         <div>
-          <span className={studio.eyebrow}>Sem letra miúda</span>
-          <h2>Regras abertas.<br />Nenhum veredito pago.</h2>
-          <p>Comparamos o preço de hoje com o que o próprio produto custou nos dias anteriores. Sem previsões mágicas: se o histórico for curto, dizemos que não dá para afirmar.</p>
-          <Link className={studio.textLink} href="/black-friday#como-julgamos">Ver como julgamos <ArrowUpRight size={16} /></Link>
+          <h2>Viu uma oferta?<br />Cole o link antes de pagar.</h2>
+          <p>Funciona com links de Amazon, Mercado Livre, Magalu, KaBuM! e outras lojas.</p>
         </div>
-        <div className={studio.diagram} aria-hidden="true"><div className={studio.diagramInner}><strong>dopamina.</strong><i /><i /><i /><span>HISTÓRICO DE PREÇOS</span></div></div>
+        <div className={styles.ctaSearch}><SearchBox id="cta-search" placeholder="https://loja.com.br/produto…" /></div>
       </section>
       <SiteFooter />
     </div>

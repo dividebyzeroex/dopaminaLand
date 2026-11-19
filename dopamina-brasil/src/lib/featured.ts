@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { analyzeProduct, mapLimit } from "./analysis";
 import type { SearchHit } from "./buscape";
 import type { Verdict } from "./price-verdict";
+import { displaySeries } from "./series";
 
 /**
  * Produtos mais procurados na Black Friday, fixados pelo endereço do produto.
@@ -23,7 +24,7 @@ export const FEATURED = [
   { group: "Games", path: "console-de-video-game/console-switch-2-com-joy-con-nintendo" },
 ];
 
-export type ThermometerItem = { group: string; hit: SearchHit; verdict: Verdict; storeCount: number | null; image?: string; name: string };
+export type ThermometerItem = { group: string; hit: SearchHit; verdict: Verdict; storeCount: number | null; image?: string; name: string; series: number[]; history: { date: string; price: number }[] };
 
 const ORDER: Record<Verdict["kind"], number> = { menor: 0, abaixo: 1, maquiado: 2, acima: 3, comum: 4, insuficiente: 5 };
 
@@ -31,9 +32,12 @@ export const getThermometer = unstable_cache(async (): Promise<ThermometerItem[]
   const results = await mapLimit(FEATURED, 2, async (item): Promise<ThermometerItem | null> => {
     const analysis = await analyzeProduct(item.path).catch(() => null);
     if (!analysis) return null;
-    const { product, verdict } = analysis;
+    const { product, verdict, history } = analysis;
+    const shown = displaySeries(history, product.bestPrice, product.checkedAt.slice(0, 10));
     return {
       group: item.group,
+      series: shown.slice(-40).map(p => p.price),
+      history: shown,
       verdict,
       storeCount: product.storeCount,
       image: product.image,
@@ -48,4 +52,4 @@ export const getThermometer = unstable_cache(async (): Promise<ThermometerItem[]
   return results
     .filter((x): x is ThermometerItem => x !== null)
     .sort((a, b) => ORDER[a.verdict.kind] - ORDER[b.verdict.kind] || (a.verdict.vsMedian ?? 0) - (b.verdict.vsMedian ?? 0));
-}, ["bf-thermometer-v2"], { revalidate: 10800 });
+}, ["bf-thermometer-v3"], { revalidate: 10800 });

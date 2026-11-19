@@ -10,6 +10,7 @@ import ProductCard from "@/components/price/ProductCard";
 import { analyzeSearch } from "@/lib/analysis";
 import { ACCESSORY, foldText, normalizeQuery, queryFromUrl } from "@/lib/buscape";
 import { isBlockedSearch } from "@/lib/search-policy";
+import { displaySeries } from "@/lib/series";
 
 type Props = { searchParams: Promise<{ q?: string | string[] }> };
 
@@ -63,8 +64,9 @@ export default async function SearchPage({ searchParams }: Props) {
             ? `Analisamos o histórico dos ${analyzed.length} primeiros: ${real} com preço abaixo do normal${fake ? `, ${fake} com desconto maquiado` : ""}. Abra um produto para ver o gráfico e as lojas.`
             : "Abra um produto para ver o histórico de preço e as ofertas por loja."}</p>
         </div>
-        <section className={styles.grid} aria-label="Resultados">
-          {results.map(({ hit, product, verdict }) => <ProductCard key={hit.sourceUrl} hit={hit} verdict={verdict} name={product?.name} image={product?.image} price={product?.bestPrice} storeCount={product?.storeCount} />)}
+        <section className={styles.grid} aria-label="Resultados" style={{ marginBottom: 56 }}>
+          {results.map(({ hit, product, verdict }) => <ProductCard key={hit.sourceUrl} hit={hit} verdict={verdict} name={product?.name} image={product?.image} price={product?.bestPrice} storeCount={product?.storeCount}
+            series={product ? displaySeries(product.history, product.bestPrice, product.checkedAt.slice(0, 10)).slice(-40).map(p => p.price) : undefined} />)}
         </section>
         <section className={studio.feature}>
           <div>

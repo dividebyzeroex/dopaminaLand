@@ -27,6 +27,7 @@ export type Verdict = {
   vsMedian: number | null;
   /** Pico de preço nas duas semanas anteriores, quando sugere maquiagem. */
   recentPeak: number | null;
+  recentPeakDate: string | null;
   baseline: number | null;
 };
 
@@ -73,6 +74,7 @@ export function computeVerdict(history: HistoryPoint[], currentPrice: number | n
     min: prices.length ? Math.min(...prices) : null,
     max: prices.length ? Math.max(...prices) : null,
     recentPeak: null as number | null,
+    recentPeakDate: null as string | null,
     baseline: null as number | null,
   };
 
@@ -104,7 +106,7 @@ export function computeVerdict(history: HistoryPoint[], currentPrice: number | n
       detail: `O preço típico nos últimos ${period} foi ${brl(base.median)}. O mínimo registrado foi ${brl(base.min)}, então ainda existe espaço para cair.` };
   }
   if (inflated && baseline && peakPoint) {
-    return { ...base, vsMedian, baseline, recentPeak: peakPoint.price, kind: "maquiado", tone: "bad", label: "Desconto maquiado",
+    return { ...base, vsMedian, baseline, recentPeak: peakPoint.price, recentPeakDate: peakPoint.date, kind: "maquiado", tone: "bad", label: "Desconto maquiado",
       headline: "O preço subiu antes de \"cair\".",
       detail: `Em ${formatDate(peakPoint.date)} chegou a ${brl(peakPoint.price)}, ${pct((peakPoint.price - baseline) / baseline)} acima do patamar de antes (${brl(baseline)}). Hoje, ${brl(current)} é praticamente o preço normal, não uma promoção.` };
   }
