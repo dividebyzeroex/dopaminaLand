@@ -1,10 +1,15 @@
-import { decideAlert, alertMessage, type WatchState } from "../src/lib/alert-rules.ts";
+import { createRequire } from "node:module";
 
+// Mesmo arquivo que o service worker carrega (public/alerts-core.js).
+const require = createRequire(import.meta.url);
+const { decideAlert, alertMessage } = require("../public/alerts-core.js");
+
+type Watch = { notifyDrop: boolean; notifyRise: boolean; notifyStable: boolean; lastPrice: number; lastChangeAt: string; lastNotifiedAt: string | null };
 let fail = 0;
 const check = (name: string, got: unknown, want: unknown) => { const ok = got === want; if (!ok) fail++; console.log(ok ? "ok  " : "FAIL", name, ok ? "" : `→ ${String(got)} (esperado ${String(want)})`); };
 const now = new Date("2026-11-20T12:00:00Z");
 const daysAgo = (n: number) => new Date(now.getTime() - n * 86400000).toISOString();
-const base: WatchState = { notifyDrop: true, notifyRise: true, notifyStable: true, lastPrice: 1000, lastChangeAt: daysAgo(1), lastNotifiedAt: null };
+const base: Watch = { notifyDrop: true, notifyRise: true, notifyStable: true, lastPrice: 1000, lastChangeAt: daysAgo(1), lastNotifiedAt: null };
 
 check("queda de 5% avisa", decideAlert(base, 950, now).kind, "drop");
 check("queda grava novo preço de referência", decideAlert(base, 950, now).next.lastPrice, 950);

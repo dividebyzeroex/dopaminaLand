@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Bell, BellRing, Check, X } from "lucide-react";
 import { usePwa } from "./usePwa";
 import InstallSteps from "./InstallSteps";
-import { ensurePushSubscription, promptInstall, rememberWatched, subscribePwa, watchedPaths } from "@/lib/pwa-client";
+import { enableBackgroundCheck, ensureNotificationPermission, localNotification, promptInstall, saveLocalWatch, subscribePwa, watchedPaths } from "@/lib/pwa-client";
 import { trackEvent } from "@/lib/tracking";
 import styles from "./pwa.module.css";
 
@@ -21,6 +21,7 @@ export default function AlertButton({ path, name, price }: Props) {
   const active = useSyncExternalStore(subscribePwa, () => watchedPaths().includes(path), () => false);
   const [step, setStep] = useState<Step>("choose");
   const [message, setMessage] = useState("");
+  const [background, setBackground] = useState(false);
   const [kinds, setKinds] = useState({ drop: true, stable: true, rise: false });
 
   // iPhone fora da tela inicial não recebe push: o primeiro passo é instalar.
@@ -34,26 +35,15 @@ export default function AlertButton({ path, name, price }: Props) {
   }
 
   async function save() {
+    if (!price) { setMessage("Não conseguimos ler o preço deste produto agora."); setStep("error"); return; }
     setStep("saving");
-    const result = await ensurePushSubscription();
-    if ("error" in result) {
-      if (result.error === "denied") { setStep("denied"); return; }
-      setMessage(result.error === "no-key" ? "Os alertas ainda não estão ativos. Volte em breve." : "Este navegador não aceita notificações. Instale o app ou tente pelo Chrome.");
-      setStep("error");
-      return;
-    }
-    const response = await fetch("/api/alerts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subscription: result.subscription.toJSON(), path, kinds }),
-    }).catch(() => null);
-    const data = await response?.json().catch(() => null);
-    if (!response?.ok || !data?.ok) {
-      setMessage(data?.error ?? "Não foi possível salvar o alerta agora.");
-      setStep("error");
-      return;
-    }
-    rememberWatched(path, true);
+    const permission = await ensureNotificationPermission();
+    if (permission === "denied" || permission === "default") { setStep("denied"); return; }
+    if (permission === "unsupported") { setMessage("Este navegador não mostra notificações. Instale o app pelo Chrome ou Safari."); setStep("error"); return; }
+    const saved = await saveLocalWatch({ path, name, price, kinds }).catch(() => false);
+    if (!saved) { setMessage("Não foi possível salvar o alerta neste aparelho."); setStep("error"); return; }
+    setBackground(await enableBackgroundCheck());
+    await localNotification("Alerta ativado ✓", `Vamos avisar quando ${name.slice(0, 60)} mudar de preço.`, `/produto/${path}`).catch(() => undefined);
     setStep("done");
     trackEvent("tracking_update", name, price ?? undefined, { action: "alert_created", path, kinds, standalone: pwa.standalone });
   }
@@ -91,13 +81,15 @@ export default function AlertButton({ path, name, price }: Props) {
           <button type="button" className={styles.primary} disabled={none || step === "saving"} onClick={() => void save()}>
             {step === "saving" ? "Ativando…" : "Ativar alerta"}
           </button>
-          <p className={styles.fine}>Sem cadastro e sem e-mail. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
+          <p className={styles.fine}>Sem cadastro e sem e-mail: o alerta fica guardado só neste aparelho. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
         </>}
 
         {step === "done" && <>
           <span className={styles.ok}><Check size={22} aria-hidden="true" /></span>
           <h2 id="alert-title" className={styles.sheetTitle}>Alerta ativado</h2>
-          <p className={styles.sheetText}>Checamos o preço todos os dias. Você vai receber uma notificação de confirmação agora.</p>
+          <p className={styles.sheetText}>{background
+            ? "O próprio app checa o preço em segundo plano, cerca de duas vezes por dia, e avisa você."
+            : "O app checa o preço sempre que você abre o Dopamina. Para não perder nada, abra o app de vez em quando."}</p>
           <Link className={styles.primary} href="/alertas">Ver meus alertas</Link>
         </>}
 

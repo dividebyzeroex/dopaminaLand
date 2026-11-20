@@ -26,7 +26,9 @@ export function initPwa() {
   });
   window.addEventListener("appinstalled", () => { deferredInstall = null; emit(); });
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => undefined);
+    navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" })
+      .then(() => startCheckOnOpen())
+      .catch(() => undefined);
   }
 }
 
@@ -47,7 +49,8 @@ export function getPwaState(): PwaState {
   const ua = navigator.userAgent;
   const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
-  const pushSupported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  // Notificação local via service worker. No iPhone só existe com o app na tela inicial.
+  const pushSupported = "serviceWorker" in navigator && "Notification" in window;
   const next: PwaState = {
     standalone, ios, mobile: /Android|iPhone|iPad|iPod|Mobile/.test(ua) || ios,
     canPromptInstall: Boolean(deferredInstall), pushSupported,
@@ -68,36 +71,111 @@ export async function promptInstall(): Promise<boolean> {
   return choice.outcome === "accepted";
 }
 
-function base64ToBytes(base64: string) {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-  const raw = atob((base64 + padding).replace(/-/g, "+").replace(/_/g, "/"));
-  return Uint8Array.from(raw, c => c.charCodeAt(0));
+// ── Alertas feitos pelo próprio navegador ─────────────────────────────────
+// Os dados ficam no IndexedDB do aparelho e quem checa e notifica é o service
+// worker (public/sw.js + public/alerts-core.js). Sem servidor de push.
+
+export type AlertKinds = { drop: boolean; rise: boolean; stable: boolean };
+export type LocalWatch = {
+  path: string; name: string;
+  notifyDrop: boolean; notifyRise: boolean; notifyStable: boolean;
+  basePrice: number; lastPrice: number; currentPrice?: number;
+  lastChangeAt: string; lastNotifiedAt: string | null; createdAt: string; checkedAt?: string;
+};
+
+const SYNC_TAG = "dopamina-precos";
+const BACKGROUND_INTERVAL = 12 * 3600_000;
+const CHECK_ON_OPEN_EVERY = 3 * 3600_000;
+
+async function swRegistration() {
+  if (!("serviceWorker" in navigator)) throw new Error("sem service worker");
+  await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
+  return navigator.serviceWorker.ready;
 }
 
-/** Pede permissão e devolve a inscrição de push do aparelho (ou o motivo de não ter). */
-export async function ensurePushSubscription(): Promise<{ subscription: PushSubscription } | { error: "unsupported" | "denied" | "no-key" | "failed" }> {
-  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!key) return { error: "no-key" };
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return { error: "unsupported" };
+/** Envia um comando ao service worker e espera a resposta. */
+async function swCall<T = Record<string, unknown>>(message: Record<string, unknown>): Promise<T & { ok: boolean; error?: string }> {
+  const registration = await swRegistration();
+  const worker = registration.active;
+  if (!worker) throw new Error("service worker inativo");
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const timer = setTimeout(() => reject(new Error("tempo esgotado")), 60_000);
+    channel.port1.onmessage = event => { clearTimeout(timer); resolve(event.data); };
+    worker.postMessage(message, [channel.port2]);
+  });
+}
+
+export async function ensureNotificationPermission(): Promise<NotificationPermission | "unsupported"> {
+  if (!("Notification" in window)) return "unsupported";
   const permission = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
   emit();
-  if (permission !== "granted") return { error: "denied" };
-  try {
-    const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
-    await navigator.serviceWorker.ready;
-    const existing = await registration.pushManager.getSubscription();
-    const subscription = existing ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64ToBytes(key) });
-    return { subscription };
-  } catch {
-    return { error: "failed" };
-  }
+  return permission;
 }
 
-export async function currentEndpoint(): Promise<string | null> {
-  if (!("serviceWorker" in navigator)) return null;
-  const registration = await navigator.serviceWorker.getRegistration("/");
-  const sub = await registration?.pushManager.getSubscription();
-  return sub?.endpoint ?? null;
+/** Ativa a checagem em segundo plano onde o navegador permite (Chrome/Edge com o app instalado). */
+export async function enableBackgroundCheck(): Promise<boolean> {
+  try {
+    const registration = await swRegistration() as ServiceWorkerRegistration & { periodicSync?: { register: (tag: string, o: { minInterval: number }) => Promise<void> } };
+    if (!registration.periodicSync) return false;
+    const status = await navigator.permissions.query({ name: "periodic-background-sync" as PermissionName }).catch(() => null);
+    if (status && status.state !== "granted") return false;
+    await registration.periodicSync.register(SYNC_TAG, { minInterval: BACKGROUND_INTERVAL });
+    return true;
+  } catch { return false; }
+}
+
+export async function saveLocalWatch(input: { path: string; name: string; price: number; kinds: AlertKinds }) {
+  const now = new Date().toISOString();
+  const watch: LocalWatch = {
+    path: input.path, name: input.name,
+    notifyDrop: input.kinds.drop, notifyRise: input.kinds.rise, notifyStable: input.kinds.stable,
+    basePrice: input.price, lastPrice: input.price, currentPrice: input.price,
+    lastChangeAt: now, lastNotifiedAt: null, createdAt: now, checkedAt: now,
+  };
+  const result = await swCall({ type: "save", watch });
+  if (result.ok) rememberWatched(input.path, true);
+  return result.ok;
+}
+
+export async function listLocalWatches() {
+  return swCall<{ watches: LocalWatch[]; lastCheck: string | null }>({ type: "list" });
+}
+
+export async function removeLocalWatch(path: string) {
+  await swCall({ type: "remove", path });
+  rememberWatched(path, false);
+}
+
+export async function checkNow() {
+  return swCall<{ report: { checked: number; notified: number; failed: number } }>({ type: "check" });
+}
+
+/** Mostra uma notificação pelo service worker (funciona também no app instalado do iPhone). */
+export async function localNotification(title: string, body: string, url = "/alertas") {
+  const registration = await swRegistration();
+  await registration.showNotification(title, { body, icon: "/icons/icon-192.png", badge: "/icons/badge-96.png", tag: "dopamina-info", data: { url } });
+}
+
+/**
+ * Ao abrir (ou voltar para) o app: se há alertas e a última checagem tem mais de
+ * 3 horas, checa agora. É o que garante os avisos onde não há segundo plano (iPhone).
+ */
+let checking = false;
+async function checkOnOpen() {
+  if (checking || !("Notification" in window) || Notification.permission !== "granted") return;
+  if (!watchedPaths().length) return;
+  checking = true;
+  try {
+    const list = await listLocalWatches();
+    const last = list.lastCheck ? Date.parse(list.lastCheck) : 0;
+    if (list.watches.length && Date.now() - last > CHECK_ON_OPEN_EVERY) await checkNow();
+  } catch { /* sem service worker ainda: tenta na próxima abertura */ } finally { checking = false; }
+}
+
+export function startCheckOnOpen() {
+  void checkOnOpen();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void checkOnOpen(); });
 }
 
 const WATCHED_KEY = "dopamina:alertas";
