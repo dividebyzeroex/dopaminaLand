@@ -1,16 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter, Outfit } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
-import { GameProvider } from "@/contexts/GameContext";
-import { DailyProvider } from "@/contexts/DailyContext";
-import Footer from "@/components/Footer";
-import AchievementToast from "@/components/AchievementToast";
-import FomoToast from "@/components/FomoToast";
 import TrackingProvider from "@/components/TrackingProvider";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
+import PwaInit from "@/components/pwa/PwaInit";
+import InstallBanner from "@/components/pwa/InstallBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,17 +21,30 @@ const outfit = Outfit({
   display: "swap",
 });
 
-export const viewport = {
-  themeColor: "#f5f5f0",
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Ocupa a tela inteira, inclusive atrás da barra de status e do recorte da câmera.
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f5f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#20211f" },
+  ],
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://dopaminado.com.br'),
-  title: "Dopamina — Compare preços e baixe seu relatório gratuito",
+  metadataBase: new URL('https://www.dopaminado.com.br'),
+  title: {
+    default: "Dopamina — histórico de preços: desconto de verdade ou maquiagem?",
+    template: "%s · Dopamina",
+  },
   description:
-    "Compare resultados de produtos, veja os preços encontrados e baixe gratuitamente um relatório com links e horário da consulta.",
+    "Veja o histórico de preços de qualquer produto e descubra se o desconto é real na Black Friday, no Natal, no Dia das Mães e em outras datas. Compare lojas antes de comprar.",
   keywords: [
     "dopamina",
+    "black friday",
+    "histórico de preço",
+    "desconto falso",
     "auditoria de preços",
     "comparador de preços",
     "preço justo",
@@ -46,10 +56,14 @@ export const metadata: Metadata = {
     "comprar barato",
   ],
   robots: "index, follow",
+  applicationName: "Dopamina",
+  // iPhone: app de tela cheia com a barra de status sobre o cabeçalho escuro.
+  appleWebApp: { capable: true, title: "Dopamina", statusBarStyle: "black-translucent" },
+  formatDetection: { telephone: false },
   openGraph: {
-    title: "Dopamina — Compare preços e baixe seu relatório gratuito",
+    title: "Dopamina — desconto de verdade ou maquiagem?",
     description:
-      "Compare resultados encontrados agora e baixe gratuitamente seu relatório de preços.",
+      "Histórico de preços e veredito honesto: descubra se o desconto é real antes de comprar.",
     locale: "pt_BR",
     type: "website",
   },
@@ -66,15 +80,13 @@ export default function RootLayout({
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <GameProvider>
-            <DailyProvider>
-              <TrackingProvider>
-                <CSPostHogProvider>
-                  <main className="flex-1 overflow-x-clip">{children}</main>
-                </CSPostHogProvider>
-              </TrackingProvider>
-            </DailyProvider>
-        </GameProvider>
+        <TrackingProvider>
+          <CSPostHogProvider>
+            <main className="flex-1 overflow-x-clip">{children}</main>
+            <PwaInit />
+            <InstallBanner />
+          </CSPostHogProvider>
+        </TrackingProvider>
         <Analytics />
         <SpeedInsights />
         

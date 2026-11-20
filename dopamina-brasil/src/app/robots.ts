@@ -1,14 +1,8 @@
-import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [
-      {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/rastreamento/'],
-      },
-    ],
-    sitemap: 'https://dopaminado.com.br/sitemap.xml',
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/relatorio"] }],
+    sitemap: "https://www.dopaminado.com.br/sitemap.xml",
   };
 }
