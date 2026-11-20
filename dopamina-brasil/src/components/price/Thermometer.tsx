@@ -1,4 +1,4 @@
-import { getThermometer } from "@/lib/featured";
+import { getThermometer, thermometerSourceNote } from "@/lib/featured";
 import ThermometerGrid from "./ThermometerGrid";
 import styles from "../bf.module.css";
 
@@ -6,7 +6,10 @@ import styles from "../bf.module.css";
 export default async function Thermometer({ limit, showFilters = true }: { limit?: number; showFilters?: boolean }) {
   const items = await getThermometer().catch(() => []);
   if (!items.length) return <p className={styles.verdictMeta} style={{ marginBottom: 50 }}>Não foi possível montar o termômetro agora. Pesquise um produto acima.</p>;
-  return <ThermometerGrid items={items} limit={limit} showFilters={showFilters} />;
+  return <>
+    <ThermometerGrid items={items} limit={limit} showFilters={showFilters} />
+    <p className={styles.verdictMeta} style={{ marginBottom: 8 }}>{thermometerSourceNote(items)}</p>
+  </>;
 }
 
 export function ThermometerSkeleton({ count = 4 }: { count?: number }) {

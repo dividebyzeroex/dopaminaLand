@@ -324,3 +324,24 @@ export function queryFromUrl(inputUrl: string): string | null {
     return clean.length >= 3 ? clean.slice(0, 120) : null;
   } catch { return null; }
 }
+
+export type PopularProduct = { path: string; name: string; category: string | null; popularity: number; price: number | null };
+
+/**
+ * "Mais populares" que o Buscapé mostra na própria home (smartRecommenderHits),
+ * ordenados pelo índice de popularidade. É o sinal de interesse real do mercado
+ * que usamos para renovar o termômetro.
+ */
+async function popularUncached(): Promise<PopularProduct[]> {
+  const data: Json = nextData(await fetchHtml(`${ORIGIN}/`));
+  const hits: Json[] = data?.props?.pageProps?.smartRecommenderHits ?? [];
+  if (!Array.isArray(hits)) return [];
+  return hits.flatMap((hit): PopularProduct[] => {
+    const path = hit?.type === "product" ? pathFromUrl(hit?.url) : null;
+    const name = text(hit?.name);
+    if (!path || !name) return [];
+    return [{ path, name, category: text(hit?.categoryName), popularity: num(hit?.popularityScore) ?? 0, price: num(hit?.price) }];
+  }).sort((a, b) => b.popularity - a.popularity);
+}
+
+export const getPopularProducts = unstable_cache(async () => popularUncached(), ["buscape-popular-v1"], { revalidate: 10800 });

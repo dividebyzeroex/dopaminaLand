@@ -30,7 +30,7 @@ export default function BlackFridayPage() {
         <SearchBox id="bf-search" suggestions={["PlayStation 5 Slim", "iPhone 15", "Air Fryer"]} />
       </section>
 
-      <div className={studio.sectionHead}><div><span className={studio.eyebrow}>Termômetro · atualizado a cada 3 horas</span><h2>Os mais procurados,<br />com veredito.</h2></div><p>Primeiro os descontos reais, depois os maquiados e os que estão acima do normal. Toque para ver o gráfico e as lojas.</p></div>
+      <div className={studio.sectionHead}><div><span className={studio.eyebrow}>Termômetro · o que está sendo procurado agora</span><h2>Os mais procurados,<br />com veredito.</h2></div><p>A lista acompanha o que as pessoas procuram e muda a cada 3 horas. Primeiro os descontos reais, depois os maquiados e os que estão acima do normal.</p></div>
       <Suspense fallback={<ThermometerSkeleton count={8} />}><Thermometer /></Suspense>
 
       <div className={studio.sectionHead} id="como-julgamos"><div><span className={studio.eyebrow}>Metodologia aberta</span><h2>Como julgamos<br />cada preço.</h2></div><p>Regras simples, aplicadas igual para todos os produtos. Não recebemos nada para mudar um veredito.</p></div>

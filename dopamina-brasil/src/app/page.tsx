@@ -10,7 +10,7 @@ import VerdictBadge from "@/components/price/VerdictBadge";
 import HeroExample, { pickExample } from "@/components/price/HeroExample";
 import ThermometerGrid from "@/components/price/ThermometerGrid";
 import { ThermometerSkeleton } from "@/components/price/Thermometer";
-import { getThermometer, sortMaquiadoFirst } from "@/lib/featured";
+import { getThermometer, sortMaquiadoFirst, thermometerSourceNote } from "@/lib/featured";
 import { blackFridayLabel } from "@/lib/black-friday";
 
 export const revalidate = 10800;
@@ -24,11 +24,10 @@ async function Example() {
 async function Thermometer() {
   const items = await getThermometer().catch(() => []);
   if (!items.length) return <p className={styles.footnote}>Não foi possível montar o termômetro agora. Pesquise um produto acima.</p>;
-  const date = items[0].history.at(-1)?.date;
   return <>
     <ThermometerGrid items={sortMaquiadoFirst(items)} limit={8} />
     <p className={styles.footnote}>
-      Preços e históricos reais{date ? ` de ${new Date(`${date}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })}` : ""}. A linha mostra o menor preço do dia entre as lojas.{" "}
+      {thermometerSourceNote(items)} A linha mostra o menor preço do dia entre as lojas.{" "}
       <Link href="/black-friday" style={{ color: "inherit" }}>Ver todos os {items.length} produtos</Link>
     </p>
   </>;
@@ -52,7 +51,7 @@ export default function HomePage() {
       </section>
 
       <div className={`${styles.head} ${styles.headTight}`} id="termometro">
-        <div><span className={styles.kicker}>Termômetro · atualizado a cada 3 h</span><h2>Os mais buscados, com veredito.</h2></div>
+        <div><span className={styles.kicker}>Termômetro · o que está sendo procurado agora</span><h2>Os mais buscados, com veredito.</h2></div>
         <p>Descontos maquiados primeiro. Toque num produto para ver o gráfico completo e as lojas.</p>
       </div>
       <Suspense fallback={<ThermometerSkeleton count={8} />}><Thermometer /></Suspense>
