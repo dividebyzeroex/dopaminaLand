@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowUpRight, Download } from "lucide-react";
 import studio from "@/components/studio.module.css";
 import styles from "@/components/bf.module.css";
 import SiteHeader from "@/components/price/SiteHeader";
@@ -67,15 +65,6 @@ export default async function SearchPage({ searchParams }: Props) {
         <section className={styles.grid} aria-label="Resultados" style={{ marginBottom: 56 }}>
           {results.map(({ hit, product, verdict }) => <ProductCard key={hit.sourceUrl} hit={hit} verdict={verdict} name={product?.name} image={product?.image} price={product?.bestPrice} storeCount={product?.storeCount}
             series={product ? displaySeries(product.history, product.bestPrice, product.checkedAt.slice(0, 10)).slice(-40).map(p => p.price) : undefined} />)}
-        </section>
-        <section className={studio.feature}>
-          <div>
-            <span className={studio.eyebrow}>Para guardar. Para compartilhar.</span>
-            <h2>Leve a pesquisa<br />com você.</h2>
-            <p>Baixe gratuitamente um PDF com os preços, o horário da consulta e os links.</p>
-            <Link href={`/relatorio?q=${encodeURIComponent(query)}`} className={studio.textLink}><Download size={15} /> Abrir relatório gratuito <ArrowUpRight size={15} /></Link>
-          </div>
-          <div className={studio.diagram} aria-hidden="true"><div className={studio.diagramInner}><strong>dopamina.</strong><i /><i /><i /><span>RELATÓRIO DE PREÇOS</span></div></div>
         </section>
       </>}
       <SiteFooter />

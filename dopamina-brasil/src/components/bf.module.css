@@ -215,3 +215,12 @@
 /* Busca dentro de seções escuras: o campo é branco, o texto precisa ser escuro. */
 .darkSearch input { color: #20211f; }
 .darkSearch input::placeholder { color: #8a8e86; }
+
+/* ── Compartilhar veredito ── */
+.share { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.shareWhats, .shareGhost { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 18px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.shareWhats { background: #1d7a4b; color: #fff; border: 0; }
+.shareWhats:hover { background: #156139; }
+.shareGhost { background: #fff; color: #20211f; border: 1px solid #20211f26; }
+.shareGhost:hover { border-color: #20211f; }
+.shareWhats:focus-visible, .shareGhost:focus-visible { outline: 2px solid #2854ec; outline-offset: 3px; }

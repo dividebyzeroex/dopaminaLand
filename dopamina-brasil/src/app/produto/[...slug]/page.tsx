@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, Download } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import studio from "@/components/studio.module.css";
 import styles from "@/components/bf.module.css";
 import SiteHeader from "@/components/price/SiteHeader";
@@ -9,6 +9,7 @@ import SiteFooter from "@/components/price/SiteFooter";
 import SearchBox from "@/components/price/SearchBox";
 import VerdictBadge from "@/components/price/VerdictBadge";
 import PriceHistoryChart from "@/components/price/PriceHistoryChart";
+import ShareVerdict from "@/components/price/ShareVerdict";
 import ProductVisual from "@/components/ProductVisual";
 import { analyzeProduct } from "@/lib/analysis";
 import { isSafeProductPath } from "@/lib/buscape";
@@ -16,6 +17,8 @@ import { VERDICT_RULES } from "@/lib/price-verdict";
 import { brl, dateTime, shortDate, signedPct } from "@/lib/format";
 
 type Props = { params: Promise<{ slug: string[] }> };
+
+const SITE = "https://www.dopaminado.com.br";
 
 export const revalidate = 10800;
 
@@ -42,7 +45,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `/produto/${product.path}` },
-    openGraph: { title, description, images: product.image ? [product.image] : undefined, type: "website", locale: "pt_BR" },
+    // Imagem de compartilhamento gerada em /og/produto/... (selo, preço e gráfico).
+    openGraph: { title, description, type: "website", locale: "pt_BR", images: [{ url: `/og/produto/${product.path}`, width: 1200, height: 630, alt: `${verdict.label}: ${product.name}` }] },
+    twitter: { card: "summary_large_image", title, description, images: [`/og/produto/${product.path}`] },
   };
 }
 
@@ -52,6 +57,12 @@ export default async function ProductPage({ params }: Props) {
   const { product, history, verdict } = data;
   const today = product.checkedAt.slice(0, 10);
   const vsMin = verdict.min && verdict.current ? (verdict.current - verdict.min) / verdict.min : null;
+  const price = product.bestPrice ? brl(product.bestPrice) : "";
+  const shareText = verdict.kind === "maquiado"
+    ? `Esse desconto é maquiado: ${product.name} por ${price} subiu antes de "cair". Veja o histórico:`
+    : verdict.kind === "insuficiente"
+      ? `${product.name} por ${price}. Veja o histórico de preço e as lojas:`
+      : `${verdict.label}: ${product.name} por ${price}${verdict.vsMedian !== null ? ` (${signedPct(verdict.vsMedian)} vs. o preço típico)` : ""}. Veja o histórico:`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -94,6 +105,7 @@ export default async function ProductPage({ params }: Props) {
             <p className={styles.verdictDetail}>{verdict.detail}</p>
             <p className={styles.verdictMeta}>Consulta: {dateTime(product.checkedAt)} · <Link href="/black-friday#como-julgamos" style={{ color: "inherit" }}>como julgamos</Link></p>
           </div>
+          <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
         </div>
       </section>
 
@@ -144,9 +156,13 @@ export default async function ProductPage({ params }: Props) {
           <span className={studio.eyebrow}>Outra ideia em mente?</span>
           <h2>Pesquise outro<br />produto.</h2>
           <div style={{ maxWidth: 440 }} className={styles.darkSearch}><SearchBox id="product-page-search" /></div>
-          <Link href={`/relatorio?q=${encodeURIComponent(product.name)}`} className={studio.textLink}><Download size={15} /> Baixar relatório em PDF <ArrowUpRight size={15} /></Link>
         </div>
-        <div className={studio.diagram} aria-hidden="true"><div className={studio.diagramInner}><strong>dopamina.</strong><i /><i /><i /><span>RELATÓRIO DE PREÇOS</span></div></div>
+        <div>
+          <span className={studio.eyebrow}>Conhece alguém de olho nele?</span>
+          <h2>Mande o veredito<br />antes da compra.</h2>
+          <p>A prévia no WhatsApp já mostra o selo, o preço e o gráfico de {verdict.days || history.length} dias.</p>
+          <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
+        </div>
       </section>
       <SiteFooter />
     </div>
