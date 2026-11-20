@@ -40,12 +40,12 @@ function readPrefs(): { tab: TabId; range: RangeKey } {
 }
 
 export default function InsightsApp() {
-  const [auth, setAuth] = useState<{ checked: boolean; ok: boolean; passwordConfigured: boolean }>({ checked: false, ok: false, passwordConfigured: true });
+  const [auth, setAuth] = useState<{ checked: boolean; ok: boolean }>({ checked: false, ok: false });
 
   useEffect(() => {
     fetch('/api/auth', { cache: 'no-store' }).then(r => r.json())
-      .then(j => setAuth({ checked: true, ok: Boolean(j.authenticated), passwordConfigured: Boolean(j.passwordConfigured) }))
-      .catch(() => setAuth({ checked: true, ok: false, passwordConfigured: true }));
+      .then(j => setAuth({ checked: true, ok: Boolean(j.authenticated) }))
+      .catch(() => setAuth({ checked: true, ok: false }));
   }, []);
 
   const logout = useCallback(async () => {
@@ -54,11 +54,11 @@ export default function InsightsApp() {
   }, []);
 
   if (!auth.checked) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted" aria-label="Carregando" /></div>;
-  if (!auth.ok) return <Login onDone={passwordConfigured => setAuth({ checked: true, ok: true, passwordConfigured })} />;
-  return <Dashboard passwordConfigured={auth.passwordConfigured} onLogout={logout} onExpired={() => setAuth(a => ({ ...a, ok: false }))} />;
+  if (!auth.ok) return <Login onDone={() => setAuth({ checked: true, ok: true })} />;
+  return <Dashboard onLogout={logout} onExpired={() => setAuth(a => ({ ...a, ok: false }))} />;
 }
 
-function Login({ onDone }: { onDone: (passwordConfigured: boolean) => void }) {
+function Login({ onDone }: { onDone: () => void }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -70,7 +70,7 @@ function Login({ onDone }: { onDone: (passwordConfigured: boolean) => void }) {
       const res = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || 'Falha no login');
-      onDone(Boolean(j.passwordConfigured));
+      onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha no login');
     } finally { setBusy(false); }
@@ -93,7 +93,7 @@ function Login({ onDone }: { onDone: (passwordConfigured: boolean) => void }) {
   );
 }
 
-function Dashboard({ passwordConfigured, onLogout, onExpired }: { passwordConfigured: boolean; onLogout: () => void; onExpired: () => void }) {
+function Dashboard({ onLogout, onExpired }: { onLogout: () => void; onExpired: () => void }) {
   // O painel só monta depois da checagem de login (no navegador), então ler o localStorage aqui é seguro.
   const [tab, setTab] = useState<TabId>(() => readPrefs().tab);
   const [range, setRange] = useState<RangeKey>(() => readPrefs().range);
@@ -152,11 +152,6 @@ function Dashboard({ passwordConfigured, onLogout, onExpired }: { passwordConfig
       </header>
 
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-5 sm:px-6">
-        {!passwordConfigured && (
-          <p className="rounded-xl border border-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_12%,transparent)] px-4 py-2.5 text-xs text-foreground">
-            O painel está usando a senha padrão. Defina <code className="font-mono">INSIGHTS_PASSWORD</code> no projeto da Vercel para trocá-la.
-          </p>
-        )}
         {report.data && !report.data.serviceRole && needsReport && (
           <p className="rounded-xl border border-border bg-surface-light px-4 py-2.5 text-xs text-secondary">
             Lendo dados com a chave pública do Supabase. Configure <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code> neste projeto antes de fechar a leitura pública das tabelas (migration 003).

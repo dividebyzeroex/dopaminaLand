@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { checkPassword, clearSessionCookie, isAuthenticated, passwordConfigured, setSessionCookie } from '@/lib/server/auth';
+import { checkPassword, clearSessionCookie, isAuthenticated, setSessionCookie } from '@/lib/server/auth';
 
 export async function GET() {
-  return NextResponse.json({ authenticated: await isAuthenticated(), passwordConfigured: passwordConfigured() });
+  return NextResponse.json({ authenticated: await isAuthenticated() });
 }
 
 export async function POST(request: Request) {
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Senha incorreta' }, { status: 401 });
   }
   await setSessionCookie();
-  return NextResponse.json({ authenticated: true, passwordConfigured: passwordConfigured() });
+  return NextResponse.json({ authenticated: true });
 }
 
 export async function DELETE() {

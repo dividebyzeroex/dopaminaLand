@@ -6,20 +6,14 @@ import { NextResponse } from 'next/server';
  * Login do painel: senha verificada no servidor e cookie assinado (HMAC), httpOnly.
  * Antes, a senha ficava no JavaScript enviado ao navegador e o acesso era um flag no localStorage.
  *
- * Configure INSIGHTS_PASSWORD (e opcionalmente INSIGHTS_SECRET) na Vercel.
- * Sem INSIGHTS_PASSWORD, vale a senha antiga do painel para ninguém ficar trancado do lado de fora;
- * o painel mostra um aviso pedindo a configuração.
+ * A senha é "dopamina". INSIGHTS_PASSWORD na Vercel, se definida, substitui essa senha.
  */
 const COOKIE = 'insights_session';
 const MAX_AGE = 60 * 60 * 24 * 14; // 14 dias
-const LEGACY_PASSWORD = 'dopamina2026';
+const DEFAULT_PASSWORD = 'dopamina';
 
 function password() {
-  return process.env.INSIGHTS_PASSWORD || LEGACY_PASSWORD;
-}
-
-export function passwordConfigured() {
-  return Boolean(process.env.INSIGHTS_PASSWORD);
+  return process.env.INSIGHTS_PASSWORD || DEFAULT_PASSWORD;
 }
 
 function secret() {

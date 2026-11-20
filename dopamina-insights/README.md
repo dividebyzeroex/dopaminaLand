@@ -39,7 +39,7 @@ Robôs (user agent de crawler/preview) ficam fora das contagens. Horários em Am
 | `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase. |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Recomendada.** Leitura no servidor. Obrigatória antes de aplicar a migration 003 (que fecha a leitura pública). |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Usada enquanto a service role não existir. |
-| `INSIGHTS_PASSWORD` | Senha do painel. Sem ela vale a senha antiga e o painel mostra um aviso. |
+| `INSIGHTS_PASSWORD` | Opcional: troca a senha do painel (padrão: `dopamina`). |
 | `INSIGHTS_SECRET` | Opcional: segredo do cookie de login (padrão: derivado da senha). |
 | `POSTHOG_*`, `HUBSPOT_ACCESS_TOKEN`, `GA_*` | Aba Integrações (opcional). |
 
