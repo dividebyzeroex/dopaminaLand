@@ -173,7 +173,7 @@
 .navLinks { display: flex; gap: 22px; align-items: center; font-size: 14px; }
 .navLinks a { color: #4c5049; text-decoration: none; }
 .navLinks a:hover { color: #20211f; }
-.navHot { color: #20211f !important; display: inline-flex; align-items: center; font-weight: 600; }
+.navHot { color: #20211f !important; display: inline-flex; align-items: center; font-weight: 600; white-space: nowrap; }
 .searchIcon { width: 44px; height: 44px; border-radius: 50%; border: 1px solid #20211f22; display: inline-flex !important; align-items: center; justify-content: center; color: #20211f !important; }
 .searchIcon:hover { background: #fff; }
 
@@ -201,7 +201,8 @@
   .storeRow .storeLink { grid-column: 1 / -1; justify-content: center; }
   .rules { grid-template-columns: 1fr; }
   .ribbon { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .navLinks { gap: 16px; }
+  .navLinks { gap: 10px; }
+  .searchIcon { width: 40px; height: 40px; }
   .filters { flex-wrap: nowrap; overflow-x: auto; margin-inline: -20px; padding: 2px 20px 4px; scrollbar-width: none; }
   .filters::-webkit-scrollbar { display: none; }
   .filter { flex-shrink: 0; }
@@ -224,3 +225,11 @@
 .shareGhost { background: #fff; color: #20211f; border: 1px solid #20211f26; }
 .shareGhost:hover { border-color: #20211f; }
 .shareWhats:focus-visible, .shareGhost:focus-visible { outline: 2px solid #2854ec; outline-offset: 3px; }
+
+/* Cabeçalho escuro do app instalado */
+@media (display-mode: standalone) {
+  .navHot { color: #f5f5f0 !important; }
+  .navLinks a { color: #d6d9d2; }
+  .searchIcon { color: #f5f5f0 !important; border-color: #f5f5f033; }
+  .searchIcon:hover { background: #ffffff14; }
+}

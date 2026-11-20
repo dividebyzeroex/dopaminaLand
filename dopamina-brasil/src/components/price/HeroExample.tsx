@@ -17,16 +17,16 @@ export function pickExample(items: ThermometerItem[]) {
     ?? items[0];
 }
 
-function story(item: ThermometerItem) {
+function story(item: ThermometerItem, eventName?: string) {
   const v = item.verdict;
   if (v.kind === "maquiado" && v.recentPeak && v.baseline) {
     const up = Math.round(((v.recentPeak - v.baseline) / v.baseline) * 100);
-    return <>O preço <strong>subiu {up}% antes</strong> da Black Friday e agora “caiu” para perto do valor normal. <strong>Não é promoção.</strong></>;
+    return <>O preço <strong>subiu {up}% antes</strong> {eventName ? `de ${eventName}` : "nas últimas semanas"} e agora “caiu” para perto do valor normal. <strong>Não é promoção.</strong></>;
   }
   return <>{v.headline} {v.detail}</>;
 }
 
-export default function HeroExample({ item }: { item: ThermometerItem }) {
+export default function HeroExample({ item, eventName }: { item: ThermometerItem; eventName?: string }) {
   const { verdict } = item;
   const points = item.history.slice(-40);
   const prices = points.map(p => p.price);
@@ -65,7 +65,7 @@ export default function HeroExample({ item }: { item: ThermometerItem }) {
       <text x={14} y={H + 14} className={styles.chartLabel}>{shortDate(points[0].date)}</text>
       <text x={W - 14} y={H + 14} textAnchor="end" className={styles.chartLabel}>hoje</text>
     </svg>
-    <p className={styles.exampleStory}>{story(item)}</p>
+    <p className={styles.exampleStory}>{story(item, eventName)}</p>
     <Link href={`/produto/${item.hit.path}`} className={styles.exampleLink}>Ver gráfico completo{item.storeCount ? ` e ${item.storeCount} ${item.storeCount === 1 ? "loja" : "lojas"}` : ""} →</Link>
   </article>;
 }

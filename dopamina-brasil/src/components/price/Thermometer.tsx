@@ -1,10 +1,11 @@
 import { getThermometer, thermometerSourceNote } from "@/lib/featured";
+import type { EventId } from "@/lib/events";
 import ThermometerGrid from "./ThermometerGrid";
 import styles from "../bf.module.css";
 
 /** Termômetro com o veredito dos produtos mais buscados. Mostra um aviso se a fonte falhar. */
-export default async function Thermometer({ limit, showFilters = true }: { limit?: number; showFilters?: boolean }) {
-  const items = await getThermometer().catch(() => []);
+export default async function Thermometer({ limit, showFilters = true, eventId = null }: { limit?: number; showFilters?: boolean; eventId?: EventId | null }) {
+  const items = await getThermometer(eventId).catch(() => []);
   if (!items.length) return <p className={styles.verdictMeta} style={{ marginBottom: 50 }}>Não foi possível montar o termômetro agora. Pesquise um produto acima.</p>;
   return <>
     <ThermometerGrid items={items} limit={limit} showFilters={showFilters} />

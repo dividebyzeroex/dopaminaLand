@@ -28,7 +28,7 @@ Robôs (user agent de crawler/preview) ficam fora das contagens. Horários em Am
 
 ## Eventos do site usados pelo painel
 
-`page_view` (com referrer/UTM na entrada), `super_search`, `search_results` (quantidade, falha, bloqueio, descontos maquiados,
+`page_view` (com referrer/UTM na entrada), `super_search`, `tracking_update` (alerta de preço criado, instalar o app), `search_results` (quantidade, falha, bloqueio, descontos maquiados,
 5 primeiros resultados), `search_blocked`, `product_view` (preço, veredito, loja), `offer_click` (loja, produto, posição),
 `outbound_click`, `share_product`, `page_leave` (tempo na página), `web_vitals`, `js_error`, `rage_click`, `dead_click`.
 

@@ -23,8 +23,8 @@ export default function ThermometerGrid({ items, limit, showFilters = true }: { 
     {showFilters && <div role="group" aria-label="Filtrar por veredito" className={styles.filters} style={{ marginBottom: 18 }}>
       {FILTERS.filter(f => count(f.key) > 0).map(f => <button key={f.key} type="button" className={styles.filter} aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}>{f.label}<span>{count(f.key)}</span></button>)}
     </div>}
-    <section className={styles.grid} aria-label="Termômetro da Black Friday" aria-live="polite">
-      {visible.map(item => <ProductCard key={item.hit.path} hit={item.hit} verdict={item.verdict} name={item.name} image={item.image} price={item.verdict.current} storeCount={item.storeCount} note={item.source === "dopamina" ? `${item.group} · em alta no Dopamina` : item.group} series={item.series} />)}
+    <section className={styles.grid} aria-label="Termômetro de preços" aria-live="polite">
+      {visible.map(item => <ProductCard key={item.hit.path} hit={item.hit} verdict={item.verdict} name={item.name} image={item.image} price={item.verdict.current} storeCount={item.storeCount} note={item.source === "dopamina" ? `${item.group} · em alta no Dopamina` : item.source === "evento" ? `${item.group} · ideia de presente` : item.group} series={item.series} />)}
     </section>
   </div>;
 }

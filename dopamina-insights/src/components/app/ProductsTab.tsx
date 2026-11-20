@@ -14,11 +14,12 @@ export default function ProductsTab({ report, now, onVisitor }: { report: Report
   return (
     <div className="space-y-4 animate-fade-in">
       <CoverageNote report={report} />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         <Stat label="Produtos vistos" value={int(k.productViews)} delta={<Delta now={k.productViews} prev={p.productViews} />} />
         <Stat label="Produtos diferentes" value={int(pr.top.length)} hint={pr.top.length >= 100 ? 'mostrando os 100 primeiros' : undefined} />
         <Stat label="Cliques em lojas" value={int(k.offerClicks)} delta={<Delta now={k.offerClicks} prev={p.offerClicks} />} />
         <Stat label="Visitas que foram à loja" value={pct(k.visitClickRate, 1)} delta={<Delta now={k.visitClickRate} prev={p.visitClickRate} asPoints />} />
+        <Stat label="Alertas de preço criados" value={int(k.alertsCreated)} delta={<Delta now={k.alertsCreated} prev={p.alertsCreated} />} hint={`${int(k.installClicks)} toque(s) em instalar o app`} />
       </div>
 
       <Card title="Produtos mais vistos" subtitle="Páginas de produto abertas no período">

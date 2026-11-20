@@ -7,10 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types tests/price-verdict.test.ts && node --experimental-strip-types tests/trending.test.ts"
+    "test": "node --experimental-strip-types tests/price-verdict.test.ts && node --experimental-strip-types tests/trending.test.ts && node --experimental-strip-types tests/events.test.ts && node --experimental-strip-types tests/alert-rules.test.ts"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
     "@google-analytics/data": "^6.1.0",
     "@supabase/supabase-js": "^2.110.2",
     "@vercel/analytics": "^2.0.1",
@@ -29,7 +28,8 @@
     "recharts": "^3.9.2",
     "stripe": "^22.3.0",
     "swr": "^2.4.2",
-    "ua-parser-js": "^2.0.10"
+    "ua-parser-js": "^2.0.10",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -39,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/ua-parser-js": "^0.7.39",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",

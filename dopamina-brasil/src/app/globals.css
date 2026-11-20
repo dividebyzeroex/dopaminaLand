@@ -267,3 +267,13 @@ body {
 .animate-scan-line {
   animation: scan-line 10s linear infinite;
 }
+
+/* ════ APP INSTALADO (tela inicial) ════
+   Tela cheia: o cabeçalho escuro ocupa a área da barra de status (iPhone com
+   black-translucent; Android usa theme_color #20211f do manifesto). */
+html { background: #f5f5f0; }
+body { min-height: 100dvh; }
+@media (display-mode: standalone) {
+  html, body { overscroll-behavior-y: none; }
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}

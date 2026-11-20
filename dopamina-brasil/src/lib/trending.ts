@@ -3,24 +3,27 @@ import { ACCESSORY, foldText, getPopularProducts, normalizeQuery, searchProducts
 import { isBlockedSearch } from "./search-policy";
 import { mapLimit } from "./analysis";
 import { pickRotating } from "./rotation";
+import type { CommerceEvent } from "./events";
 
 /**
  * De onde vem a lista do termômetro, em ordem de prioridade:
  *  1. buscas feitas no próprio Dopamina nos últimos 7 dias (cada termo precisa de
  *     pelo menos 2 visitantes diferentes, para ninguém conseguir manipular a lista);
- *  2. os produtos mais populares do Buscapé agora;
- *  3. uma reserva fixa, usada só se as fontes acima falharem.
+ *  2. ideias de presente da data comercial em campanha (Natal, Dia das Mães...), se houver;
+ *  3. os produtos mais populares do Buscapé agora;
+ *  4. uma reserva fixa, usada só se as fontes acima falharem.
  * Máximo de 2 produtos por categoria, para a lista não virar seis versões de PS5.
  * Os 8 mais fortes ficam fixos; as últimas vagas revezam a cada 3 horas.
  */
 
-export type TrendingSource = "dopamina" | "buscape" | "reserva";
+export type TrendingSource = "dopamina" | "evento" | "buscape" | "reserva";
 export type TrendingEntry = { path: string; group: string; source: TrendingSource };
 
 const TOTAL = 12;
 const FROM_OWN_SEARCHES = 4;
+const FROM_EVENT = 6; // ideias de presente da data em campanha
 const PER_CATEGORY = 2;
-const MIN_PRICE = 80; // abaixo disso a Black Friday quase não muda a decisão
+const MIN_PRICE = 80; // abaixo disso a data comercial quase não muda a decisão
 const FIXED_TOP = 8; // vagas fixas para os mais populares; o restante reveza
 const ROTATION_MS = 3 * 3600_000;
 
@@ -87,23 +90,30 @@ async function ownTopQueries(days = 7, limit = 8): Promise<string[]> {
     .map(v => v.label);
 }
 
-export async function trendingEntries(now = new Date()): Promise<TrendingEntry[]> {
-  // 1. O que os nossos visitantes procuram: cada termo vira o 1º produto (não acessório) encontrado.
-  const queries = await ownTopQueries().catch(() => []);
+/** Cada termo vira o 1º produto (não acessório, acima do preço mínimo) encontrado. */
+async function resolveQueries(queries: string[], source: TrendingSource): Promise<TrendingEntry[]> {
   const resolved = await mapLimit(queries, 2, async (query): Promise<TrendingEntry | null> => {
     const hits = await searchProducts(query.toLowerCase()).catch(() => []);
     const hit = hits.find(h => h.path && h.price >= MIN_PRICE && (ACCESSORY.test(foldText(query)) || !ACCESSORY.test(foldText(h.name))));
-    return hit?.path ? { path: hit.path, group: groupName(hit.category, hit.path), source: "dopamina" } : null;
+    return hit?.path ? { path: hit.path, group: groupName(hit.category, hit.path), source } : null;
   });
-  const own = resolved.filter((e): e is TrendingEntry => e !== null).slice(0, FROM_OWN_SEARCHES);
+  return resolved.filter((e): e is TrendingEntry => e !== null);
+}
 
-  // 2. O que o mercado procura agora.
+export async function trendingEntries(event: CommerceEvent | null = null, now = new Date()): Promise<TrendingEntry[]> {
+  // 1. O que os nossos visitantes procuram.
+  const own = (await resolveQueries(await ownTopQueries().catch(() => []), "dopamina")).slice(0, FROM_OWN_SEARCHES);
+  // 2. Ideias de presente da data em campanha. Ficam à frente dos populares,
+  //    mas sem tirar vaga das buscas reais dos visitantes.
+  const gifts = event?.giftQueries.length ? (await resolveQueries(event.giftQueries, "evento")).slice(0, FROM_EVENT) : [];
+
+  // 3. O que o mercado procura agora.
   const popular: TrendingEntry[] = (await getPopularProducts().catch(() => []))
     .filter(p => (p.price === null || p.price >= MIN_PRICE) && !ACCESSORY.test(foldText(p.name)))
     .map(p => ({ path: p.path, group: groupName(p.category, p.path), source: "buscape" as const }));
 
-  const chosen = pickRotating<TrendingEntry>(own, popular, { total: TOTAL, fixedTop: FIXED_TOP, perGroup: PER_CATEGORY, window: Math.floor(now.getTime() / ROTATION_MS) });
+  const chosen = pickRotating<TrendingEntry>([...own, ...gifts], popular, { total: TOTAL, fixedTop: FIXED_TOP, perGroup: PER_CATEGORY, window: Math.floor(now.getTime() / ROTATION_MS) });
 
-  // 3. Reserva, só para completar.
+  // 4. Reserva, só para completar.
   return chosen.length >= TOTAL ? chosen : pickRotating<TrendingEntry>(chosen, RESERVE, { total: TOTAL, fixedTop: TOTAL, perGroup: PER_CATEGORY, window: 0 });
 }

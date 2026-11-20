@@ -372,6 +372,8 @@ export function kpisOf(visits: Visit[]) {
     productViews,
     offerClicks,
     shares: visits.reduce((n, v) => n + v.shares, 0),
+    alertsCreated: visits.reduce((n, v) => n + v.events.filter(e => e.event_type === 'tracking_update' && e.meta.action === 'alert_created').length, 0),
+    installClicks: visits.reduce((n, v) => n + v.events.filter(e => e.event_type === 'tracking_update' && e.meta.action === 'install_banner_click').length, 0),
     avgVisitSec: visits.length ? Math.round(visits.reduce((n, v) => n + v.durationSec, 0) / visits.length) : 0,
     medianVisitSec: quantile(visits.map(v => v.durationSec), 0.5) ?? 0,
     bounceRate: pct(visits.filter(v => v.bounced).length, visits.length),
@@ -615,6 +617,11 @@ export function describe(e: Ev, timeline = false): FeedItem | null {
     case 'share_product': return { ...base, kind: 'share', title: 'Compartilhou um veredito', detail: [m.channel, e.product_id].filter(Boolean).join(' · ') };
     case 'js_error': return { ...base, kind: 'error', title: 'Erro de JavaScript', detail: String(m.message || '').slice(0, 120) };
     case 'rage_click': return { ...base, kind: 'frustration', title: 'Cliques repetidos (frustração)', detail: String(m.tag || '') };
+    case 'tracking_update':
+      if (m.action === 'alert_created') return { ...base, kind: 'share', title: `Criou alerta de preço${e.product_id ? `: ${e.product_id}` : ''}`, detail: [Array.isArray(m.kinds) ? m.kinds.join(', ') : '', m.standalone ? 'no app instalado' : ''].filter(Boolean).join(' · ') };
+      if (m.action === 'alert_open') return { ...base, kind: 'page', title: 'Abriu o alerta de preço', detail: e.product_id || '' };
+      if (m.action === 'install_banner_click') return { ...base, kind: 'click', title: 'Tocou em instalar o app', detail: m.ios ? 'iOS' : '' };
+      return null;
     case 'page_leave': {
       if (!timeline) return null;
       const sec = num(m.dwell_time_seconds) ?? 0;
