@@ -8,8 +8,8 @@ import styles from "../bf.module.css";
 
 const FILTERS: { key: "all" | VerdictTone; label: string }[] = [
   { key: "all", label: "Todos" },
-  { key: "good", label: "Abaixo do normal" },
   { key: "bad", label: "Maquiado" },
+  { key: "good", label: "Abaixo do normal" },
   { key: "warn", label: "Acima do normal" },
   { key: "neutral", label: "Preço comum" },
 ];

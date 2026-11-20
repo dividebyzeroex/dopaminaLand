@@ -10,7 +10,7 @@ import VerdictBadge from "@/components/price/VerdictBadge";
 import HeroExample, { pickExample } from "@/components/price/HeroExample";
 import ThermometerGrid from "@/components/price/ThermometerGrid";
 import { ThermometerSkeleton } from "@/components/price/Thermometer";
-import { getThermometer } from "@/lib/featured";
+import { getThermometer, sortMaquiadoFirst } from "@/lib/featured";
 import { blackFridayLabel } from "@/lib/black-friday";
 
 export const revalidate = 10800;
@@ -26,7 +26,7 @@ async function Thermometer() {
   if (!items.length) return <p className={styles.footnote}>Não foi possível montar o termômetro agora. Pesquise um produto acima.</p>;
   const date = items[0].history.at(-1)?.date;
   return <>
-    <ThermometerGrid items={items} limit={8} />
+    <ThermometerGrid items={sortMaquiadoFirst(items)} limit={8} />
     <p className={styles.footnote}>
       Preços e históricos reais{date ? ` de ${new Date(`${date}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })}` : ""}. A linha mostra o menor preço do dia entre as lojas.{" "}
       <Link href="/black-friday" style={{ color: "inherit" }}>Ver todos os {items.length} produtos</Link>
@@ -49,9 +49,19 @@ export default function HomePage() {
             {["Histórico diário de 40 dias", "Regras abertas", "Nenhum veredito pago"].map(text => <li key={text}><Check size={16} color="#1d7a4b" strokeWidth={2.2} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
-        <Suspense fallback={<div className={`${styles.example}`} aria-hidden="true" style={{ minHeight: 420 }} />}><Example /></Suspense>
       </section>
 
+      <div className={`${styles.head} ${styles.headTight}`} id="termometro">
+        <div><span className={styles.kicker}>Termômetro · atualizado a cada 3 h</span><h2>Os mais buscados, com veredito.</h2></div>
+        <p>Descontos maquiados primeiro. Toque num produto para ver o gráfico completo e as lojas.</p>
+      </div>
+      <Suspense fallback={<ThermometerSkeleton count={8} />}><Thermometer /></Suspense>
+
+      <div className={styles.head}>
+        <div><span className={styles.kicker}>Na prática</span><h2>O veredito, na prática.</h2></div>
+      </div>
+      <div className={styles.practice}>
+        <Suspense fallback={<div className={styles.example} aria-hidden="true" style={{ minHeight: 420 }} />}><Example /></Suspense>
       <section className={styles.questions} aria-label="O que respondemos">
         {[
           ["01", "Está barato hoje?", "Comparamos com o preço típico do próprio produto, não com o “de” riscado da loja."],
@@ -59,12 +69,8 @@ export default function HomePage() {
           ["03", "Subiu antes de cair?", "Se o preço foi inflado nas semanas anteriores, o selo avisa: desconto maquiado."],
         ].map(([n, title, text]) => <div key={n} className={styles.question}><span>{n}</span><h2>{title}</h2><p>{text}</p></div>)}
       </section>
-
-      <div className={styles.head} id="termometro">
-        <div><span className={styles.kicker}>Termômetro · atualizado a cada 3 h</span><h2>Os mais buscados, com veredito.</h2></div>
-        <p>Toque num produto para ver o gráfico completo e as lojas.</p>
       </div>
-      <Suspense fallback={<ThermometerSkeleton count={8} />}><Thermometer /></Suspense>
+
 
       <div className={styles.head} id="regras"><h2>Como julgamos, sem letra miúda.</h2></div>
       <section className={styles.rules}>

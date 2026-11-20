@@ -1,18 +1,18 @@
 /* Home (Black Friday). Paleta de studio.module.css: tinta #20211f, papel #f5f5f0, azul #2854ec. */
 
-.hero { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding: 52px 0 44px; }
-.heroCopy { flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 22px; }
+.hero { padding: 48px 0 8px; }
+.heroCopy { max-width: 760px; display: flex; flex-direction: column; gap: 22px; }
 .pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; background: #20211f; color: #f5f5f0; font-size: 13px; font-weight: 500; text-decoration: none; }
 .pillDot { width: 7px; height: 7px; border-radius: 50%; background: #ff6b4f; animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
 .title { margin: 0; font-size: clamp(42px, 6.2vw, 84px); line-height: 1; letter-spacing: -.065em; font-weight: 600; }
 .title span { color: #8b9087; }
-.lead { margin: 0; font-size: 18px; line-height: 1.6; color: #4c5049; max-width: 480px; }
+.lead { margin: 0; font-size: 18px; line-height: 1.6; color: #4c5049; max-width: 560px; }
 .trust { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: #4c5049; list-style: none; padding: 0; margin: 0; }
 .trust li { display: inline-flex; gap: 8px; align-items: center; }
 
 /* Card do exemplo real */
-.example { flex: 1 1 460px; min-width: 0; background: #fff; border-radius: 22px; padding: 26px; box-shadow: 0 24px 60px #20211f14; display: flex; flex-direction: column; gap: 16px; }
+.example { flex: 1.4 1 460px; min-width: 0; background: #fff; border-radius: 22px; padding: 26px; box-shadow: 0 24px 60px #20211f14; display: flex; flex-direction: column; gap: 16px; }
 .exampleTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .kicker { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #5d625b; }
 .exampleProduct { display: flex; gap: 16px; align-items: center; }
@@ -29,7 +29,7 @@
 .exampleLink:hover { text-decoration: underline; }
 
 /* Três perguntas */
-.questions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.questions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; min-width: 0; }
 .question { background: #e9ebe5; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
 .question span { font-size: 13px; font-weight: 600; color: #5d625b; }
 .question h2 { margin: 0; font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
@@ -40,6 +40,11 @@
 .head h2 { margin: 10px 0 0; font-size: clamp(30px, 4vw, 48px); letter-spacing: -.05em; line-height: 1.05; font-weight: 600; }
 .head p { margin: 0; max-width: 340px; font-size: 14px; line-height: 1.6; color: #4c5049; }
 .head a { color: inherit; }
+.headTight { margin-top: 48px; }
+
+/* Exemplo real + três perguntas, lado a lado no desktop */
+.practice { display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch; }
+.practice .questions { flex: 1 1 320px; grid-template-columns: 1fr; }
 .footnote { margin: 4px 0 0; font-size: 13px; color: #5d625b; }
 
 /* Regras */
@@ -56,7 +61,8 @@
 .ctaSearch input { color: #20211f; }
 
 @media (max-width: 700px) {
-  .hero { padding: 28px 0 32px; gap: 32px; }
+  .hero { padding: 28px 0 4px; }
+  .headTight { margin-top: 36px; }
   .lead { font-size: 16px; }
   .example { padding: 20px; border-radius: 18px; }
   .examplePrice { font-size: 26px; }

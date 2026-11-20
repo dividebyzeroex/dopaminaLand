@@ -53,3 +53,14 @@ export const getThermometer = unstable_cache(async (): Promise<ThermometerItem[]
     .filter((x): x is ThermometerItem => x !== null)
     .sort((a, b) => ORDER[a.verdict.kind] - ORDER[b.verdict.kind] || (a.verdict.vsMedian ?? 0) - (b.verdict.vsMedian ?? 0));
 }, ["bf-thermometer-v3"], { revalidate: 10800 });
+
+const MAQUIADO_FIRST: Record<Verdict["kind"], number> = { maquiado: 0, menor: 1, abaixo: 2, acima: 3, comum: 4, insuficiente: 5 };
+
+/** Home: descontos maquiados primeiro (do maior aumento antes da "queda" para o menor), depois os demais. */
+export function sortMaquiadoFirst(items: ThermometerItem[]): ThermometerItem[] {
+  const inflation = (i: ThermometerItem) => (i.verdict.recentPeak && i.verdict.baseline ? i.verdict.recentPeak / i.verdict.baseline : 0);
+  return [...items].sort((a, b) =>
+    MAQUIADO_FIRST[a.verdict.kind] - MAQUIADO_FIRST[b.verdict.kind]
+    || inflation(b) - inflation(a)
+    || (a.verdict.vsMedian ?? 0) - (b.verdict.vsMedian ?? 0));
+}
