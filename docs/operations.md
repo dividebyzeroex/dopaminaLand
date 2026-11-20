@@ -6,7 +6,7 @@
 - Painel publicado: projeto Vercel `dopamina-land-insights`, repositório separado `dividebyzeroex/dopaminaLandHQ`. Alterar a pasta `dopamina-insights` deste repositório não atualiza esse painel.
 - Banco compartilhado: projeto Supabase `supabase-agendai` (`vvanjarfwdxtzklogysy`). As alterações do Dopamina devem ficar restritas às suas tabelas; não modificar permissões globais ou objetos do Agenda AI.
 - A migration `002` foi aplicada e validada. As migrations `004` e `005` já constavam no banco, com o cron `dopamina-price-watch` ativo. A existência do cron e do segredo no Vault não comprova a entrega de notificações.
-- A migration `003` ainda depende da publicação dos consumidores compatíveis. No painel do repositório `dopaminaLandHQ`, configurar `SUPABASE_SERVICE_ROLE_KEY` e uma `INSIGHTS_PASSWORD` forte em Production e fazer redeploy. Essa versão usa login por cookie assinado, não `INSIGHTS_USERNAME`; enquanto a senha não for definida, existe um fallback conhecido que deve ser substituído antes da liberação.
+- A migration `003` ainda depende da publicação dos consumidores compatíveis. No painel do repositório `dopaminaLandHQ`, configurar `SUPABASE_SERVICE_ROLE_KEY` em Production e fazer redeploy. Essa versão usa login por cookie assinado, não `INSIGHTS_USERNAME`. Por decisão do responsável, a senha fixa existente será mantida, sem exigir `INSIGHTS_PASSWORD`. Como essa senha consta no código, ela não oferece proteção contra quem a conhece; manter a proteção de deployment da Vercel.
 
 ## Ordem de ativação
 
