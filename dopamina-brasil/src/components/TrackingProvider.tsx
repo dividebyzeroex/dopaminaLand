@@ -17,6 +17,9 @@ function WebVitalsTracker() {
   return null;
 }
 
+// Primeiro page_view desta aba carrega referrer/UTM (a origem da visita).
+let pageViewSentInTab = false;
+
 function TrackingLogic() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -35,6 +38,22 @@ function TrackingLogic() {
 
     // UTMs and Referrer tracking handled in initSession
     initSession();
+
+    // Page view: base de acessos, páginas e origem de cada visita no painel de insights.
+    const firstInTab = !pageViewSentInTab;
+    pageViewSentInTab = true;
+    const q = searchParams.get('q');
+    trackEvent('page_view', undefined, undefined, {
+      path: pathname,
+      ...(q ? { q: q.slice(0, 200) } : {}),
+      ...(firstInTab ? {
+        landing: true,
+        referrer: document.referrer || '',
+        utm_source: searchParams.get('utm_source') || '',
+        utm_medium: searchParams.get('utm_medium') || '',
+        utm_campaign: searchParams.get('utm_campaign') || '',
+      } : {}),
+    });
 
     // Reset tracking state on path change
     entryTimeRef.current = Date.now();
@@ -59,6 +78,23 @@ function TrackingLogic() {
     const handleClick = (e: MouseEvent) => {
       const now = Date.now();
       const click = { x: e.pageX, y: e.pageY, time: now };
+
+      // 0. Cliques que saem do site (ofertas das lojas e outros links externos)
+      const link = (e.target as HTMLElement | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (link) {
+        let url: URL | null = null;
+        try { url = new URL(link.href, window.location.href); } catch {}
+        if (link.dataset.track === 'offer') {
+          trackEvent('offer_click', link.dataset.product || undefined, Number(link.dataset.price) || undefined, {
+            store: link.dataset.store || '',
+            product_path: link.dataset.productPath || '',
+            position: Number(link.dataset.position) || null,
+            host: url?.hostname || '',
+          });
+        } else if (url && url.hostname !== window.location.hostname && /^https?:$/.test(url.protocol)) {
+          trackEvent('outbound_click', undefined, undefined, { host: url.hostname, url: url.href.slice(0, 300), label: (link.textContent || '').trim().slice(0, 80) });
+        }
+      }
       
       // 1. Heatmap Click
       trackEvent('heatmap_click', undefined, undefined, {

@@ -46,7 +46,10 @@ export async function POST(request: Request) {
     const validSessionId = ensureUuid(session_id);
 
     // Extract headers for location and IP
-    const city = request.headers.get('x-vercel-ip-city') || 'Desconhecido';
+    // A Vercel envia a cidade codificada para URL (ex.: "S%C3%A3o%20Paulo").
+    const rawCity = request.headers.get('x-vercel-ip-city') || 'Desconhecido';
+    let city = rawCity;
+    try { city = decodeURIComponent(rawCity); } catch {}
     const state = request.headers.get('x-vercel-ip-country-region') || 'Desconhecido';
     const country = request.headers.get('x-vercel-ip-country') || 'BR';
 

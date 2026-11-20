@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BellOff, RefreshCw } from "lucide-react";
 import { usePwa } from "./usePwa";
 import InstallSteps from "./InstallSteps";
+import TrendingToggle from "./TrendingToggle";
 import { checkNow, listLocalWatches, removeLocalWatch, type LocalWatch } from "@/lib/pwa-client";
 import styles from "./pwa.module.css";
 
@@ -55,6 +56,7 @@ export default function MyAlerts() {
   if (watches === null) return <p className={styles.sheetText} role="status">Carregando seus alertas…</p>;
 
   return <div className={styles.myAlerts}>
+    <TrendingToggle />
     {watches.length === 0 && <div className={styles.empty}>
       <BellOff size={28} aria-hidden="true" />
       <p className={styles.sheetText}>Nenhum alerta neste aparelho ainda. Abra um produto e toque em <b>Avisar quando o preço mudar</b>.</p>
