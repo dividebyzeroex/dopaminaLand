@@ -1,53 +1,16 @@
-import React from 'react';
-
-export const metadata = {
-  title: 'Política de Privacidade | Dopamina Brasil',
-};
-
-export default function PrivacidadePage() {
-  return (
-    <div className="space-y-6 prose prose-invert max-w-none">
-      <h2 className="text-2xl font-black text-foreground border-b border-border pb-4">Política de Privacidade</h2>
-      
-      <p className="text-muted leading-relaxed">
-        <strong>Última atualização:</strong> {new Date().toLocaleDateString('pt-BR')}
-      </p>
-
-      <div className="space-y-8 mt-8">
-        <section>
-          <h3 className="text-lg font-bold text-foreground">1. Pagamentos reais</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            A pesquisa e o relatório de preços são gratuitos, assim como as compras simuladas. Contribuições voluntárias, quando disponíveis, são pagamentos reais processados pelo Stripe. Os dados de cartão são informados diretamente no checkout do Stripe.
-          </p>
-        </section>
-
-        <section>
-          <h3 className="text-lg font-bold text-foreground">2. O que nós coletamos</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            Nós armazenamos apenas o básico para que você possa participar do nosso experimento gamificado:
-          </p>
-          <ul className="list-disc pl-5 mt-2 space-y-2 text-muted">
-            <li><strong>Nome e E-mail:</strong> Usados exclusivamente para criar o seu perfil no Supabase e manter o seu ranking.</li>
-            <li><strong>XP e Nível:</strong> Registramos suas interações no site (adicionar ao carrinho, simular checkout) para calcular sua pontuação de dopamina.</li>
-            <li><strong>Pesquisa de preços:</strong> O termo pesquisado é usado para consultar ofertas. O link do relatório contém esse termo e pode ser compartilhado por você.</li>
-            <li><strong>Endereço Físico (Apenas sob demanda):</strong> Se você atingir os níveis mais altos (Top Levels) e for elegível para receber um brinde físico (swag), pediremos o seu endereço de entrega. Esse endereço é usado de forma isolada, exclusiva para o envio do prêmio, e não é compartilhado com terceiros além dos correios/transportadoras parceiras.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h3 className="text-lg font-bold text-foreground">3. Uso de Cookies (As bolachas digitais)</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            Usamos <em>cookies</em> locais e <em>AsyncStorage</em> para lembrar se você já fechou pop-ups chatos (como o nosso banner "Isso é uma sátira"), para manter sua sessão de login ativa e guardar o seu progresso offline. Não rastreamos a sua navegação para fora deste site, nem enviamos anúncios para te perseguir no Instagram depois.
-          </p>
-        </section>
-
-        <section>
-          <h3 className="text-lg font-bold text-foreground">4. Compartilhamento de Dados</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            Usamos serviços de hospedagem, análise, banco de dados e processamento de pagamentos para operar a plataforma. O Stripe processa pagamentos reais. Não vendemos seus dados pessoais.
-          </p>
-        </section>
-      </div>
+export const metadata = { title: "Política de Privacidade" };
+export default function Page() {
+  const email = process.env.PRIVACY_CONTACT_EMAIL;
+  return <div className="space-y-6 max-w-none">
+    <h2 className="text-2xl font-black text-foreground border-b border-border pb-4">Política de Privacidade</h2>
+    <p className="text-muted">Última atualização: 20/11/2026</p>
+    <div className="space-y-8">
+        <section><h3 className="text-lg font-bold">O serviço</h3><p className="text-muted leading-relaxed mt-2">O Dopamina compara preços públicos e mostra históricos. A busca não exige cadastro. Não vendemos os produtos exibidos; a compra acontece na loja indicada.</p></section>
+        <section><h3 className="text-lg font-bold">Dados utilizados</h3><p className="text-muted leading-relaxed mt-2">As consultas usam termos de busca e páginas de produtos. A telemetria pode registrar um identificador aleatório do navegador, páginas, pesquisas, cliques, rolagem, desempenho, dispositivo, origem do acesso e localização aproximada informada pela hospedagem. Termos bloqueados são substituídos antes do armazenamento na telemetria própria. Não é necessário informar nome, e-mail ou endereço para pesquisar.</p></section>
+        <section><h3 className="text-lg font-bold">Alertas de preço</h3><p className="text-muted leading-relaxed mt-2">Ao permitir notificações, o aparelho guarda os produtos acompanhados. Quando o push do servidor está disponível, também armazenamos o endereço de entrega da notificação, suas chaves técnicas e os produtos e preferências do alerta. O navegador pode limitar verificações em segundo plano. Você pode remover alertas em Meus alertas e revogar notificações nos ajustes do navegador.</p></section>
+        <section><h3 className="text-lg font-bold">Armazenamento e serviços externos</h3><p className="text-muted leading-relaxed mt-2">Usamos armazenamento local e IndexedDB para sessão, preferências e alertas. Vercel hospeda o site e fornece Analytics e Speed Insights; Supabase armazena dados; Google Analytics, PostHog e HubSpot recebem dados de uso conforme a configuração do serviço. Buscapé recebe as consultas de preços. Serviços de push do navegador entregam notificações. Contribuições voluntárias, quando disponíveis, são processadas pelo Stripe. Esses provedores podem processar dados fora do Brasil.</p></section>
+        <section><h3 className="text-lg font-bold">Controle e direitos</h3><p className="text-muted leading-relaxed mt-2">Você pode apagar o armazenamento do site e remover permissões no navegador. Isso não apaga automaticamente dados já enviados ao servidor ou aos provedores. Consulte a página de direitos para entrar em contato com o responsável. Não publique dados pessoais, chaves ou identificadores em issues públicas.</p></section>
+      <p>{email ? <a href={`mailto:${email}`}>Contato de privacidade</a> : <a href="https://github.com/dividebyzeroex" target="_blank" rel="noopener noreferrer">Responsável pelo projeto</a>}</p>
     </div>
-  );
+  </div>;
 }

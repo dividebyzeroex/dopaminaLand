@@ -1,6 +1,9 @@
+import { adminAccess } from "@/lib/admin-auth";
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const denied = adminAccess(request);
+  if (denied) return denied;
   const token = process.env.HUBSPOT_ACCESS_TOKEN;
 
   if (!token) {

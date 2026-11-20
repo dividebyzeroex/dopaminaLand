@@ -22,7 +22,7 @@ function TrackingLogic() {
   const searchParams = useSearchParams();
   
   // Refs for tracking state
-  const entryTimeRef = useRef<number>(Date.now());
+  const entryTimeRef = useRef<number>(0);
   const maxScrollRef = useRef<number>(0);
   const clickHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);
   const mouseMoveHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Smartphone, Send, Search, Filter, Loader2, CheckCircle2, Terminal } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+
 
 interface Lead {
   id: string;
@@ -26,13 +26,13 @@ export default function LeadsTab() {
   const fetchLeads = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('price_alerts')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await fetch('/api/analytics/leads', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Não foi possível consultar os contatos.');
+      const { data } = await response.json() as { data: Array<{
+        id: string; contact: string; channel: 'email' | 'whatsapp'; product_name: string;
+        current_price: number; target_price: number; created_at: string;
+      }> };
 
-      if (error) throw error;
-      
       const mappedLeads: Lead[] = (data || []).map(row => ({
         id: row.id,
         contact: row.contact,

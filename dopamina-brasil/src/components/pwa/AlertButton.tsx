@@ -46,7 +46,7 @@ export default function AlertButton({ path, name, price }: Props) {
     if (!saved) { setMessage("Não foi possível salvar o alerta neste aparelho."); setStep("error"); return; }
     const background = serverPush ? false : await enableBackgroundCheck();
     setMode(serverPush ? "push" : background ? "background" : "open");
-    await localNotification("Alerta ativado ✓", `Vamos avisar quando ${name.slice(0, 60)} mudar de preço.`, `/produto/${path}`).catch(() => undefined);
+    await localNotification(serverPush ? "Alerta por push ativado ✓" : "Alerta local ativado ✓", serverPush ? `Vamos avisar quando ${name.slice(0, 60)} mudar de preço.` : "Abra o Dopamina para atualizar o preço. Avisos com o app fechado não estão garantidos.", `/produto/${path}`).catch(() => undefined);
     setStep("done");
     trackEvent("tracking_update", name, price ?? undefined, { action: "alert_created", path, kinds, standalone: pwa.standalone });
   }
@@ -77,14 +77,14 @@ export default function AlertButton({ path, name, price }: Props) {
           <fieldset className={styles.options}>
             <legend className="sr-only">Tipos de alerta</legend>
             <label className={styles.option}><input type="checkbox" checked={kinds.drop} onChange={() => toggle("drop")} /><span><b>Baixar de preço</b><small>Queda de 3% ou mais</small></span></label>
-            <label className={styles.option}><input type="checkbox" checked={kinds.stable} onChange={() => toggle("stable")} /><span><b>Estabilizar</b><small>Uma semana sem mudar: sem queda à vista</small></span></label>
+            <label className={styles.option}><input type="checkbox" checked={kinds.stable} onChange={() => toggle("stable")} /><span><b>Estabilizar</b><small>Uma semana sem variação relevante</small></span></label>
             <label className={styles.option}><input type="checkbox" checked={kinds.rise} onChange={() => toggle("rise")} /><span><b>Subir de preço</b><small>Alta de 3% ou mais</small></span></label>
           </fieldset>
           {pwa.canPromptInstall && !pwa.standalone && <button type="button" className={styles.secondary} onClick={() => void promptInstall()}>Instalar o app para receber mais rápido</button>}
           <button type="button" className={styles.primary} disabled={none || step === "saving"} onClick={() => void save()}>
             {step === "saving" ? "Ativando…" : "Ativar alerta"}
           </button>
-          <p className={styles.fine}>Sem cadastro e sem e-mail: o alerta fica guardado só neste aparelho. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
+          <p className={styles.fine}>Sem cadastro e sem e-mail: o alerta fica neste aparelho e, quando o push está disponível, também no servidor. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
         </>}
 
         {step === "done" && <>

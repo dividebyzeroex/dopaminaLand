@@ -1,18 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder_key';
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key';
-
-// For client-side tracking (public access)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// For server-side privileged operations (e.g., webhooks)
+import "server-only";
+import { createClient } from "@supabase/supabase-js";
 export function getServiceSupabase() {
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("Banco de dados não configurado.");
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }

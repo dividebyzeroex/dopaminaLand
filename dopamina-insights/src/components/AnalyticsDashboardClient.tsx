@@ -19,12 +19,9 @@ import { StoreAuditAnalyticsTab } from './dashboard/StoreAuditAnalyticsTab';
 import { TabHeaderBanner } from './dashboard/TabHeaderBanner';
 import LeadsTab from './dashboard/LeadsTab';
 import AdsManagerTab from './dashboard/AdsManagerTab';
-import { Lock, RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users, Activity, Megaphone } from 'lucide-react';
+import { RefreshCw, Loader2, LayoutDashboard, Target, Package, Briefcase, MousePointer2, Radio, PlaySquare, MapPin, Shield, Search, BarChart3, Users, Activity, Megaphone } from 'lucide-react';
 
 export default function AnalyticsDashboardClient() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'audit_intelligence' | 'search_analytics' | 'leads' | 'intent' | 'ux' | 'visitors'>('overview');
 
   // Time selector state
@@ -78,7 +75,7 @@ export default function AnalyticsDashboardClient() {
   }, []);
 
   const {
-    loading, lastUpdated, fetchDashboardData,
+    loading, dataNotice, lastUpdated, fetchDashboardData,
     kpis, funnelData, topProducts, timelineData, ecommerceInsights, uxMetrics,
     intentData, scoreWeights, setScoreWeights, auditInsights,
     hubspotCrmData, rawSessions, rawEvents, exactCounts,
@@ -134,67 +131,19 @@ export default function AnalyticsDashboardClient() {
     setTimeout(() => setSuccessToast(null), 4000);
   };
 
-  useEffect(() => {
-    const auth = localStorage.getItem('insights_auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === 'dopamina2026' || password === 'admin' || password === 'dopamina') {
-      setIsAuthenticated(true);
-      localStorage.setItem('insights_auth', 'true');
-      setError('');
-    } else {
-      setError('Senha incorreta');
-    }
-  };
-
   const handleRefresh = () => {
     const { startDate, endDate } = getTimeFilterDates(timeRange, customStart, customEnd);
     fetchDashboardData(startDate, endDate, false, activeTab);
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const { startDate, endDate } = getTimeFilterDates(timeRange, customStart, customEnd);
-      fetchDashboardData(startDate, endDate, false, activeTab);
-    }
-  }, [isAuthenticated, timeRange, customStart, customEnd, activeTab, fetchDashboardData, getTimeFilterDates]);
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-surface-light p-8 shadow-sm">
-          <div className="mb-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-light border border-border">
-              <Lock className="h-6 w-6 text-foreground" />
-            </div>
-            <h1 className="mt-4 text-xl font-semibold text-foreground">
-              Acesso Restrito
-            </h1>
-            <p className="text-sm text-muted mt-1">Dashboard de Insights Avançados v4</p>
-          </div>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <input
-              type="password"
-              placeholder="Senha de administrador"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-xl border border-border bg-surface-light px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:bg-surface-light"
-              autoFocus
-            />
-            {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
-            <button type="submit" className="rounded-xl bg-primary px-4 py-3 text-sm font-medium text-foreground transition hover:bg-primary-hover">
-              Acessar Painel
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
+    const { startDate, endDate } = getTimeFilterDates(timeRange, customStart, customEnd);
+    void fetchDashboardData(startDate, endDate, false, activeTab);
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") void fetchDashboardData(startDate, endDate, true, activeTab);
+    }, 30_000);
+    return () => clearInterval(timer);
+  }, [timeRange, customStart, customEnd, activeTab, fetchDashboardData, getTimeFilterDates]);
 
   const TABS = [
     { id: 'overview', label: 'System Overview', icon: LayoutDashboard },
@@ -209,6 +158,7 @@ export default function AnalyticsDashboardClient() {
 
   return (
     <div className="bg-[#0b0f19] text-[#e4e4e7] min-h-screen font-sans">
+      {dataNotice && <p role="status" className="p-4 text-sm">{dataNotice}</p>}
       {/* Toast notification */}
       {successToast && (
         <div className="fixed bottom-6 right-6 z-50 rounded-sm bg-emerald-500 text-white px-4 py-3 font-mono text-[11px] uppercase font-bold shadow-md animate-bounce border border-emerald-400">
