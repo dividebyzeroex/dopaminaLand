@@ -1,59 +1,16 @@
-import React from 'react';
-
-export const metadata = {
-  title: 'Termos de Uso | Dopamina Brasil',
-};
-
-export default function TermosPage() {
-  return (
-    <div className="space-y-6 prose prose-invert max-w-none">
-      <h2 className="text-2xl font-black text-foreground border-b border-border pb-4">Termos de Uso</h2>
-      
-      <p className="text-muted leading-relaxed">
-        <strong>Última atualização:</strong> {new Date().toLocaleDateString('pt-BR')}
-      </p>
-
-      <div className="space-y-8 mt-8">
-        <section>
-          <h3 className="text-lg font-bold text-foreground">1. Aceitação do Irreal</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            A loja gamificada simula compras e não entrega produtos. A pesquisa de preços e o relatório compartilhável são gratuitos e têm finalidade informativa.
-          </p>
-        </section>
-
-        <section>
-          <h3 className="text-lg font-bold text-foreground">2. O Jogo e os Níveis de Dopamina</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            A plataforma opera em um sistema de experiência (XP). Você ganha XP ao interagir com o site (simular compras, navegar por produtos). O XP não possui valor monetário, não é uma criptomoeda, e não pode ser transferido ou vendido.
-          </p>
-        </section>
-
-        <section>
-          <h3 className="text-lg font-bold text-foreground">3. Swag Lab e Recompensas Reais</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            O único elemento físico deste projeto são os brindes (Swag). Caso você acumule a quantidade necessária de XP e atinja um nível elegível, você poderá resgatar brindes do projeto (como adesivos, camisas ou garrafas, a depender da disponibilidade).
-          </p>
-          <ul className="list-disc pl-5 mt-2 space-y-2 text-muted">
-            <li>O resgate de brindes é gratuito, incluindo o frete.</li>
-            <li>Limitado ao estoque do mês (bancado pelo nosso próprio bolso).</li>
-            <li>O direito ao brinde pode ser revogado caso detectemos o uso de bots, scripts automáticos ou qualquer tentativa de burlar a pontuação de XP (jogue limpo).</li>
-          </ul>
-        </section>
-
-        <section>
-          <h3 className="text-lg font-bold text-foreground">4. Compras simuladas e pesquisa de preços</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            O checkout da loja simulada não cobra dinheiro. O relatório de preços pode ser impresso ou salvo como PDF gratuitamente. Cada abertura do link faz uma nova consulta. Preços, frete, estoque e condições podem mudar; resultados de busca podem apresentar modelos diferentes. Confira a oferta na loja antes de comprar. Contribuições voluntárias, quando disponíveis, são identificadas separadamente como pagamentos reais.
-          </p>
-        </section>
-        
-        <section>
-          <h3 className="text-lg font-bold text-foreground">5. Limitação de Responsabilidade</h3>
-          <p className="text-muted leading-relaxed mt-2">
-            Não nos responsabilizamos pela tristeza imediata ou longo prazo decorrente da constatação de que você não vai receber aquele super computador holográfico que comprou por R$ 0,00 no nosso site.
-          </p>
-        </section>
-      </div>
+export const metadata = { title: "Termos de Uso" };
+export default function Page() {
+  const email = process.env.PRIVACY_CONTACT_EMAIL;
+  return <div className="space-y-6 max-w-none">
+    <h2 className="text-2xl font-black text-foreground border-b border-border pb-4">Termos de Uso</h2>
+    <p className="text-muted">Última atualização: 20/11/2026</p>
+    <div className="space-y-8">
+        <section><h3 className="text-lg font-bold">Finalidade</h3><p className="text-muted leading-relaxed mt-2">O Dopamina é uma ferramenta gratuita de comparação e histórico de preços. Não é uma loja e não oferece ranking, pontos ou recompensas pela pesquisa. Links externos levam a ofertas de terceiros.</p></section>
+        <section><h3 className="text-lg font-bold">Preços e metodologia</h3><p className="text-muted leading-relaxed mt-2">Os dados vêm de páginas públicas do Buscapé e das observações armazenadas pelo serviço. Podem existir atrasos de atualização, indisponibilidade da fonte, ofertas incompletas ou produtos semelhantes. Confira modelo, vendedor, frete, estoque, cupons e condições na loja antes de comprar.</p></section>
+        <section><h3 className="text-lg font-bold">Vereditos</h3><p className="text-muted leading-relaxed mt-2">Os vereditos são comparações estatísticas com o histórico disponível, conforme a metodologia publicada. Não são garantia de desconto, previsão de preços futuros ou prova de intenção de uma loja. Um preço estável não garante que continuará estável.</p></section>
+        <section><h3 className="text-lg font-bold">Alertas</h3><p className="text-muted leading-relaxed mt-2">Notificações dependem das permissões do aparelho, disponibilidade dos serviços e configuração do servidor. A checagem horária só está disponível quando o alerta por push é confirmado. No modo local, abra o site para verificar os preços; a execução com o app fechado não é garantida.</p></section>
+        <section><h3 className="text-lg font-bold">Contribuições e uso adequado</h3><p className="text-muted leading-relaxed mt-2">Contribuições voluntárias, quando disponíveis, são pagamentos reais separados da pesquisa gratuita. Não use automação abusiva para sobrecarregar o serviço, manipular métricas ou acessar dados de outras pessoas.</p></section>
+      <p>{email ? <a href={`mailto:${email}`}>Contato de privacidade</a> : <a href="https://github.com/dividebyzeroex" target="_blank" rel="noopener noreferrer">Responsável pelo projeto</a>}</p>
     </div>
-  );
+  </div>;
 }

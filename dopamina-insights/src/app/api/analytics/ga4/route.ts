@@ -1,7 +1,10 @@
+import { adminAccess } from "@/lib/admin-auth";
 import { NextResponse } from 'next/server';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const denied = adminAccess(request);
+  if (denied) return denied;
   const propertyId = process.env.GA_PROPERTY_ID;
   const clientEmail = process.env.GA_CLIENT_EMAIL;
   // Na Vercel, a chave privada costuma vir com \n literal que precisa ser convertido

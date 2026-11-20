@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+
 
 export interface PostHogData {
   kpis: any;
@@ -115,6 +115,7 @@ export interface IntentLead {
 }
 
 export function useInsightsData() {
+  const [dataNotice, setDataNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(new Date());
 
@@ -373,10 +374,15 @@ export function useInsightsData() {
       const formatMap = (map: Record<string, number>) =>
         Object.keys(map).map(name => ({ name, value: map[name] })).sort((a, b) => b.value - a.value);
 
-      // 1. Fetch Sessions (sessions table has session_id, device_info)
-      const sessionQuery = supabase.from('sessions').select('*', { count: 'exact' });
-      const { data: sessionData, count: sessionCount, error: sessionError } = await sessionQuery;
-      if (sessionError) console.warn('Sessions fetch warning:', sessionError.message);
+      const params = new URLSearchParams();
+      if (startDate) params.set("startDate", startDate);
+      if (endDate) params.set("endDate", endDate);
+      const response = await fetch(`/api/analytics/data?${params}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("Não foi possível consultar o painel.");
+      const snapshot = await response.json();
+      const sessionData: any[] = snapshot.sessions;
+      const sessionCount: number = snapshot.sessionCount;
+      setDataNotice(snapshot.truncated ? "Métricas comportamentais calculadas sobre até 1.000 registros recentes. Reduza o período para uma análise completa." : null);
 
       const genderMap: Record<string, number> = {};
       const osMap: Record<string, number> = {};
@@ -418,26 +424,10 @@ export function useInsightsData() {
       setMarketing({ utmSource: formatMap(sourceMap).slice(0, 5), utmMedium: formatMap(mediumMap).slice(0, 5), referrer: formatMap(referrerMap).slice(0, 5) });
       setHardware({ connection: formatMap(connMap).slice(0, 5), ram: formatMap(ramMap).slice(0, 5), cores: formatMap(coresMap).slice(0, 5), theme: formatMap(themeMap).slice(0, 3) });
 
-      // 2. Fetch Events
-      let eventQuery = supabase.from('intent_events').select('*').order('created_at', { ascending: false });
-      if (startDate) eventQuery = eventQuery.gte('created_at', startDate);
-      if (endDate) eventQuery = eventQuery.lte('created_at', endDate);
-      const { data: events, error: eventsError } = await eventQuery;
-      if (eventsError) throw eventsError;
-
-      // 3. Fetch Exact Counts for Specific Events (ignoring 1000 row limit)
-      let bookmarkletQuery = supabase.from('intent_events').select('id', { count: 'exact', head: true }).eq('event_type', 'bookmarklet_installed');
-      if (startDate) bookmarkletQuery = bookmarkletQuery.gte('created_at', startDate);
-      if (endDate) bookmarkletQuery = bookmarkletQuery.lte('created_at', endDate);
-      const { count: bookmarkletInstallsCount } = await bookmarkletQuery;
-
-      let auditQuery = supabase.from('intent_events').select('id', { count: 'exact', head: true }).eq('event_type', 'dark_pattern_audit');
-      if (startDate) auditQuery = auditQuery.gte('created_at', startDate);
-      if (endDate) auditQuery = auditQuery.lte('created_at', endDate);
-      const { count: storeAuditsCount } = await auditQuery;
-
-      // 4. Fetch Product Dictionary
-      const { data: allProducts } = await supabase.from('products').select('id, name, short_name');
+      const events: any[] = snapshot.events;
+      const bookmarkletInstallsCount: number = snapshot.bookmarkletCount;
+      const storeAuditsCount: number = snapshot.auditCount;
+      const allProducts: any[] = snapshot.products;
       const pDict = (allProducts || []).reduce((acc: any, p: any) => { acc[p.id] = p; return acc; }, {});
 
       setExactCounts({ bookmarklets: bookmarkletInstallsCount || 0, audits: storeAuditsCount || 0 });
@@ -671,7 +661,7 @@ export function useInsightsData() {
       // Top Products with images
       const topIds = Object.keys(productInteractions).sort((a, b) => productInteractions[b].carts - productInteractions[a].carts).slice(0, 5);
       if (topIds.length > 0) {
-        const { data: productsData } = await supabase.from('products').select('id, name, short_name, image_url').in('id', topIds);
+        const productsData = allProducts.filter(p => topIds.includes(p.id));
         const formattedTopProducts = productsData?.map(p => ({ ...p, metrics: productInteractions[p.id] })) || [];
         formattedTopProducts.sort((a, b) => b.metrics.carts - a.metrics.carts);
         setTopProducts(formattedTopProducts);
@@ -722,41 +712,16 @@ export function useInsightsData() {
 
       setLastUpdated(new Date());
     } catch (err: any) {
+      setDataNotice('Dados indisponíveis. Verifique a configuração do servidor e atualize o painel.');
       console.error('Error fetching dashboard data:', err);
     } finally {
       setLoading(false);
     }
   }, [recomputeIntentMetrics, scoreWeights]);
 
-  // ── Supabase Realtime Subscription ──
-  useEffect(() => {
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'sessions' },
-        () => {
-          // Re-fetch silently via WebSocket when a new session arrives
-          fetchDashboardData(undefined, undefined, true);
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'intent_events' },
-        () => {
-          // Re-fetch silently via WebSocket when a new event arrives
-          fetchDashboardData(undefined, undefined, true);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchDashboardData]);
-
   return {
     loading,
+    dataNotice,
     lastUpdated,
     scoreWeights, setScoreWeights,
     kpis, funnelData, topProducts, timelineData, demographics, hardware, marketing,
