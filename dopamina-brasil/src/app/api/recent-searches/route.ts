@@ -1,3 +1,4 @@
+import { isBlockedSearch } from '@/lib/search-policy';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
@@ -22,7 +23,7 @@ export async function GET() {
       for (const event of data) {
         const query = event.metadata?.query?.trim();
         // Ignora buscas vazias ou por URL longa
-        if (query && !query.startsWith('http') && !uniqueQueries.has(query)) {
+        if (query && !query.startsWith('http') && !query.startsWith('[') && !isBlockedSearch(query) && !uniqueQueries.has(query)) {
           uniqueQueries.add(query);
           recentSearches.push(query);
         }

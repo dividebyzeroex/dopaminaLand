@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isBlockedSearch } from "@/lib/search-policy";
+import { checkSearch } from "@/lib/search-policy";
 import { getProduct, normalizeQuery, queryFromUrl, searchProducts } from "@/lib/buscape";
 import { computeVerdict } from "@/lib/price-verdict";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   const raw = searchParams.get("q") || searchParams.get("query") || (inputUrl ? queryFromUrl(inputUrl) : null);
   const query = raw ? normalizeQuery(raw) : "";
   if (query.length < 2) return fail('Informe o parâmetro "q" ou "url".', 400);
-  if (isBlockedSearch(query)) return fail("Esta pesquisa não é permitida.", 400);
+  if (checkSearch(query).blocked) return fail("Esta pesquisa não é permitida.", 400);
 
   const informed = Number.parseFloat(searchParams.get("current_price") || searchParams.get("storePrice") || "");
 

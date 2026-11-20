@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const path = req.nextUrl.searchParams.get("path") ?? "";
   if (!isSafeProductPath(path)) return NextResponse.json({ ok: false, error: "Produto inválido." }, { status: 400 });
   const product = await getProduct(path).catch(() => null);
-  if (!product?.bestPrice) return NextResponse.json({ ok: false, error: "Preço indisponível agora." }, { status: 502 });
+  if (!product?.bestPrice || product.adult) return NextResponse.json({ ok: false, error: "Preço indisponível agora." }, { status: product?.adult ? 404 : 502 });
   return NextResponse.json(
     { ok: true, path: product.path, name: product.name, price: product.bestPrice, store: product.bestStore, checkedAt: product.checkedAt },
     { headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" } },

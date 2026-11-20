@@ -1,10 +1,14 @@
+import { sanitizeQueryForStorage } from "@/lib/search-policy";
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { sessionId, eventType, productId, priceDisplayed, metadata } = body;
+    const { sessionId, eventType, productId, priceDisplayed } = body;
+    const metadata = body.metadata && typeof body.metadata === "object" && "query" in body.metadata
+      ? { ...body.metadata, query: sanitizeQueryForStorage(body.metadata.query) }
+      : body.metadata;
 
     if (!sessionId || !eventType) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

@@ -7,10 +7,13 @@ import SearchBox from "@/components/price/SearchBox";
 import ProductCard from "@/components/price/ProductCard";
 import { analyzeSearch } from "@/lib/analysis";
 import { ACCESSORY, foldText, normalizeQuery, queryFromUrl } from "@/lib/buscape";
-import { isBlockedSearch } from "@/lib/search-policy";
+import { redirect } from "next/navigation";
+import { blockedMessage, checkSearch } from "@/lib/search-policy";
 import { displaySeries } from "@/lib/series";
 
-type Props = { searchParams: Promise<{ q?: string | string[] }> };
+type Props = { searchParams: Promise<{ q?: string | string[]; bloqueada?: string }> };
+
+const REASONS = ["ofensivo", "odio", "sexual", "ilegal", "violencia", "autolesao"] as const;
 
 async function readQuery(searchParams: Props["searchParams"]) {
   const raw = (await searchParams).q;
@@ -20,8 +23,9 @@ async function readQuery(searchParams: Props["searchParams"]) {
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const query = await readQuery(searchParams);
+  const blocked = Boolean((await searchParams).bloqueada) || (query ? checkSearch(query).blocked : false);
   return {
-    title: query ? `Preço de ${query}: histórico e veredito` : "Buscar produto",
+    title: blocked ? "Busca não permitida" : query ? `Preço de ${query}: histórico e veredito` : "Buscar produto",
     // Páginas de busca não devem ser indexadas; as de produto sim.
     robots: { index: false, follow: true },
   };
@@ -29,7 +33,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default async function SearchPage({ searchParams }: Props) {
   const query = await readQuery(searchParams);
-  const blocked = query ? isBlockedSearch(query) : false;
+  const policy = query ? checkSearch(query) : ({ blocked: false } as const);
+  // O termo bloqueado sai da URL (histórico, links compartilhados, analytics).
+  if (policy.blocked) redirect(`/busca?bloqueada=${policy.reason}`);
+  const flagged = (await searchParams).bloqueada;
+  const reason = REASONS.find(r => r === flagged);
+  const blocked = Boolean(reason);
   let results: Awaited<ReturnType<typeof analyzeSearch>> = [];
   let failed = false;
   if (query.length >= 2 && !blocked) {
@@ -46,11 +55,11 @@ export default async function SearchPage({ searchParams }: Props) {
       <SiteHeader />
       <section style={{ padding: "44px 0 10px", maxWidth: 640 }}>
         <span className={studio.eyebrow}>Sua busca</span>
-        <h1 className={studio.resultTitle}>{query || "O que você quer comprar?"}</h1>
-        <SearchBox key={query} defaultValue={query} id="search-again" />
+        <h1 className={studio.resultTitle}>{blocked ? "Busca não permitida" : query || "O que você quer comprar?"}</h1>
+        <SearchBox key={blocked ? "bloqueada" : query} defaultValue={blocked ? "" : query} id="search-again" />
       </section>
 
-      {blocked && <div className={styles.empty}><h2>Pesquisa não permitida.</h2><p>Busque outro produto.</p></div>}
+      {reason && <div className={styles.empty} role="alert"><h2>Não podemos mostrar resultados para essa busca.</h2><p>{blockedMessage(reason)}</p></div>}
       {failed && <div className={styles.empty}><span className={studio.eyebrow}>Fonte indisponível</span><h2>Não conseguimos consultar os preços agora.</h2><p>A fonte de preços não respondeu. Tente novamente em alguns instantes.</p></div>}
       {!failed && !blocked && query && results.length === 0 && <div className={styles.empty}><span className={studio.eyebrow}>Nada encontrado</span><h2>Nenhum preço verificável para “{query}”.</h2><p>Tente um nome mais curto ou o modelo do produto (ex.: “Galaxy S24 128GB”).</p></div>}
 

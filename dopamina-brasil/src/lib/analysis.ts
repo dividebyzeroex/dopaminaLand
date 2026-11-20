@@ -21,7 +21,8 @@ export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, in
 /** Produto + histórico completo (fonte + o que já gravamos antes da janela da fonte) + veredito. */
 export async function analyzeProduct(path: string): Promise<{ product: ProductDetail; history: ProductDetail["history"]; verdict: Verdict } | null> {
   const product = await getProduct(path).catch(() => null);
-  if (!product) return null;
+  // Conteúdo adulto marcado pela fonte não aparece no site (página, termômetro, busca).
+  if (!product || product.adult) return null;
   const stored = await loadStoredHistory(product.sourceId, product.history[0]?.date).catch(() => []);
   const history = [...stored, ...product.history];
   return { product, history, verdict: computeVerdict(history, product.bestPrice) };
@@ -34,9 +35,12 @@ export async function analyzeProduct(path: string): Promise<{ product: ProductDe
 export async function analyzeSearch(query: string, detailed = 6): Promise<AnalyzedHit[]> {
   const hits = (await searchProducts(query.toLowerCase())).slice(0, 16);
   const toDetail = new Set(hits.filter(hit => hit.path).slice(0, detailed).map(hit => hit.path));
-  return mapLimit(hits, 2, async hit => {
+  const results = await mapLimit(hits, 2, async (hit): Promise<AnalyzedHit | null> => {
     if (!hit.path || !toDetail.has(hit.path)) return { hit, product: null, verdict: null };
-    const analysis = await analyzeProduct(hit.path);
+    const product = await getProduct(hit.path).catch(() => null);
+    if (product?.adult) return null; // conteúdo adulto marcado pela fonte fica de fora
+    const analysis = product ? await analyzeProduct(hit.path) : null;
     return { hit, product: analysis?.product ?? null, verdict: analysis?.verdict ?? null };
   });
+  return results.filter((entry): entry is AnalyzedHit => entry !== null);
 }

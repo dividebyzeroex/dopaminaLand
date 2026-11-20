@@ -64,6 +64,8 @@ export type ProductDetail = {
   history: HistoryPoint[];
   sourceUrl: string;
   checkedAt: string;
+  /** Marcado como conteúdo adulto pela fonte: não exibimos. */
+  adult: boolean;
 };
 
 const SAFE_PATH = /^[a-z0-9-]+(?:\/[a-z0-9-]+){1,3}$/;
@@ -283,6 +285,7 @@ async function productUncached(path: string): Promise<ProductDetail | null> {
     history,
     sourceUrl,
     checkedAt: new Date().toISOString(),
+    adult: Boolean(info?.adultContent),
   };
 
   // Guarda a série no nosso banco para formar histórico próprio além dos 40 dias da fonte.
@@ -300,7 +303,7 @@ export const searchProducts = unstable_cache(
 /** Detalhe de produto com cache de 3 horas. */
 export const getProduct = unstable_cache(
   async (path: string) => productUncached(path),
-  ["buscape-product-v2"],
+  ["buscape-product-v3"],
   { revalidate: 10800 },
 );
 
@@ -349,6 +352,6 @@ export const getPopularProducts = unstable_cache(async () => popularUncached(), 
 /** Detalhe de produto com cache de 1 hora: usado pela checagem horária dos alertas. */
 export const getProductFresh = unstable_cache(
   async (path: string) => productUncached(path),
-  ["buscape-product-fresh-v1"],
+  ["buscape-product-fresh-v2"],
   { revalidate: 3600 },
 );
