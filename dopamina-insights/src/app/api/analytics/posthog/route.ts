@@ -1,3 +1,4 @@
+import { requireAuth } from '@/lib/server/auth';
 import { NextResponse } from 'next/server';
 
 interface HogQLResult {
@@ -34,6 +35,9 @@ async function runHogQLQuery(query: string): Promise<HogQLResult | null> {
 }
 
 export async function GET() {
+  const denied = await requireAuth();
+  if (denied) return denied;
+
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY;
   const projectId = process.env.POSTHOG_PROJECT_ID;
 

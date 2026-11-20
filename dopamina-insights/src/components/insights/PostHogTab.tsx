@@ -4,7 +4,7 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import type { PostHogData } from '@/hooks/useInsightsData';
+import type { PostHogData } from './types';
 
 const GRADIENT_COLORS = ['#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b', '#ef4444'];
 

@@ -1,6 +1,10 @@
+import { requireAuth } from '@/lib/server/auth';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  const denied = await requireAuth();
+  if (denied) return denied;
+
   const token = process.env.HUBSPOT_ACCESS_TOKEN;
 
   if (!token) {

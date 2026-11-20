@@ -5,6 +5,7 @@ import SiteHeader from "@/components/price/SiteHeader";
 import SiteFooter from "@/components/price/SiteFooter";
 import SearchBox from "@/components/price/SearchBox";
 import ProductCard from "@/components/price/ProductCard";
+import TrackOnce from "@/components/price/TrackOnce";
 import { analyzeSearch } from "@/lib/analysis";
 import { ACCESSORY, foldText, normalizeQuery, queryFromUrl } from "@/lib/buscape";
 import { isBlockedSearch } from "@/lib/search-policy";
@@ -44,6 +45,17 @@ export default async function SearchPage({ searchParams }: Props) {
   return <main className={studio.shell}>
     <div className={studio.wrap}>
       <SiteHeader />
+      {query && <TrackOnce event="search_results" metadata={{
+        query,
+        results: results.length,
+        analyzed: analyzed.length,
+        real_discounts: real,
+        fake_discounts: fake,
+        failed,
+        blocked,
+        only_accessories: onlyAccessories,
+        top: results.slice(0, 5).map(({ hit, product, verdict }) => ({ name: product?.name ?? hit.name, path: hit.path ?? null, price: product?.bestPrice ?? hit.price ?? null, verdict: verdict?.kind ?? null })),
+      }} />}
       <section style={{ padding: "44px 0 10px", maxWidth: 640 }}>
         <span className={studio.eyebrow}>Sua busca</span>
         <h1 className={studio.resultTitle}>{query || "O que você quer comprar?"}</h1>

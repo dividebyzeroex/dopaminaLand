@@ -18,7 +18,7 @@ export default function SearchBox({ defaultValue = "", suggestions = [], id = "p
   function go(term: string) {
     const query = term.trim();
     if (query.length < 2 || pending) return;
-    if (isBlockedSearch(query)) { setError("Esta pesquisa não é permitida. Busque outro produto."); return; }
+    if (isBlockedSearch(query)) { trackEvent("search_blocked", undefined, undefined, { query: query.slice(0, 120) }); setError("Esta pesquisa não é permitida. Busque outro produto."); return; }
     setError("");
     setValue(query);
     trackEvent("super_search", "search_submitted", undefined, { query });

@@ -6,9 +6,8 @@
 --
 -- Pré-requisitos antes de aplicar:
 --   1. Criar SUPABASE_SERVICE_ROLE_KEY na Vercel (projetos dopamina-land e dopamina-land-insights).
---   2. Mover as leituras do painel dopamina-insights (src/hooks/useInsightsData.ts e
---      src/components/dashboard/LeadsTab.tsx) para rotas
---      de servidor que usem a service role, protegidas por login.
+--   2. FEITO: o painel dopamina-insights lê tudo por rotas de servidor (/api/insights/*) com login.
+--      Ele já usa a SUPABASE_SERVICE_ROLE_KEY quando ela existe; basta criá-la no projeto da Vercel.
 --   3. Mudar /api/recent-searches, /api/track-session e /api/track-event para getServiceSupabase()
 --      (o upsert de sessions hoje depende da policy FOR ALL removida abaixo).
 -- Depois disso, mover este arquivo para supabase/migrations/ e aplicar.

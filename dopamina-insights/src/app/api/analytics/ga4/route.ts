@@ -1,7 +1,11 @@
+import { requireAuth } from '@/lib/server/auth';
 import { NextResponse } from 'next/server';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 export async function GET() {
+  const denied = await requireAuth();
+  if (denied) return denied;
+
   const propertyId = process.env.GA_PROPERTY_ID;
   const clientEmail = process.env.GA_CLIENT_EMAIL;
   // Na Vercel, a chave privada costuma vir com \n literal que precisa ser convertido
