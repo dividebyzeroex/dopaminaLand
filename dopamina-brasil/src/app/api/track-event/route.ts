@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sanitizeQueryForStorage } from '@/lib/search-policy';
 import { supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 
@@ -29,7 +30,11 @@ export async function OPTIONS() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { session_id, event_type, product_id, price_displayed, metadata } = body;
+    const { session_id, event_type, product_id, price_displayed } = body;
+    // Buscas ofensivas ou proibidas não são gravadas como foram digitadas.
+    const metadata = body.metadata && typeof body.metadata === "object" && "query" in body.metadata
+      ? { ...body.metadata, query: sanitizeQueryForStorage(body.metadata.query) }
+      : body.metadata;
 
     if (!session_id || !event_type) {
       return NextResponse.json({ error: 'session_id and event_type are required' }, { status: 400, headers: corsHeaders });

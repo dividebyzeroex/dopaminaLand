@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { BellRing, X } from "lucide-react";
 import { usePwa } from "./usePwa";
-import InstallSteps, { AndroidSteps } from "./InstallSteps";
+import Link from "next/link";
+import InstallSteps from "./InstallSteps";
 import { promptInstall, readLocal, subscribePwa, writeLocal } from "@/lib/pwa-client";
 import { trackEvent } from "@/lib/tracking";
 import styles from "./pwa.module.css";
@@ -14,11 +16,13 @@ const SNOOZE_DAYS = 14;
 /** Convite para instalar o app (só no celular, fora do app, e some por 14 dias ao fechar). */
 export default function InstallBanner() {
   const pwa = usePwa();
+  const pathname = usePathname();
   const dialog = useRef<HTMLDialogElement>(null);
   // Escondido até ler o adiamento salvo (no servidor, sempre escondido).
   const hidden = useSyncExternalStore(subscribePwa, () => Date.now() < Number(readLocal(KEY) || 0), () => true);
 
-  if (hidden || !pwa.mobile || pwa.standalone) return null;
+  // Na página de instalação o próprio guia já está na tela.
+  if (hidden || !pwa.mobile || pwa.standalone || pathname === "/instalar") return null;
 
   function dismiss() {
     writeLocal(KEY, String(Date.now() + SNOOZE_DAYS * 86400000));
@@ -42,9 +46,10 @@ export default function InstallBanner() {
       <div className={styles.sheetInner}>
         <button type="button" className={styles.close} onClick={() => dialog.current?.close()} aria-label="Fechar"><X size={18} /></button>
         <span className={styles.kicker}>App Dopamina</span>
-        <h2 id="install-title" className={styles.sheetTitle}>Instale em 3 toques</h2>
+        <h2 id="install-title" className={styles.sheetTitle}>Instale em poucos toques</h2>
         <p className={styles.sheetText}>Com o app na tela inicial, você recebe notificação quando um preço que acompanha cair, subir ou estabilizar.</p>
-        {pwa.ios ? <InstallSteps /> : <AndroidSteps />}
+        <InstallSteps />
+        <Link href="/instalar" className={styles.fine}>Abrir o guia completo</Link>
       </div>
     </dialog>
   </>;

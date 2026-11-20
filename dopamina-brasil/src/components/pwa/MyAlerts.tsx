@@ -74,7 +74,7 @@ export default function MyAlerts() {
       return <article key={w.path} className={styles.alertRow}>
         <div>
           <Link href={`/produto/${w.path}`} className={styles.alertName}>{w.name}</Link>
-          <p className={styles.fine}>Avisa ao {kinds}. Quando criou: {brl(w.basePrice)} · agora: {brl(now)}{Math.abs(change) >= 0.005 ? ` (${change > 0 ? "+" : "−"}${Math.abs(change * 100).toFixed(1).replace(".", ",")}%)` : ""}</p>
+          <p className={styles.fine}>{w.serverPush ? "Checado de hora em hora, com o app fechado. " : ""}Avisa ao {kinds}. Quando criou: {brl(w.basePrice)} · agora: {brl(now)}{Math.abs(change) >= 0.005 ? ` (${change > 0 ? "+" : "−"}${Math.abs(change * 100).toFixed(1).replace(".", ",")}%)` : ""}</p>
         </div>
         <button type="button" className={styles.secondary} onClick={() => void remove(w.path)}>Remover</button>
       </article>;

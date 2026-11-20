@@ -32,16 +32,40 @@ export function initPwa() {
   }
 }
 
+export type DeviceOs = "ios" | "android" | "desktop";
+export type DeviceBrowser = "safari" | "chrome" | "samsung" | "firefox" | "edge" | "opera" | "inapp" | "other";
+
 export type PwaState = {
   standalone: boolean;
   ios: boolean;
   mobile: boolean;
+  os: DeviceOs;
+  browser: DeviceBrowser;
+  /** Safari 26+ (iOS 26): o botão Compartilhar fica dentro do menu ⋯. */
+  safariNew: boolean;
   canPromptInstall: boolean;
   pushSupported: boolean;
   permission: NotificationPermission | "unsupported";
 };
 
-const SERVER_STATE: PwaState = { standalone: false, ios: false, mobile: false, canPromptInstall: false, pushSupported: false, permission: "unsupported" };
+const SERVER_STATE: PwaState = { standalone: false, ios: false, mobile: false, os: "desktop", browser: "other", safariNew: false, canPromptInstall: false, pushSupported: false, permission: "unsupported" };
+
+/** Sistema e navegador a partir do user agent (só para escolher as instruções certas). */
+export function detectDevice(ua: string, maxTouchPoints = 0, platform = ""): { os: DeviceOs; browser: DeviceBrowser; safariNew: boolean } {
+  const ios = /iPhone|iPad|iPod/.test(ua) || (platform === "MacIntel" && maxTouchPoints > 1);
+  const android = /Android/i.test(ua);
+  const os: DeviceOs = ios ? "ios" : android ? "android" : "desktop";
+  let browser: DeviceBrowser = "other";
+  if (/Instagram|FBAN|FBAV|FB_IAB|WhatsApp|TikTok|musical_ly|Line\/|LinkedInApp|Snapchat|; wv\)/i.test(ua)) browser = "inapp";
+  else if (/SamsungBrowser/i.test(ua)) browser = "samsung";
+  else if (/EdgiOS|EdgA|Edg\//.test(ua)) browser = "edge";
+  else if (/FxiOS|Firefox/.test(ua)) browser = "firefox";
+  else if (/OPR\/|OPiOS|OPT\//.test(ua)) browser = "opera";
+  else if (/CriOS|Chrome\//.test(ua)) browser = "chrome";
+  else if (/Safari/.test(ua)) browser = "safari";
+  const version = Number(ua.match(/Version\/(\d+)/)?.[1] ?? 0);
+  return { os, browser, safariNew: ios && browser === "safari" && version >= 26 };
+}
 let cached: PwaState = SERVER_STATE;
 
 export function getPwaState(): PwaState {
@@ -51,7 +75,9 @@ export function getPwaState(): PwaState {
   const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
   // Notificação local via service worker. No iPhone só existe com o app na tela inicial.
   const pushSupported = "serviceWorker" in navigator && "Notification" in window;
+  const device = detectDevice(ua, navigator.maxTouchPoints, navigator.platform);
   const next: PwaState = {
+    ...device,
     standalone, ios, mobile: /Android|iPhone|iPad|iPod|Mobile/.test(ua) || ios,
     canPromptInstall: Boolean(deferredInstall), pushSupported,
     permission: "Notification" in window ? Notification.permission : "unsupported",
@@ -78,6 +104,8 @@ export async function promptInstall(): Promise<boolean> {
 export type AlertKinds = { drop: boolean; rise: boolean; stable: boolean };
 export type LocalWatch = {
   path: string; name: string;
+  /** true: o servidor checa de hora em hora e manda push (app fechado). */
+  serverPush?: boolean;
   notifyDrop: boolean; notifyRise: boolean; notifyStable: boolean;
   basePrice: number; lastPrice: number; currentPrice?: number;
   lastChangeAt: string; lastNotifiedAt: string | null; createdAt: string; checkedAt?: string;
@@ -125,10 +153,10 @@ export async function enableBackgroundCheck(): Promise<boolean> {
   } catch { return false; }
 }
 
-export async function saveLocalWatch(input: { path: string; name: string; price: number; kinds: AlertKinds }) {
+export async function saveLocalWatch(input: { path: string; name: string; price: number; kinds: AlertKinds; serverPush?: boolean }) {
   const now = new Date().toISOString();
   const watch: LocalWatch = {
-    path: input.path, name: input.name,
+    path: input.path, name: input.name, serverPush: Boolean(input.serverPush),
     notifyDrop: input.kinds.drop, notifyRise: input.kinds.rise, notifyStable: input.kinds.stable,
     basePrice: input.price, lastPrice: input.price, currentPrice: input.price,
     lastChangeAt: now, lastNotifiedAt: null, createdAt: now, checkedAt: now,
@@ -145,6 +173,49 @@ export async function listLocalWatches() {
 export async function removeLocalWatch(path: string) {
   await swCall({ type: "remove", path });
   rememberWatched(path, false);
+  // Também para os avisos do servidor, se este aparelho estiver inscrito.
+  const endpoint = await pushEndpoint().catch(() => null);
+  if (endpoint) await fetch("/api/alerts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ endpoint, path }) }).catch(() => undefined);
+}
+
+// ── Push do servidor (avisos de hora em hora com o app fechado) ─────────
+export const serverPushConfigured = Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+
+function base64ToBytes(base64: string) {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const raw = atob((base64 + padding).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+
+async function pushEndpoint(): Promise<string | null> {
+  const registration = await swRegistration();
+  const sub = await registration.pushManager?.getSubscription();
+  return sub?.endpoint ?? null;
+}
+
+/**
+ * Inscreve o aparelho no push e registra o alerta no servidor, que checa o preço
+ * de hora em hora. Retorna false se o navegador ou o servidor não suportarem:
+ * aí o alerta segue só com a checagem local.
+ */
+export async function registerServerAlert(input: { path: string; kinds: AlertKinds }): Promise<boolean> {
+  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!key) return false;
+  try {
+    const registration = await swRegistration();
+    if (!registration.pushManager) return false;
+    const subscription = await registration.pushManager.getSubscription()
+      ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64ToBytes(key) });
+    const response = await fetch("/api/alerts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscription: subscription.toJSON(), path: input.path, kinds: input.kinds }),
+    });
+    const data = await response.json().catch(() => null);
+    return Boolean(response.ok && data?.ok);
+  } catch {
+    return false;
+  }
 }
 
 export async function checkNow() {

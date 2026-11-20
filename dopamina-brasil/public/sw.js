@@ -2,6 +2,7 @@
  * Service worker do Dopamina. Os alertas de preço são feitos pelo próprio
  * navegador: os produtos acompanhados ficam no aparelho (IndexedDB) e este
  * worker checa os preços e mostra as notificações.
+ *   - De hora em hora com o app fechado: push enviado pelo servidor (evento "push").
  *   - Em segundo plano: Periodic Background Sync (Chrome/Edge com o app instalado).
  *   - Ao abrir o app: a página pede uma checagem ("check").
  */
@@ -19,6 +20,20 @@ function notify(title, options) {
 function runCheck() {
   return self.DopaminaAlerts.checkAll({ fetch: fetch.bind(self), notify: notify });
 }
+
+// Push do servidor: checagem de hora em hora feita fora do aparelho.
+self.addEventListener("push", function (event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data && event.data.text() }; }
+  event.waitUntil(notify(data.title || "Dopamina", {
+    body: data.body || "",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/badge-96.png",
+    tag: data.tag,
+    renotify: Boolean(data.tag),
+    data: { url: data.url || "/" },
+  }));
+});
 
 self.addEventListener("periodicsync", function (event) {
   if (event.tag === SYNC_TAG) event.waitUntil(runCheck());

@@ -75,7 +75,7 @@ async function ownTopQueries(days = 7, limit = 8): Promise<string[]> {
   const visitors = new Map<string, { label: string; sessions: Set<string> }>();
   for (const row of data) {
     const raw = typeof row.metadata?.query === "string" ? row.metadata.query : "";
-    if (!raw || /^https?:\/\//i.test(raw)) continue;
+    if (!raw || /^https?:\/\//i.test(raw) || raw.startsWith("[")) continue;
     const label = normalizeQuery(raw);
     const key = foldText(label);
     if (key.length < 3 || isBlockedSearch(label)) continue;
