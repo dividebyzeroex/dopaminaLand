@@ -26,11 +26,11 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.dopaminado.com.br'),
   title: {
-    default: "Dopamina — Black Friday: desconto de verdade ou maquiagem?",
+    default: "Dopamina — histórico de preços: desconto de verdade ou maquiagem?",
     template: "%s · Dopamina",
   },
   description:
-    "Veja o histórico de preços de qualquer produto e descubra se o desconto da Black Friday é real. Compare lojas e baixe um relatório gratuito.",
+    "Veja o histórico de preços de qualquer produto e descubra se o desconto é real na Black Friday, no Natal, no Dia das Mães e em outras datas. Compare lojas antes de comprar.",
   keywords: [
     "dopamina",
     "black friday",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   ],
   robots: "index, follow",
   openGraph: {
-    title: "Dopamina — Black Friday: desconto de verdade ou maquiagem?",
+    title: "Dopamina — desconto de verdade ou maquiagem?",
     description:
       "Histórico de preços e veredito honesto: descubra se o desconto é real antes de comprar.",
     locale: "pt_BR",

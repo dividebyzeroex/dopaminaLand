@@ -1,7 +1,7 @@
 import type { HistoryPoint } from "./buscape";
 
 /**
- * Veredito "Black Friday de verdade?" — regras simples, públicas e reproduzíveis.
+ * Veredito "o desconto é de verdade?" — regras simples, públicas e reproduzíveis, para qualquer data.
  *
  * Entradas: série diária do menor preço encontrado (todas as lojas) e o menor preço de agora.
  * Não há modelo preditivo nem promessa de queda futura: só comparamos o preço de hoje

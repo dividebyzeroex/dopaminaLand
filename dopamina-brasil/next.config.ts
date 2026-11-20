@@ -33,7 +33,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return legacyRoutes.map(source => ({ source, destination: "/", permanent: true }));
+    return [
+      ...legacyRoutes.map(source => ({ source, destination: "/", permanent: true })),
+      // A campanha de Black Friday virou uma das datas do calendário.
+      { source: "/black-friday", destination: "/datas/black-friday", permanent: true },
+    ];
   },
 };
 
