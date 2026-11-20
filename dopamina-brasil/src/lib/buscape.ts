@@ -345,3 +345,10 @@ async function popularUncached(): Promise<PopularProduct[]> {
 }
 
 export const getPopularProducts = unstable_cache(async () => popularUncached(), ["buscape-popular-v1"], { revalidate: 10800 });
+
+/** Detalhe de produto com cache de 1 hora: usado pela checagem horária dos alertas. */
+export const getProductFresh = unstable_cache(
+  async (path: string) => productUncached(path),
+  ["buscape-product-fresh-v1"],
+  { revalidate: 3600 },
+);

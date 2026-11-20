@@ -5,6 +5,9 @@
  * - Os alertas ficam no IndexedDB do aparelho.
  * - A checagem roda em segundo plano (Periodic Background Sync, Chrome/Edge com o
  *   app instalado) e sempre que o app é aberto.
+ * - Alertas com `serverPush: true` também são checados de hora em hora pelo
+ *   servidor, que manda o push; aqui eles só atualizam o preço exibido, sem
+ *   notificar, para o aviso não chegar em dobro.
  * - Regras: baixou 3%+, subiu 3%+, estável (±1%) por 7 dias, sem repetir antes de 7 dias.
  */
 (function (root) {
@@ -105,7 +108,7 @@
               var decision = decideAlert(w, data.price, now);
               var updated = Object.assign({}, w, decision.next, { currentPrice: data.price, checkedAt: now.toISOString() });
               var shown = Promise.resolve();
-              if (decision.kind) {
+              if (decision.kind && !w.serverPush) {
                 var stableDays = (now.getTime() - Date.parse(w.lastChangeAt)) / DAY;
                 var msg = alertMessage(decision.kind, w.name, data.price, previous, decision.change, stableDays);
                 report.notified++;
