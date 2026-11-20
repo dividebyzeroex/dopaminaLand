@@ -23,6 +23,8 @@ export default function AlertButton({ path, name, price }: Props) {
   const [message, setMessage] = useState("");
   const [mode, setMode] = useState<"push" | "background" | "open">("open");
   const [kinds, setKinds] = useState({ drop: true, stable: true, rise: false });
+  // Destaques de queda dos mais buscados (no máximo 1 aviso por dia).
+  const [trending, setTrending] = useState(true);
 
   // iPhone fora da tela inicial não recebe push: o primeiro passo é instalar.
   const needsIosInstall = pwa.ios && !pwa.standalone;
@@ -41,14 +43,14 @@ export default function AlertButton({ path, name, price }: Props) {
     if (permission === "denied" || permission === "default") { setStep("denied"); return; }
     if (permission === "unsupported") { setMessage("Este navegador não mostra notificações. Instale o app pelo Chrome ou Safari."); setStep("error"); return; }
     // 1º servidor (avisos de hora em hora com o app fechado); se não der, fica a checagem local.
-    const serverPush = await registerServerAlert({ path, kinds });
+    const serverPush = await registerServerAlert({ path, kinds, trending });
     const saved = await saveLocalWatch({ path, name, price, kinds, serverPush }).catch(() => false);
     if (!saved) { setMessage("Não foi possível salvar o alerta neste aparelho."); setStep("error"); return; }
     const background = serverPush ? false : await enableBackgroundCheck();
     setMode(serverPush ? "push" : background ? "background" : "open");
     await localNotification(serverPush ? "Alerta por push ativado ✓" : "Alerta local ativado ✓", serverPush ? `Vamos avisar quando ${name.slice(0, 60)} mudar de preço.` : "Abra o Dopamina para atualizar o preço. Avisos com o app fechado não estão garantidos.", `/produto/${path}`).catch(() => undefined);
     setStep("done");
-    trackEvent("tracking_update", name, price ?? undefined, { action: "alert_created", path, kinds, standalone: pwa.standalone });
+    trackEvent("tracking_update", name, price ?? undefined, { action: "alert_created", path, kinds, trending: serverPush ? trending : false, standalone: pwa.standalone });
   }
 
   const toggle = (key: keyof typeof kinds) => setKinds(k => ({ ...k, [key]: !k[key] }));
@@ -80,6 +82,7 @@ export default function AlertButton({ path, name, price }: Props) {
             <label className={styles.option}><input type="checkbox" checked={kinds.stable} onChange={() => toggle("stable")} /><span><b>Estabilizar</b><small>Uma semana sem variação relevante</small></span></label>
             <label className={styles.option}><input type="checkbox" checked={kinds.rise} onChange={() => toggle("rise")} /><span><b>Subir de preço</b><small>Alta de 3% ou mais</small></span></label>
           </fieldset>
+          <label className={styles.option} style={{ marginTop: 8 }}><input type="checkbox" checked={trending} onChange={() => setTrending(t => !t)} /><span><b>Quedas nos mais buscados</b><small>Desconto real nos produtos que mais gente procura. No máximo 1 aviso por dia.</small></span></label>
           {pwa.canPromptInstall && !pwa.standalone && <button type="button" className={styles.secondary} onClick={() => void promptInstall()}>Instalar o app para receber mais rápido</button>}
           <button type="button" className={styles.primary} disabled={none || step === "saving"} onClick={() => void save()}>
             {step === "saving" ? "Ativando…" : "Ativar alerta"}
@@ -91,7 +94,7 @@ export default function AlertButton({ path, name, price }: Props) {
           <span className={styles.ok}><Check size={22} aria-hidden="true" /></span>
           <h2 id="alert-title" className={styles.sheetTitle}>Alerta ativado</h2>
           <p className={styles.sheetText}>{mode === "push"
-            ? "Checamos o preço de hora em hora e avisamos aqui, mesmo com o app fechado."
+            ? `Checamos o preço de hora em hora e avisamos aqui, mesmo com o app fechado.${trending ? " Você também recebe, no máximo uma vez por dia, as quedas reais nos produtos mais buscados." : ""}`
             : mode === "background"
               ? "O app checa o preço em segundo plano, cerca de duas vezes por dia, e avisa você."
               : "O app checa o preço sempre que você abre o Dopamina. Para não perder nada, abra o app de vez em quando."}</p>
