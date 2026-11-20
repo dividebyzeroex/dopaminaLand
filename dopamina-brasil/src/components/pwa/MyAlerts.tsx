@@ -2,63 +2,81 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BellOff } from "lucide-react";
+import { BellOff, RefreshCw } from "lucide-react";
 import { usePwa } from "./usePwa";
 import InstallSteps from "./InstallSteps";
-import { currentEndpoint, rememberWatched } from "@/lib/pwa-client";
+import { checkNow, listLocalWatches, removeLocalWatch, type LocalWatch } from "@/lib/pwa-client";
 import styles from "./pwa.module.css";
 
-type Alert = { product_path: string; product_name: string | null; notify_drop: boolean; notify_rise: boolean; notify_stable: boolean; base_price: number | null; last_price: number | null };
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+const when = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
+/** Alertas guardados neste aparelho (IndexedDB, via service worker). */
 export default function MyAlerts() {
   const pwa = usePwa();
-  const [endpoint, setEndpoint] = useState<string | null>(null);
-  const [alerts, setAlerts] = useState<Alert[] | null>(null);
-  const [error, setError] = useState("");
+  const [watches, setWatches] = useState<LocalWatch[] | null>(null);
+  const [lastCheck, setLastCheck] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+
+  async function load() {
+    try {
+      const data = await listLocalWatches();
+      setWatches(data.watches.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+      setLastCheck(data.lastCheck);
+    } catch {
+      setWatches([]);
+    }
+  }
 
   useEffect(() => {
     let alive = true;
-    (async () => {
-      const ep = await currentEndpoint().catch(() => null);
-      if (!alive) return;
-      setEndpoint(ep);
-      if (!ep) { setAlerts([]); return; }
-      const res = await fetch(`/api/alerts?endpoint=${encodeURIComponent(ep)}`).catch(() => null);
-      const data = await res?.json().catch(() => null);
-      if (!alive) return;
-      if (!res?.ok || !data?.ok) { setError(data?.error ?? "Não foi possível carregar seus alertas."); setAlerts([]); return; }
-      setAlerts(data.alerts);
-    })();
+    listLocalWatches()
+      .then(data => { if (alive) { setWatches(data.watches.sort((a, b) => b.createdAt.localeCompare(a.createdAt))); setLastCheck(data.lastCheck); } })
+      .catch(() => { if (alive) setWatches([]); });
     return () => { alive = false; };
   }, []);
 
-  async function remove(path: string) {
-    if (!endpoint) return;
-    await fetch("/api/alerts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ endpoint, path }) }).catch(() => null);
-    rememberWatched(path, false);
-    setAlerts(list => list?.filter(a => a.product_path !== path) ?? null);
+  async function refresh() {
+    setBusy(true); setNote("");
+    try {
+      const { report } = await checkNow();
+      setNote(report.notified ? `${report.notified} ${report.notified === 1 ? "aviso enviado" : "avisos enviados"}.` : "Nenhuma mudança relevante desde a última checagem.");
+    } catch { setNote("Não foi possível checar agora."); }
+    await load();
+    setBusy(false);
   }
 
-  if (alerts === null) return <p className={styles.sheetText} role="status">Carregando seus alertas…</p>;
+  async function remove(path: string) {
+    await removeLocalWatch(path).catch(() => undefined);
+    setWatches(list => list?.filter(w => w.path !== path) ?? null);
+  }
+
+  if (watches === null) return <p className={styles.sheetText} role="status">Carregando seus alertas…</p>;
 
   return <div className={styles.myAlerts}>
-    {error && <p className={styles.sheetText} role="alert">{error}</p>}
-    {!error && alerts.length === 0 && <div className={styles.empty}>
+    {watches.length === 0 && <div className={styles.empty}>
       <BellOff size={28} aria-hidden="true" />
       <p className={styles.sheetText}>Nenhum alerta neste aparelho ainda. Abra um produto e toque em <b>Avisar quando o preço mudar</b>.</p>
       {pwa.ios && !pwa.standalone && <><p className={styles.sheetText}>No iPhone, instale o app antes:</p><InstallSteps /></>}
       <Link className={styles.primary} href="/">Buscar um produto</Link>
     </div>}
-    {alerts.map(a => {
-      const kinds = [a.notify_drop && "baixar", a.notify_stable && "estabilizar", a.notify_rise && "subir"].filter(Boolean).join(", ");
-      const change = a.base_price && a.last_price ? (a.last_price - a.base_price) / a.base_price : null;
-      return <article key={a.product_path} className={styles.alertRow}>
+
+    {watches.length > 0 && <div className={styles.alertRow}>
+      <p className={styles.fine}>{lastCheck ? `Última checagem: ${when(lastCheck)}.` : "Ainda não checamos."} O app checa ao ser aberto{pwa.standalone && !pwa.ios ? " e em segundo plano" : ""}.{note ? ` ${note}` : ""}</p>
+      <button type="button" className={styles.secondary} onClick={() => void refresh()} disabled={busy}><RefreshCw size={16} aria-hidden="true" style={{ marginRight: 8 }} />{busy ? "Checando…" : "Checar agora"}</button>
+    </div>}
+
+    {watches.map(w => {
+      const kinds = [w.notifyDrop && "baixar", w.notifyStable && "estabilizar", w.notifyRise && "subir"].filter(Boolean).join(", ");
+      const now = w.currentPrice ?? w.lastPrice;
+      const change = w.basePrice ? (now - w.basePrice) / w.basePrice : 0;
+      return <article key={w.path} className={styles.alertRow}>
         <div>
-          <Link href={`/produto/${a.product_path}`} className={styles.alertName}>{a.product_name ?? a.product_path}</Link>
-          <p className={styles.fine}>Avisa ao {kinds}. {a.base_price ? `Quando criou: ${brl(a.base_price)}` : ""}{a.last_price ? ` · último registrado: ${brl(a.last_price)}` : ""}{change !== null && Math.abs(change) >= 0.005 ? ` (${change > 0 ? "+" : "−"}${Math.abs(change * 100).toFixed(1).replace(".", ",")}%)` : ""}</p>
+          <Link href={`/produto/${w.path}`} className={styles.alertName}>{w.name}</Link>
+          <p className={styles.fine}>{w.serverPush ? "Checado de hora em hora, com o app fechado. " : ""}Avisa ao {kinds}. Quando criou: {brl(w.basePrice)} · agora: {brl(now)}{Math.abs(change) >= 0.005 ? ` (${change > 0 ? "+" : "−"}${Math.abs(change * 100).toFixed(1).replace(".", ",")}%)` : ""}</p>
         </div>
-        <button type="button" className={styles.secondary} onClick={() => void remove(a.product_path)}>Remover</button>
+        <button type="button" className={styles.secondary} onClick={() => void remove(w.path)}>Remover</button>
       </article>;
     })}
   </div>;

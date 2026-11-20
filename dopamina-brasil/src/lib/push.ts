@@ -15,7 +15,10 @@ function configurePush(): boolean {
   const priv = process.env.VAPID_PRIVATE_KEY;
   const subject = process.env.VAPID_SUBJECT || "mailto:contato@dopaminado.com.br";
   configured = Boolean(pub && priv);
-  if (configured) webpush.setVapidDetails(subject, pub!, priv!);
+  if (configured) {
+    try { webpush.setVapidDetails(subject, pub!, priv!); }
+    catch { configured = false; }
+  }
   return configured;
 }
 

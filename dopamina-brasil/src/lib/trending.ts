@@ -59,7 +59,7 @@ function groupName(category: string | null, path: string): string {
 /** Termos mais buscados no Dopamina (por visitantes distintos), mais recentes primeiro em caso de empate. */
 async function ownTopQueries(days = 7, limit = 8): Promise<string[]> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return [];
   const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
   const since = new Date(Date.now() - days * 86400000).toISOString();
@@ -75,7 +75,7 @@ async function ownTopQueries(days = 7, limit = 8): Promise<string[]> {
   const visitors = new Map<string, { label: string; sessions: Set<string> }>();
   for (const row of data) {
     const raw = typeof row.metadata?.query === "string" ? row.metadata.query : "";
-    if (!raw || /^https?:\/\//i.test(raw)) continue;
+    if (!raw || /^https?:\/\//i.test(raw) || raw.startsWith("[")) continue;
     const label = normalizeQuery(raw);
     const key = foldText(label);
     if (key.length < 3 || isBlockedSearch(label)) continue;

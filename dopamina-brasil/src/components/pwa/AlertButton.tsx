@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Bell, BellRing, Check, X } from "lucide-react";
 import { usePwa } from "./usePwa";
 import InstallSteps from "./InstallSteps";
-import { ensurePushSubscription, promptInstall, rememberWatched, subscribePwa, watchedPaths } from "@/lib/pwa-client";
+import { enableBackgroundCheck, ensureNotificationPermission, localNotification, promptInstall, registerServerAlert, saveLocalWatch, subscribePwa, watchedPaths } from "@/lib/pwa-client";
 import { trackEvent } from "@/lib/tracking";
 import styles from "./pwa.module.css";
 
@@ -21,6 +21,7 @@ export default function AlertButton({ path, name, price }: Props) {
   const active = useSyncExternalStore(subscribePwa, () => watchedPaths().includes(path), () => false);
   const [step, setStep] = useState<Step>("choose");
   const [message, setMessage] = useState("");
+  const [mode, setMode] = useState<"push" | "background" | "open">("open");
   const [kinds, setKinds] = useState({ drop: true, stable: true, rise: false });
 
   // iPhone fora da tela inicial não recebe push: o primeiro passo é instalar.
@@ -34,26 +35,18 @@ export default function AlertButton({ path, name, price }: Props) {
   }
 
   async function save() {
+    if (!price) { setMessage("Não conseguimos ler o preço deste produto agora."); setStep("error"); return; }
     setStep("saving");
-    const result = await ensurePushSubscription();
-    if ("error" in result) {
-      if (result.error === "denied") { setStep("denied"); return; }
-      setMessage(result.error === "no-key" ? "Os alertas ainda não estão ativos. Volte em breve." : "Este navegador não aceita notificações. Instale o app ou tente pelo Chrome.");
-      setStep("error");
-      return;
-    }
-    const response = await fetch("/api/alerts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subscription: result.subscription.toJSON(), path, kinds }),
-    }).catch(() => null);
-    const data = await response?.json().catch(() => null);
-    if (!response?.ok || !data?.ok) {
-      setMessage(data?.error ?? "Não foi possível salvar o alerta agora.");
-      setStep("error");
-      return;
-    }
-    rememberWatched(path, true);
+    const permission = await ensureNotificationPermission();
+    if (permission === "denied" || permission === "default") { setStep("denied"); return; }
+    if (permission === "unsupported") { setMessage("Este navegador não mostra notificações. Instale o app pelo Chrome ou Safari."); setStep("error"); return; }
+    // 1º servidor (avisos de hora em hora com o app fechado); se não der, fica a checagem local.
+    const serverPush = await registerServerAlert({ path, kinds });
+    const saved = await saveLocalWatch({ path, name, price, kinds, serverPush }).catch(() => false);
+    if (!saved) { setMessage("Não foi possível salvar o alerta neste aparelho."); setStep("error"); return; }
+    const background = serverPush ? false : await enableBackgroundCheck();
+    setMode(serverPush ? "push" : background ? "background" : "open");
+    await localNotification(serverPush ? "Alerta por push ativado ✓" : "Alerta local ativado ✓", serverPush ? `Vamos avisar quando ${name.slice(0, 60)} mudar de preço.` : "Abra o Dopamina para atualizar o preço. Avisos com o app fechado não estão garantidos.", `/produto/${path}`).catch(() => undefined);
     setStep("done");
     trackEvent("tracking_update", name, price ?? undefined, { action: "alert_created", path, kinds, standalone: pwa.standalone });
   }
@@ -84,20 +77,24 @@ export default function AlertButton({ path, name, price }: Props) {
           <fieldset className={styles.options}>
             <legend className="sr-only">Tipos de alerta</legend>
             <label className={styles.option}><input type="checkbox" checked={kinds.drop} onChange={() => toggle("drop")} /><span><b>Baixar de preço</b><small>Queda de 3% ou mais</small></span></label>
-            <label className={styles.option}><input type="checkbox" checked={kinds.stable} onChange={() => toggle("stable")} /><span><b>Estabilizar</b><small>Uma semana sem mudar: sem queda à vista</small></span></label>
+            <label className={styles.option}><input type="checkbox" checked={kinds.stable} onChange={() => toggle("stable")} /><span><b>Estabilizar</b><small>Uma semana sem variação relevante</small></span></label>
             <label className={styles.option}><input type="checkbox" checked={kinds.rise} onChange={() => toggle("rise")} /><span><b>Subir de preço</b><small>Alta de 3% ou mais</small></span></label>
           </fieldset>
           {pwa.canPromptInstall && !pwa.standalone && <button type="button" className={styles.secondary} onClick={() => void promptInstall()}>Instalar o app para receber mais rápido</button>}
           <button type="button" className={styles.primary} disabled={none || step === "saving"} onClick={() => void save()}>
             {step === "saving" ? "Ativando…" : "Ativar alerta"}
           </button>
-          <p className={styles.fine}>Sem cadastro e sem e-mail. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
+          <p className={styles.fine}>Sem cadastro e sem e-mail: o alerta fica neste aparelho e, quando o push está disponível, também no servidor. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
         </>}
 
         {step === "done" && <>
           <span className={styles.ok}><Check size={22} aria-hidden="true" /></span>
           <h2 id="alert-title" className={styles.sheetTitle}>Alerta ativado</h2>
-          <p className={styles.sheetText}>Checamos o preço todos os dias. Você vai receber uma notificação de confirmação agora.</p>
+          <p className={styles.sheetText}>{mode === "push"
+            ? "Checamos o preço de hora em hora e avisamos aqui, mesmo com o app fechado."
+            : mode === "background"
+              ? "O app checa o preço em segundo plano, cerca de duas vezes por dia, e avisa você."
+              : "O app checa o preço sempre que você abre o Dopamina. Para não perder nada, abra o app de vez em quando."}</p>
           <Link className={styles.primary} href="/alertas">Ver meus alertas</Link>
         </>}
 

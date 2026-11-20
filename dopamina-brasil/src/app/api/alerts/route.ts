@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb, alertsAvailable, isValidEndpoint, sendPush } from "@/lib/push";
+import { adminDb, alertsAvailable, isValidEndpoint } from "@/lib/push";
 import { getProduct, isSafeProductPath } from "@/lib/buscape";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
@@ -54,16 +54,9 @@ export async function POST(req: NextRequest) {
   }, { onConflict: "subscription_id,product_path" });
   if (watchError) return bad("Não foi possível salvar o alerta.", 500);
 
-  // Primeiro alerta do aparelho: confirma com um push, que já testa a entrega.
-  if (!existing) {
-    await sendPush({ id: saved.id, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth }, {
-      title: "Alertas ativados ✓",
-      body: `Vamos avisar quando ${product.name.slice(0, 60)} mudar de preço.`,
-      url: `/produto/${product.path}`,
-      tag: "dopamina-welcome",
-    });
-  }
-  return NextResponse.json({ ok: true, price: product.bestPrice, name: product.name });
+  // A confirmação "Alerta ativado" é mostrada pelo próprio aparelho; aqui só
+  // registramos a inscrição para os avisos em segundo plano.
+  return NextResponse.json({ ok: true, price: product.bestPrice, name: product.name, firstOnDevice: !existing });
 }
 
 /** Lista os alertas do aparelho. */

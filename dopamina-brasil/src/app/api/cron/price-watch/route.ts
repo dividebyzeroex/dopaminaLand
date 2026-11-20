@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb, alertsAvailable, sendPush, type StoredSubscription } from "@/lib/push";
-import { getProduct } from "@/lib/buscape";
+import { getProductFresh } from "@/lib/buscape";
 import { mapLimit } from "@/lib/analysis";
 import { alertMessage, decideAlert } from "@/lib/alert-rules";
 
 /**
- * Checagem dos alertas. Chamada pela Vercel Cron (vercel.json) com
- * `Authorization: Bearer $CRON_SECRET`; pode ser chamada por outro agendador
- * com o mesmo cabeçalho para rodar com mais frequência.
+ * Checagem horária dos alertas: consulta o preço de cada produto acompanhado
+ * (cache de 1 hora) e manda push para quem deve ser avisado, mesmo com o app
+ * fechado. Chamada a cada hora pelo agendador do Supabase (pg_cron + pg_net,
+ * migration 005) com `Authorization: Bearer $CRON_SECRET`.
  */
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
   const paths = [...new Set(watches.map(w => w.product_path))];
   const prices = new Map<string, number>();
   await mapLimit(paths, 2, async path => {
-    const product = await getProduct(path).catch(() => null);
+    const product = await getProductFresh(path).catch(() => null);
     if (product?.bestPrice) prices.set(path, product.bestPrice);
   });
 

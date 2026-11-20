@@ -1,10 +1,9 @@
-import { requireAuth } from '@/lib/server/auth';
+import { adminAccess } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const denied = await requireAuth();
+  const denied = adminAccess(req);
   if (denied) return denied;
-
   try {
     const body = await req.json();
     const { contact, channel, productName, targetPrice } = body;

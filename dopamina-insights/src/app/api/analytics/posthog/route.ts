@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/server/auth';
+import { adminAccess } from "@/lib/admin-auth";
 import { NextResponse } from 'next/server';
 
 interface HogQLResult {
@@ -34,10 +34,9 @@ async function runHogQLQuery(query: string): Promise<HogQLResult | null> {
   return { columns: json.columns || [], results: json.results || [] };
 }
 
-export async function GET() {
-  const denied = await requireAuth();
+export async function GET(request: Request) {
+  const denied = adminAccess(request);
   if (denied) return denied;
-
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY;
   const projectId = process.env.POSTHOG_PROJECT_ID;
 

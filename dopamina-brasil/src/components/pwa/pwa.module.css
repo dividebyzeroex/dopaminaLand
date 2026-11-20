@@ -52,3 +52,16 @@
 .empty { display: grid; gap: 14px; justify-items: start; background: #fff; border-radius: 18px; padding: 24px; }
 
 @media (prefers-reduced-motion: reduce) { .sheet[open] { animation: none; } }
+
+/* Guia de instalação por sistema/navegador */
+.guide { display: grid; gap: 12px; }
+.detected { margin: 0; font-size: 13px; color: #5d625b; }
+.detected b { color: #20211f; }
+.steps li { position: relative; }
+.stepIcon { margin-left: auto; width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: #fff; border: 1px solid #20211f14; display: flex; align-items: center; justify-content: center; color: #2854ec; }
+.others summary { cursor: pointer; font-size: 13px; color: #5d625b; text-decoration: underline; list-style: none; }
+.others summary::-webkit-details-marker { display: none; }
+.otherList { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #20211f26; background: #fff; font: inherit; font-size: 13px; cursor: pointer; color: #20211f; }
+.chip[aria-pressed="true"] { background: #20211f; color: #fff; border-color: #20211f; }
+@media (display-mode: standalone) { html { background: #20211f; } }

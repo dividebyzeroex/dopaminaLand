@@ -6,6 +6,10 @@ const cases: [string, ReturnType<typeof days>, number, string][] = [
   ["new low", days(39, i => 1000 - (i === 5 ? 50 : 0)), 940, "menor"],
   ["below median", days(39, i => (i < 5 ? 880 : 1000)), 930, "abaixo"],
   ["inflated then back", days(39, i => (i >= 30 ? 1150 : 1000)), 1000, "maquiado"],
+  ["rise without subsequent drop", days(39, i => (i >= 25 ? 1150 : 1000)), 1150, "acima"],
+  ["new high after prior peak", days(39, i => (i >= 30 ? 1150 : 1000)), 1200, "acima"],
+  ["partial drop still above normal", days(39, i => (i >= 30 ? 1200 : 1000)), 1100, "acima"],
+  ["return near baseline", days(39, i => (i >= 30 ? 1150 : 1000)), 1020, "maquiado"],
   ["above", days(39, () => 1000), 1080, "acima"],
   ["short history", days(5, () => 1000), 900, "insuficiente"],
 ];

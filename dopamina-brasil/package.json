@@ -7,11 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types tests/price-verdict.test.ts && node --experimental-strip-types tests/trending.test.ts && node --experimental-strip-types tests/events.test.ts && node --experimental-strip-types tests/alert-rules.test.ts"
+    "test": "node --experimental-strip-types tests/price-verdict.test.ts && node --experimental-strip-types tests/trending.test.ts && node --experimental-strip-types tests/events.test.ts && node --experimental-strip-types tests/alerts-core.test.ts && node --experimental-strip-types tests/install-guide.test.ts && node --experimental-strip-types tests/search-policy.test.ts && node --experimental-strip-types --test tests/request-body.test.ts && node --test tests/rls.test.mjs",
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@google-analytics/data": "^6.1.0",
-    "@supabase/supabase-js": "^2.110.2",
+    "@supabase/supabase-js": "2.110.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.18.1",
@@ -21,17 +21,19 @@
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.26.0",
     "matter-js": "^0.20.0",
-    "next": "16.2.10",
+    "next": "16.4.6",
     "posthog-js": "^1.399.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.9.2",
+    "server-only": "0.0.1",
     "stripe": "^22.3.0",
     "swr": "^2.4.2",
     "ua-parser-js": "^2.0.10",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.17",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/matter-js": "^0.20.2",
@@ -41,8 +43,11 @@
     "@types/ua-parser-js": "^0.7.39",
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

@@ -1,5 +1,9 @@
-import InsightsApp from '@/components/app/InsightsApp';
+import AnalyticsDashboardClient from '@/components/AnalyticsDashboardClient';
 
 export default function Home() {
-  return <InsightsApp />;
+  return (
+    <main className="min-h-screen bg-surface">
+      <AnalyticsDashboardClient />
+    </main>
+  );
 }

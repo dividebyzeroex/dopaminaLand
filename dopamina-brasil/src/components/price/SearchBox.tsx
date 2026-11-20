@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Search } from "lucide-react";
 import studio from "../studio.module.css";
-import { isBlockedSearch } from "@/lib/search-policy";
+import { blockedMessage, checkSearch } from "@/lib/search-policy";
 import { trackEvent } from "@/lib/tracking";
 
 type Props = { defaultValue?: string; suggestions?: string[]; id?: string; placeholder?: string };
@@ -18,7 +18,8 @@ export default function SearchBox({ defaultValue = "", suggestions = [], id = "p
   function go(term: string) {
     const query = term.trim();
     if (query.length < 2 || pending) return;
-    if (isBlockedSearch(query)) { trackEvent("search_blocked", undefined, undefined, { query: query.slice(0, 120) }); setError("Esta pesquisa não é permitida. Busque outro produto."); return; }
+    const policy = checkSearch(query);
+    if (policy.blocked) { setError(blockedMessage(policy.reason)); setValue(""); return; }
     setError("");
     setValue(query);
     trackEvent("super_search", "search_submitted", undefined, { query });

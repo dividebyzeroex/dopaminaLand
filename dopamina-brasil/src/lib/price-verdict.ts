@@ -92,7 +92,10 @@ export function computeVerdict(history: HistoryPoint[], currentPrice: number | n
   const recent = prior.filter(p => p.date >= cut);
   const baseline = older.length >= 7 ? median(older) : null;
   const peakPoint = recent.reduce<HistoryPoint | null>((top, p) => (!top || p.price > top.price ? p : top), null);
-  const inflated = Boolean(baseline && peakPoint && peakPoint.price >= baseline * 1.08 && current >= baseline * 0.97);
+  // Exige queda posterior ao pico e retorno a até 3% do patamar anterior.
+  const inflated = Boolean(baseline && peakPoint && peakPoint.price >= baseline * 1.08
+    && current <= peakPoint.price * 0.97
+    && current >= baseline * 0.97 && current <= baseline * 1.03);
   const period = `${prior.length} dias`;
 
   if (current <= base.min * 1.005 && vsMedian <= -0.03) {

@@ -36,17 +36,6 @@ export async function initSession(forceUpdate: boolean = false) {
   const nav = navigator as Navigator & { deviceMemory?: number; connection?: { effectiveType?: string; saveData?: boolean }; mozConnection?: { effectiveType?: string; saveData?: boolean }; webkitConnection?: { effectiveType?: string; saveData?: boolean } };
   const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
   
-  let email = '';
-  let nickname = '';
-  try {
-    const saved = localStorage.getItem('dopamina-game');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      email = parsed.email || '';
-      nickname = parsed.nickname || '';
-    }
-  } catch {}
-
   const deviceInfo = {
     userAgent: navigator.userAgent,
     language: navigator.language,
@@ -60,31 +49,20 @@ export async function initSession(forceUpdate: boolean = false) {
     utm_source,
     utm_medium,
     utm_campaign,
-    referrer,
-    email,
-    nickname
+    referrer
   };
 
-  // Simulação de Gênero para composição de Dashboard de Vendas por Impulso
-  // Como não há coleta real, atribuímos uma persona simulada (probabilística)
-  let mockGender = localStorage.getItem('dopamina_mock_gender');
-  if (!mockGender) {
-    mockGender = Math.random() > 0.45 ? 'Feminino' : 'Masculino';
-    localStorage.setItem('dopamina_mock_gender', mockGender);
-  }
-
   try {
-    await fetch('/api/track-session', {
+    const response = await fetch('/api/track-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         session_id: sessionId, 
-        device_info: deviceInfo,
-        mock_gender: mockGender 
+        device_info: deviceInfo
       }),
       keepalive: true
     });
-    sessionStorage.setItem('dopamina_session_initialized', 'true');
+    if (response.ok) sessionStorage.setItem('dopamina_session_initialized', 'true');
   } catch (error) {
     console.error('Failed to init tracking session', error);
   }

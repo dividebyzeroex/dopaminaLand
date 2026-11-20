@@ -15,9 +15,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Dopamina Insights",
-  description: "Acessos, buscas, produtos e visitas do dopaminado.com.br em tempo quase real.",
-  robots: { index: false, follow: false },
+  title: "Insights | Dopamina Brasil ⚡",
+  description: "Analytics de Intenções de Compra e B2B Data Intent.",
 };
 
 export default function RootLayout({

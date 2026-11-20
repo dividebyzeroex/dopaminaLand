@@ -26,9 +26,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Ocupa a tela inteira, inclusive atrás da barra de status e do recorte da câmera.
   viewportFit: "cover",
+  // No app instalado, a área da barra de status assume a cor do cabeçalho escuro
+  // (o iOS usa a theme-color ali); no navegador, a cor do papel.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f5f0" },
+    { media: "(display-mode: standalone)", color: "#20211f" },
     { media: "(prefers-color-scheme: dark)", color: "#20211f" },
+    { color: "#f5f5f0" },
   ],
 };
 
