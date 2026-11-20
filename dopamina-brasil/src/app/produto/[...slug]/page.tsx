@@ -10,6 +10,7 @@ import SearchBox from "@/components/price/SearchBox";
 import VerdictBadge from "@/components/price/VerdictBadge";
 import PriceHistoryChart from "@/components/price/PriceHistoryChart";
 import ShareVerdict from "@/components/price/ShareVerdict";
+import AlertButton from "@/components/pwa/AlertButton";
 import ProductVisual from "@/components/ProductVisual";
 import { analyzeProduct } from "@/lib/analysis";
 import { isSafeProductPath } from "@/lib/buscape";
@@ -106,6 +107,7 @@ export default async function ProductPage({ params }: Props) {
             <p className={styles.verdictDetail}>{verdict.detail}</p>
             <p className={styles.verdictMeta}>Consulta: {dateTime(product.checkedAt)} · <Link href="/metodologia" style={{ color: "inherit" }}>como julgamos</Link></p>
           </div>
+          <div style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} /></div>
           <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
         </div>
       </section>
@@ -162,6 +164,7 @@ export default async function ProductPage({ params }: Props) {
           <span className={studio.eyebrow}>Conhece alguém de olho nele?</span>
           <h2>Mande o veredito<br />antes da compra.</h2>
           <p>A prévia no WhatsApp já mostra o selo, o preço e o gráfico de {verdict.days || history.length} dias.</p>
+          <div style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} /></div>
           <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
         </div>
       </section>
