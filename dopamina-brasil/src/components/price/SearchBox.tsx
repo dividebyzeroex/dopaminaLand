@@ -9,6 +9,7 @@ import { blockedMessage, checkSearch } from "@/lib/search-policy";
 import { trackEvent } from "@/lib/tracking";
 import { addRecent } from "@/lib/recent-searches";
 import { extractLink } from "@/lib/shared-link";
+import { FEATURES } from "@/lib/features";
 
 const noop = () => () => {};
 
@@ -61,7 +62,7 @@ export default function SearchBox({ defaultValue = "", suggestions = [], id = "p
     {error && <p role="alert" className={studio.error}>{error}</p>}
     <div className={studio.quickActions}>
       {canPaste && <button type="button" className={studio.pasteButton} onClick={() => void paste()} disabled={pending}><ClipboardPaste size={16} aria-hidden="true" /> Colar link da loja</button>}
-      <Link href="/escanear" className={studio.pasteButton}><ScanBarcode size={16} aria-hidden="true" /> Escanear código</Link>
+      {FEATURES.scanner && <Link href="/escanear" className={studio.pasteButton}><ScanBarcode size={16} aria-hidden="true" /> Escanear código</Link>}
     </div>
     {suggestions.length > 0 && <div className={studio.suggestions}><span>Experimente</span>{suggestions.map(item => <button type="button" key={item} disabled={pending} onClick={() => go(item)}>{item}</button>)}</div>}
   </div>;

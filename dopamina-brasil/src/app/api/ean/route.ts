@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { nameToQuery, normalizeGtin } from "@/lib/ean";
 import { checkSearch } from "@/lib/search-policy";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { FEATURES } from "@/lib/features";
 
 /**
  * Código de barras → nome do produto, para o leitor da loja física.
@@ -39,6 +40,7 @@ async function lookupUncached(code: string): Promise<{ name: string; source: str
 const lookup = (code: string) => unstable_cache(() => lookupUncached(code), ["ean-v1", code], { revalidate: 30 * 86400 })();
 
 export async function GET(req: NextRequest) {
+  if (!FEATURES.scanner) return NextResponse.json({ ok: false, error: "Leitor de código de barras desativado." }, { status: 404 });
   if (!rateLimit(`ean:${clientIp(req.headers)}`, 20, 60_000).ok) return NextResponse.json({ ok: false, error: "Muitas leituras seguidas. Tente em instantes." }, { status: 429 });
   const code = normalizeGtin(req.nextUrl.searchParams.get("code") ?? "");
   if (!code) return NextResponse.json({ ok: false, error: "Código de barras inválido. Tente ler de novo." }, { status: 400 });
