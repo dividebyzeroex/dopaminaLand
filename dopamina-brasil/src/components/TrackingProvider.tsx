@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useRef } from 'react';
-import { initSession, trackEvent } from '@/lib/tracking';
+import { initSession, isStandalone, trackEvent } from '@/lib/tracking';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useReportWebVitals } from 'next/web-vitals';
 
@@ -43,6 +43,8 @@ function TrackingLogic() {
     const q = searchParams.get('q');
     trackEvent('page_view', undefined, undefined, {
       path: pathname,
+      // Aberto pelo app instalado: base da penetração do app no painel.
+      app: isStandalone(),
       ...(q ? { q: q.slice(0, 200) } : {}),
       ...(firstInTab ? {
         landing: true,

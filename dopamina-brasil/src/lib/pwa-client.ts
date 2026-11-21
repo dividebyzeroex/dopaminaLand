@@ -1,5 +1,7 @@
 "use client";
 
+import { trackEvent } from "./tracking";
+
 /**
  * Estado do app no aparelho: instalação (tela inicial) e notificações push.
  * Guardado em módulo para que qualquer componente leia o mesmo estado.
@@ -24,7 +26,12 @@ export function initPwa() {
     deferredInstall = event as InstallPromptEvent;
     emit();
   });
-  window.addEventListener("appinstalled", () => { deferredInstall = null; emit(); });
+  window.addEventListener("appinstalled", () => {
+    deferredInstall = null;
+    emit();
+    const device = detectDevice(navigator.userAgent, navigator.maxTouchPoints, navigator.platform);
+    trackEvent("app_installed", undefined, undefined, { os: device.os, browser: device.browser });
+  });
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" })
       .then(() => startCheckOnOpen())

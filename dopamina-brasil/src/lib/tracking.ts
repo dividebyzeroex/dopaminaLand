@@ -8,6 +8,12 @@ function generateUUID() {
   });
 }
 
+/** true quando o site foi aberto pelo ícone do app instalado (tela inicial), em qualquer sistema. */
+export function isStandalone(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia?.('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+}
+
 export function getSessionId() {
   if (typeof window === 'undefined') return null;
   let sessionId = localStorage.getItem('dopamina_session_id');
@@ -71,7 +77,9 @@ export async function initSession(forceUpdate: boolean = false) {
 export async function trackEvent(
   eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals' | 'tracking_update' | 'digital_dna_scan' | 'narrator_interaction' | 'neuro_xray_toggle' | 'resistance_training_start' | 'resistance_training_fail' | 'resistance_training_complete' | 'wrapped_generated' | 'wrapped_shared' | 'bookmarklet_installed' | 'dark_pattern_audit' | 'super_search'
     // Funil de pesquisa de preços (lido pelo dopamina-insights)
-    | 'page_view' | 'search_results' | 'search_blocked' | 'product_view' | 'offer_click' | 'outbound_click',
+    | 'page_view' | 'search_results' | 'search_blocked' | 'product_view' | 'offer_click' | 'outbound_click'
+    // App instalado (PWA): instalação confirmada pelo navegador (Android/computador; o iPhone não avisa)
+    | 'app_installed',
   productName?: string,
   priceDisplayed?: number,
   metadata?: Record<string, unknown>
