@@ -198,7 +198,7 @@ async function pushEndpoint(): Promise<string | null> {
  * de hora em hora. Retorna false se o navegador ou o servidor não suportarem:
  * aí o alerta segue só com a checagem local.
  */
-export async function registerServerAlert(input: { path: string; kinds: AlertKinds }): Promise<boolean> {
+export async function registerServerAlert(input: { path: string; kinds: AlertKinds; trending?: boolean }): Promise<boolean> {
   const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   if (!key) return false;
   try {
@@ -209,12 +209,53 @@ export async function registerServerAlert(input: { path: string; kinds: AlertKin
     const response = await fetch("/api/alerts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subscription: subscription.toJSON(), path: input.path, kinds: input.kinds }),
+      body: JSON.stringify({ subscription: subscription.toJSON(), path: input.path, kinds: input.kinds, trending: input.trending }),
     });
     const data = await response.json().catch(() => null);
     return Boolean(response.ok && data?.ok);
   } catch {
     return false;
+  }
+}
+
+// ── Destaques de queda dos produtos mais buscados ───────────────────────
+
+/** Preferência deste aparelho: true/false, ou null se ele não recebe push do servidor. */
+export async function getTrendingPreference(): Promise<boolean | null> {
+  if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return null;
+  const endpoint = await pushEndpoint().catch(() => null);
+  if (!endpoint) return null;
+  const response = await fetch(`/api/alerts/preferencias?endpoint=${encodeURIComponent(endpoint)}`, { cache: "no-store" }).catch(() => null);
+  const data = await response?.json().catch(() => null);
+  return response?.ok && data?.ok ? data.trending : null;
+}
+
+/**
+ * Liga ou desliga os destaques. Ligar num aparelho sem push pede a permissão e
+ * inscreve o aparelho, mesmo sem nenhum alerta de produto.
+ */
+export async function setTrendingPreference(on: boolean): Promise<{ ok: boolean; error?: string }> {
+  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!key) return { ok: false, error: "Os avisos por push ainda não estão ativos." };
+  try {
+    const registration = await swRegistration();
+    if (!registration.pushManager) return { ok: false, error: "Este navegador não recebe avisos com o app fechado." };
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      if (!on) return { ok: true };
+      const permission = await ensureNotificationPermission();
+      if (permission !== "granted") return { ok: false, error: "Permita as notificações do Dopamina para receber os destaques." };
+      subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64ToBytes(key) });
+    }
+    const response = await fetch("/api/alerts/preferencias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(on ? { subscription: subscription.toJSON(), trending: true } : { endpoint: subscription.endpoint, trending: false }),
+    });
+    const data = await response.json().catch(() => null);
+    return response.ok && data?.ok ? { ok: true } : { ok: false, error: data?.error ?? "Não foi possível salvar agora." };
+  } catch {
+    return { ok: false, error: "Não foi possível salvar agora." };
   }
 }
 

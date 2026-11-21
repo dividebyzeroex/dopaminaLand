@@ -3,12 +3,17 @@ import { adminDb, alertsAvailable, sendPush, type StoredSubscription } from "@/l
 import { getProductFresh } from "@/lib/buscape";
 import { mapLimit } from "@/lib/analysis";
 import { alertMessage, decideAlert } from "@/lib/alert-rules";
+import { runTrendingDigest } from "@/lib/trending-digest";
 
 /**
  * Checagem horária dos alertas: consulta o preço de cada produto acompanhado
  * (cache de 1 hora) e manda push para quem deve ser avisado, mesmo com o app
  * fechado. Chamada a cada hora pelo agendador do Supabase (pg_cron + pg_net,
  * migration 005) com `Authorization: Bearer $CRON_SECRET`.
+ *
+ * Nas horas de destaque (10h, 13h, 16h e 19h de São Paulo) também manda os
+ * destaques de queda dos produtos mais buscados (lib/trending-digest.ts).
+ * `?destaques=agora` força essa etapa fora do horário, para testar.
  */
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -69,5 +74,9 @@ export async function GET(req: NextRequest) {
     }).eq("id", w.id);
   });
 
-  return NextResponse.json({ ok: true, ...stats });
+  // Destaques de queda dos mais buscados. Falha aqui não derruba os alertas acima.
+  const force = req.nextUrl.searchParams.get("destaques") === "agora";
+  const digest = await runTrendingDigest(db, now, { force }).catch(e => ({ ran: false, reason: e instanceof Error ? e.message : "erro" }));
+
+  return NextResponse.json({ ok: true, ...stats, digest });
 }

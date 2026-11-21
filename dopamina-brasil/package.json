@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types tests/price-verdict.test.ts && node --experimental-strip-types tests/trending.test.ts && node --experimental-strip-types tests/events.test.ts && node --experimental-strip-types tests/alerts-core.test.ts && node --experimental-strip-types tests/install-guide.test.ts && node --experimental-strip-types tests/search-policy.test.ts && node --experimental-strip-types --test tests/request-body.test.ts && node --test tests/rls.test.mjs",
+    "test": "node --experimental-strip-types tests/price-verdict.test.ts && node --experimental-strip-types tests/trending.test.ts && node --experimental-strip-types tests/events.test.ts && node --experimental-strip-types tests/alerts-core.test.ts && node --experimental-strip-types tests/drop-digest.test.ts && node --experimental-strip-types tests/install-guide.test.ts && node --experimental-strip-types tests/search-policy.test.ts && node --experimental-strip-types --test tests/request-body.test.ts && node --test tests/rls.test.mjs",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {

@@ -16,6 +16,8 @@ type Body = {
   endpoint?: string;
   path?: string;
   kinds?: { drop?: boolean; rise?: boolean; stable?: boolean };
+  /** Também receber os destaques de queda dos produtos mais buscados. */
+  trending?: boolean;
 };
 
 async function subscriptionId(endpoint: string) {
@@ -46,6 +48,11 @@ export async function POST(req: NextRequest) {
     last_seen_at: new Date().toISOString(), disabled_at: null,
   }, { onConflict: "endpoint" }).select("id").single();
   if (error || !saved) return bad("Não foi possível salvar o alerta.", 500);
+  // Preferência dos destaques (migration 006). Separado do upsert acima para o
+  // alerta continuar funcionando mesmo antes da migration.
+  if (typeof body.trending === "boolean") {
+    await db.from("push_subscriptions").update({ notify_trending: body.trending }).eq("id", saved.id);
+  }
 
   const { error: watchError } = await db.from("price_watches").upsert({
     subscription_id: saved.id, product_path: product.path, product_name: product.name,

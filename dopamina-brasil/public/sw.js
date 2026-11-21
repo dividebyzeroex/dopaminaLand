@@ -25,15 +25,39 @@ function runCheck() {
 self.addEventListener("push", function (event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data && event.data.text() }; }
-  event.waitUntil(notify(data.title || "Dopamina", {
+  var options = {
     body: data.body || "",
     icon: "/icons/icon-192.png",
     badge: "/icons/badge-96.png",
     tag: data.tag,
     renotify: Boolean(data.tag),
-    data: { url: data.url || "/" },
-  }));
+    data: { url: data.url || "/", kind: data.kind || "alerta" },
+  };
+  // Destaques dos mais buscados: botão para parar (onde o sistema mostra botões).
+  if (data.kind === "destaques") options.actions = [{ action: STOP_TRENDING, title: "Parar destaques" }];
+  event.waitUntil(notify(data.title || "Dopamina", options));
 });
+
+var STOP_TRENDING = "parar-destaques";
+
+function stopTrending() {
+  return self.registration.pushManager.getSubscription().then(function (sub) {
+    if (!sub) return;
+    return fetch("/api/alerts/preferencias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint: sub.endpoint, trending: false }),
+    }).then(function () {
+      return notify("Destaques desativados", {
+        body: "Você continua recebendo os alertas dos produtos que escolheu. Para voltar, abra Meus alertas.",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/badge-96.png",
+        tag: "dopamina-info",
+        data: { url: "/alertas" },
+      });
+    });
+  }).catch(function () {});
+}
 
 self.addEventListener("periodicsync", function (event) {
   if (event.tag === SYNC_TAG) event.waitUntil(runCheck());
@@ -56,6 +80,7 @@ self.addEventListener("message", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
+  if (event.action === STOP_TRENDING) { event.waitUntil(stopTrending()); return; }
   var target = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
   event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (all) {
     for (var i = 0; i < all.length; i++) {

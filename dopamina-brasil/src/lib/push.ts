@@ -36,7 +36,8 @@ export function alertsAvailable(): boolean {
 }
 
 export type StoredSubscription = { id: string; endpoint: string; p256dh: string; auth: string };
-export type PushPayload = { title: string; body: string; url: string; tag?: string; image?: string };
+/** `kind: "destaques"` faz o service worker mostrar o botão "Parar destaques". */
+export type PushPayload = { title: string; body: string; url: string; tag?: string; image?: string; kind?: "alerta" | "destaques" };
 
 /** Envia um push. Retorna "gone" quando a inscrição não existe mais (o app foi removido). */
 export async function sendPush(sub: StoredSubscription, payload: PushPayload): Promise<"sent" | "gone" | "error"> {
