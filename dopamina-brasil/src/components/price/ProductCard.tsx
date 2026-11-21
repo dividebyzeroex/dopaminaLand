@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { SearchHit } from "@/lib/buscape";
 import type { Verdict } from "@/lib/price-verdict";
-import { brl, signedPct } from "@/lib/format";
+import { brl, shortDate, signedPct } from "@/lib/format";
 import ProductVisual from "../ProductVisual";
 import VerdictBadge from "./VerdictBadge";
 import Sparkline, { TONE_COLOR } from "./Sparkline";
@@ -55,7 +55,10 @@ export default function ProductCard({ hit, verdict, name, image, price, storeCou
       </p>}
       <strong className={styles.cardPrice}>{brl(value)}</strong>
       {verdict && series && series.length > 1 && <div className={styles.cardSpark}><Sparkline prices={series} tone={verdict.tone} /></div>}
-      {verdict && verdict.kind !== "insuficiente" && verdict.vsMedian !== null && verdict.median
+      {verdict?.kind === "maquiado" && verdict.recentPeak && verdict.recentPeakDate
+        // "0% vs. típico" com selo de maquiado confunde: o que importa é o pico antes da "queda".
+        ? <p className={styles.cardVerdict}>Subiu para <b style={{ color: TONE_COLOR.bad }}>{brl(verdict.recentPeak)}</b> em {shortDate(verdict.recentPeakDate)} e voltou ao preço de antes.</p>
+        : verdict && verdict.kind !== "insuficiente" && verdict.vsMedian !== null && verdict.median
         ? <p className={styles.cardVerdict}><b style={{ color: TONE_COLOR[verdict.tone] }}>{signedPct(verdict.vsMedian)}</b> vs. típico de {brl(verdict.median)}</p>
         : hit.store ? <p className={styles.cardVerdict}>Sem histórico: oferta de uma loja só.</p> : null}
     </div>

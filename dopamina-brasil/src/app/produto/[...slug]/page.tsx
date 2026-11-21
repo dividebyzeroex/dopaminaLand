@@ -25,7 +25,8 @@ type Props = { params: Promise<{ slug: string[] }> };
 
 const SITE = "https://www.dopaminado.com.br";
 
-export const revalidate = 10800;
+// Mesmo tempo do cache de produto (PRODUCT_TTL): a página nunca fica atrás do termômetro.
+export const revalidate = 1800;
 
 // Nenhuma página pré-gerada no build: cada produto é gerado no 1º acesso e fica em cache (ISR).
 export async function generateStaticParams() {

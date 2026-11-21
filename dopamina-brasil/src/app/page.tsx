@@ -14,7 +14,7 @@ import { ThermometerSkeleton } from "@/components/price/Thermometer";
 import { getThermometer, sortMaquiadoFirst, thermometerSourceNote } from "@/lib/featured";
 import { activeEvent, eventLabel, EVERGREEN, type EventId } from "@/lib/events";
 
-export const revalidate = 10800;
+export const revalidate = 1800;
 
 async function Example({ eventId, eventName }: { eventId: EventId | null; eventName?: string }) {
   const items = await getThermometer(eventId).catch(() => []);
