@@ -11,6 +11,7 @@ import VerdictBadge from "@/components/price/VerdictBadge";
 import PriceHistoryChart from "@/components/price/PriceHistoryChart";
 import ShareVerdict from "@/components/price/ShareVerdict";
 import AlertButton from "@/components/pwa/AlertButton";
+import InstallBanner from "@/components/pwa/InstallBanner";
 import ProductVisual from "@/components/ProductVisual";
 import { analyzeProduct } from "@/lib/analysis";
 import { isSafeProductPath } from "@/lib/buscape";
@@ -66,6 +67,17 @@ export default async function ProductPage({ params }: Props) {
       ? `${product.name} por ${price}. Veja o histórico de preço e as lojas:`
       : `${verdict.label}: ${product.name} por ${price}${verdict.vsMedian !== null ? ` (${signedPct(verdict.vsMedian)} vs. o preço típico)` : ""}. Veja o histórico:`;
 
+  // Uma linha por loja (a mais barata); as demais ofertas da mesma loja viram contagem.
+  const byStore = new Map<string, { offer: (typeof product.offers)[number]; more: number }>();
+  for (const offer of product.offers) {
+    const key = `${offer.store.trim().toLowerCase()}|${offer.marketplace}`;
+    const seen = byStore.get(key);
+    if (!seen) byStore.set(key, { offer, more: 0 });
+    else { seen.more++; if (offer.price < seen.offer.price) seen.offer = offer; }
+  }
+  const stores = [...byStore.values()].sort((a, b) => a.offer.price - b.offer.price);
+  const best = stores[0]?.offer;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -82,7 +94,7 @@ export default async function ProductPage({ params }: Props) {
     } : undefined,
   };
 
-  return <main className={studio.shell}>
+  return <main className={`${studio.shell} ${styles.withBar}`}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <div className={studio.wrap}>
       <SiteHeader />
@@ -107,8 +119,10 @@ export default async function ProductPage({ params }: Props) {
             <p className={styles.verdictDetail}>{verdict.detail}</p>
             <p className={styles.verdictMeta}>Consulta: {dateTime(product.checkedAt)} · <Link href="/metodologia" style={{ color: "inherit" }}>como julgamos</Link></p>
           </div>
-          <div style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} /></div>
+          {/* No celular o alerta fica na barra fixa; aqui só no desktop. */}
+          <div className={styles.desktopOnly} style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} /></div>
           <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
+          <InstallBanner />
         </div>
       </section>
 
@@ -128,11 +142,11 @@ export default async function ProductPage({ params }: Props) {
           <div className={styles.storeList}>
             <div className={styles.chartHead} style={{ padding: "18px 0 6px" }}><h3>Onde comprar</h3><span>ordenado por preço</span></div>
             {product.offers.length === 0 && <p className={studio.note}>A fonte não listou ofertas individuais agora.</p>}
-            {product.offers.map(offer => <div key={offer.id} className={styles.storeRow}>
+            {stores.map(({ offer, more }) => <div key={offer.id} className={styles.storeRow}>
               <div className={styles.storeName}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {offer.logo ? <img src={offer.logo} alt="" loading="lazy" /> : null}
-                <div>{offer.store}<small>{offer.marketplace ? "Marketplace (vendedor parceiro)" : "Loja oficial / venda direta"}</small></div>
+                <div>{offer.store}<small>{offer.marketplace ? "Marketplace (vendedor parceiro)" : "Loja oficial / venda direta"}{more ? ` · +${more} ${more === 1 ? "oferta" : "ofertas"} nesta loja` : ""}</small></div>
               </div>
               <div className={styles.storePrice}>{brl(offer.price)}{offer.installments && offer.installmentValue ? <small>ou {offer.installments}x {brl(offer.installmentValue)}</small> : null}</div>
               <a className={styles.storeLink} href={offer.url} target="_blank" rel="noopener noreferrer nofollow">Ir à loja <ArrowUpRight size={13} /></a>
@@ -145,30 +159,30 @@ export default async function ProductPage({ params }: Props) {
         </section>
       </div>
 
-      <div className={studio.sectionHead}><div><span className={studio.eyebrow} id="regras">Transparência</span><h2>Como chegamos<br />neste veredito.</h2></div><p>Sem “inteligência” mágica: comparamos o preço de hoje com o que este mesmo produto custou nos dias anteriores.</p></div>
-      <section className={styles.rules}>
-        {VERDICT_RULES.filter(rule => rule.kind !== "insuficiente").map(rule => {
-          const tone = rule.kind === "menor" || rule.kind === "abaixo" ? "good" : rule.kind === "maquiado" ? "bad" : rule.kind === "acima" ? "warn" : "neutral";
-          return <article key={rule.kind} className={styles.rule} style={rule.kind === verdict.kind ? { outline: "2px solid #20211f" } : undefined}><VerdictBadge tone={tone} label={rule.label} small /><p>{rule.rule}</p></article>;
-        })}
-        <article className={styles.rule}><span className={studio.eyebrow}>Fonte</span><p>Série diária do menor preço entre as lojas, publicada pelo Buscapé, somada ao histórico que gravamos a cada consulta. Frete, cupons e cashback não entram no cálculo.</p></article>
-      </section>
+      <details className={styles.why} id="regras">
+        <summary><span>Por que “{verdict.label}”?</span><small>Ver as regras do veredito</small></summary>
+        <p className={styles.whyIntro}>Sem “inteligência” mágica: comparamos o preço de hoje com o que este mesmo produto custou nos dias anteriores. <Link href="/metodologia">Metodologia completa</Link>.</p>
+        <section className={styles.rules}>
+          {VERDICT_RULES.filter(rule => rule.kind !== "insuficiente").map(rule => {
+            const tone = rule.kind === "menor" || rule.kind === "abaixo" ? "good" : rule.kind === "maquiado" ? "bad" : rule.kind === "acima" ? "warn" : "neutral";
+            return <article key={rule.kind} className={styles.rule} style={rule.kind === verdict.kind ? { outline: "2px solid #20211f" } : undefined}><VerdictBadge tone={tone} label={rule.label} small /><p>{rule.rule}</p></article>;
+          })}
+          <article className={styles.rule}><span className={studio.eyebrow}>Fonte</span><p>Série diária do menor preço entre as lojas, publicada pelo Buscapé, somada ao histórico que gravamos a cada consulta. Frete, cupons e cashback não entram no cálculo.</p></article>
+        </section>
+      </details>
 
-      <section className={studio.feature}>
-        <div>
-          <span className={studio.eyebrow}>Outra ideia em mente?</span>
-          <h2>Pesquise outro<br />produto.</h2>
-          <div style={{ maxWidth: 440 }} className={styles.darkSearch}><SearchBox id="product-page-search" /></div>
-        </div>
-        <div>
-          <span className={studio.eyebrow}>Conhece alguém de olho nele?</span>
-          <h2>Mande o veredito<br />antes da compra.</h2>
-          <p>A prévia no WhatsApp já mostra o selo, o preço e o gráfico de {verdict.days || history.length} dias.</p>
-          <div style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} /></div>
-          <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
-        </div>
+      <section className={styles.again} aria-labelledby="again-title">
+        <h2 id="again-title">Pesquise outro produto</h2>
+        <div className={styles.darkSearch}><SearchBox id="product-page-search" /></div>
       </section>
       <SiteFooter />
+    </div>
+    {/* Celular: as duas ações que importam sempre ao alcance do polegar. */}
+    <div className={styles.actionBar} role="region" aria-label="Ações do produto">
+      <AlertButton path={product.path} name={product.name} price={product.bestPrice} compact />
+      {best
+        ? <a className={styles.actionStore} href={best.url} target="_blank" rel="noopener noreferrer nofollow">Ir à loja · {brl(best.price)} <ArrowUpRight size={16} aria-hidden="true" /></a>
+        : <a className={styles.actionStore} href={product.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">Ver ofertas <ArrowUpRight size={16} aria-hidden="true" /></a>}
     </div>
   </main>;
 }

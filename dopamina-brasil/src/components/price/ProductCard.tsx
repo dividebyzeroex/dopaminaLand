@@ -17,9 +17,11 @@ type Props = {
   note?: string;
   /** Preços diários para o minigráfico (o último é o de agora). */
   series?: number[];
+  /** Veredito ainda sendo calculado (busca em duas etapas). */
+  checking?: boolean;
 };
 
-export default function ProductCard({ hit, verdict, name, image, price, storeCount, note, series }: Props) {
+export default function ProductCard({ hit, verdict, name, image, price, storeCount, note, series, checking }: Props) {
   const title = name ?? hit.name;
   const value = price ?? verdict?.current ?? hit.price;
   const stores = storeCount ?? hit.storeCount;
@@ -30,6 +32,7 @@ export default function ProductCard({ hit, verdict, name, image, price, storeCou
   const body = <>
     <div className={styles.cardVisual}>
       {verdict && <VerdictBadge tone={verdict.tone} label={verdict.label} small />}
+      {checking && <span className={styles.checking} aria-live="polite">Checando histórico…</span>}
       <ProductVisual src={image ?? hit.image} name={title} />
     </div>
     <div className={styles.cardBody}>
