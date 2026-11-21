@@ -7,7 +7,6 @@ import "./globals.css";
 import TrackingProvider from "@/components/TrackingProvider";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
 import PwaInit from "@/components/pwa/PwaInit";
-import InstallBanner from "@/components/pwa/InstallBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -87,18 +86,17 @@ export default function RootLayout({
           <CSPostHogProvider>
             <main className="flex-1 overflow-x-clip">{children}</main>
             <PwaInit />
-            <InstallBanner />
           </CSPostHogProvider>
         </TrackingProvider>
         <Analytics />
         <SpeedInsights />
         
-        {/* Google Analytics (GA4) */}
+        {/* Google Analytics (GA4): carrega depois que a página fica pronta, sem disputar com o conteúdo. */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-JG8ZCXR32T"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -107,12 +105,6 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* HubSpot Embed Code */}
-        <Script 
-          id="hs-script-loader" 
-          src="//js-na1.hs-scripts.com/51726820.js" 
-          strategy="afterInteractive" 
-        />
       </body>
     </html>
   );

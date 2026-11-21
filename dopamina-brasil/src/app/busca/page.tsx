@@ -5,7 +5,9 @@ import SiteHeader from "@/components/price/SiteHeader";
 import SiteFooter from "@/components/price/SiteFooter";
 import SearchBox from "@/components/price/SearchBox";
 import ProductCard from "@/components/price/ProductCard";
-import { analyzeSearch } from "@/lib/analysis";
+import { Suspense } from "react";
+import { startSearch, type AnalyzedHit } from "@/lib/analysis";
+import type { SearchHit } from "@/lib/buscape";
 import { ACCESSORY, foldText, normalizeQuery, queryFromUrl } from "@/lib/buscape";
 import { redirect } from "next/navigation";
 import { blockedMessage, checkSearch } from "@/lib/search-policy";
@@ -39,16 +41,13 @@ export default async function SearchPage({ searchParams }: Props) {
   const flagged = (await searchParams).bloqueada;
   const reason = REASONS.find(r => r === flagged);
   const blocked = Boolean(reason);
-  let results: Awaited<ReturnType<typeof analyzeSearch>> = [];
+  let search: Awaited<ReturnType<typeof startSearch>> | null = null;
   let failed = false;
   if (query.length >= 2 && !blocked) {
-    try { results = await analyzeSearch(query); } catch { failed = true; }
+    try { search = await startSearch(query); } catch { failed = true; }
   }
-
-  const analyzed = results.filter(r => r.verdict);
-  const onlyAccessories = results.length > 0 && !ACCESSORY.test(foldText(query)) && results.every(r => ACCESSORY.test(foldText(r.hit.name)));
-  const real = analyzed.filter(r => r.verdict!.kind === "menor" || r.verdict!.kind === "abaixo").length;
-  const fake = analyzed.filter(r => r.verdict!.kind === "maquiado").length;
+  const hits = search?.hits ?? [];
+  const onlyAccessories = hits.length > 0 && !ACCESSORY.test(foldText(query)) && hits.every(hit => ACCESSORY.test(foldText(hit.name)));
 
   return <main className={studio.shell}>
     <div className={studio.wrap}>
@@ -61,22 +60,45 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {reason && <div className={styles.empty} role="alert"><h2>Não podemos mostrar resultados para essa busca.</h2><p>{blockedMessage(reason)}</p></div>}
       {failed && <div className={styles.empty}><span className={studio.eyebrow}>Fonte indisponível</span><h2>Não conseguimos consultar os preços agora.</h2><p>A fonte de preços não respondeu. Tente novamente em alguns instantes.</p></div>}
-      {!failed && !blocked && query && results.length === 0 && <div className={styles.empty}><span className={studio.eyebrow}>Nada encontrado</span><h2>Nenhum preço verificável para “{query}”.</h2><p>Tente um nome mais curto ou o modelo do produto (ex.: “Galaxy S24 128GB”).</p></div>}
+      {!failed && !blocked && query && hits.length === 0 && <div className={styles.empty}><span className={studio.eyebrow}>Nada encontrado</span><h2>Nenhum preço verificável para “{query}”.</h2><p>Tente um nome mais curto ou o modelo do produto (ex.: “Galaxy S24 128GB”).</p></div>}
 
       {onlyAccessories && <p className={styles.ribbon} role="note">A fonte só trouxe acessórios para “{query}”. Tente o nome completo do modelo, como “Samsung Galaxy S24 FE 128GB”.</p>}
-      {results.length > 0 && <>
+      {search && hits.length > 0 && <>
         <div className={studio.sectionHead}>
-          <div><span className={studio.eyebrow}>{results.length} produtos · ordem de relevância da fonte</span><h2>Escolha o modelo exato.</h2></div>
-          <p>{analyzed.length > 0
-            ? `Analisamos o histórico dos ${analyzed.length} primeiros: ${real} com preço abaixo do normal${fake ? `, ${fake} com desconto maquiado` : ""}. Abra um produto para ver o gráfico e as lojas.`
-            : "Abra um produto para ver o histórico de preço e as ofertas por loja."}</p>
+          <div><span className={studio.eyebrow}>{hits.length} produtos · ordem de relevância da fonte</span><h2>Escolha o modelo exato.</h2></div>
+          <Suspense fallback={<p>Checando o histórico de preço dos primeiros resultados. Os vereditos aparecem nos cards em segundos.</p>}>
+            <Summary pending={search.pending} />
+          </Suspense>
         </div>
         <section className={styles.grid} aria-label="Resultados" style={{ marginBottom: 56 }}>
-          {results.map(({ hit, product, verdict }) => <ProductCard key={hit.sourceUrl} hit={hit} verdict={verdict} name={product?.name} image={product?.image} price={product?.bestPrice} storeCount={product?.storeCount}
-            series={product ? displaySeries(product.history, product.bestPrice, product.checkedAt.slice(0, 10)).slice(-40).map(p => p.price) : undefined} />)}
+          {hits.map((hit, i) => {
+            const pending = search.pending[i];
+            if (!pending) return <ProductCard key={hit.sourceUrl} hit={hit} verdict={null} />;
+            return <Suspense key={hit.sourceUrl} fallback={<ProductCard hit={hit} verdict={null} checking />}>
+              <AnalyzedCard hit={hit} pending={pending} />
+            </Suspense>;
+          })}
         </section>
       </>}
       <SiteFooter />
     </div>
   </main>;
+}
+
+/** Card com veredito: aparece assim que a análise deste produto termina. */
+async function AnalyzedCard({ hit, pending }: { hit: SearchHit; pending: Promise<AnalyzedHit | null> }) {
+  const result = await pending;
+  if (!result) return null; // conteúdo adulto marcado pela fonte
+  const { product, verdict } = result;
+  return <ProductCard hit={hit} verdict={verdict} name={product?.name} image={product?.image} price={product?.bestPrice} storeCount={product?.storeCount}
+    series={product ? displaySeries(product.history, product.bestPrice, product.checkedAt.slice(0, 10)).slice(-40).map(p => p.price) : undefined} />;
+}
+
+async function Summary({ pending }: { pending: (Promise<AnalyzedHit | null> | null)[] }) {
+  const done = await Promise.all(pending.filter((p): p is Promise<AnalyzedHit | null> => p !== null));
+  const analyzed = done.filter((r): r is AnalyzedHit => Boolean(r?.verdict));
+  if (!analyzed.length) return <p>Abra um produto para ver o histórico de preço e as ofertas por loja.</p>;
+  const real = analyzed.filter(r => r.verdict!.kind === "menor" || r.verdict!.kind === "abaixo").length;
+  const fake = analyzed.filter(r => r.verdict!.kind === "maquiado").length;
+  return <p>Analisamos o histórico dos {analyzed.length} primeiros: {real} com preço abaixo do normal{fake ? `, ${fake} com desconto maquiado` : ""}. Abra um produto para ver o gráfico e as lojas.</p>;
 }

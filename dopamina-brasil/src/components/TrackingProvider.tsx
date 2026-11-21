@@ -25,8 +25,6 @@ function TrackingLogic() {
   const entryTimeRef = useRef<number>(0);
   const maxScrollRef = useRef<number>(0);
   const clickHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);
-  const mouseMoveHistoryRef = useRef<{ x: number; y: number; time: number }[]>([]);
-  const lastHeatmapMoveRef = useRef<number>(0);
   
 
   useEffect(() => {
@@ -107,44 +105,7 @@ function TrackingLogic() {
       }
     };
 
-    // Mouse Move Tracking (Frustration & Heatmap Move)
-    const handleMouseMove = (e: MouseEvent) => {
-      const now = Date.now();
-      
-      // 1. Throttle Heatmap Move to once every 1.5 seconds
-      if (now - lastHeatmapMoveRef.current > 1500) {
-        trackEvent('heatmap_move', undefined, undefined, {
-          x: e.pageX, y: e.pageY,
-          vw: window.innerWidth, vh: document.documentElement.scrollHeight,
-          path: pathname
-        });
-        lastHeatmapMoveRef.current = now;
-      }
-
-      // 2. Frustration (Jiggle) Detection
-      const move = { x: e.pageX, y: e.pageY, time: now };
-      mouseMoveHistoryRef.current.push(move);
-      // Keep history for 1 second
-      mouseMoveHistoryRef.current = mouseMoveHistoryRef.current.filter(m => now - m.time < 1000);
-
-      // If moved a lot of times rapidly in different directions within 1 second
-      if (mouseMoveHistoryRef.current.length > 20) {
-        let directionChanges = 0;
-        for (let i = 2; i < mouseMoveHistoryRef.current.length; i++) {
-          const dx1 = mouseMoveHistoryRef.current[i-1].x - mouseMoveHistoryRef.current[i-2].x;
-          const dx2 = mouseMoveHistoryRef.current[i].x - mouseMoveHistoryRef.current[i-1].x;
-          if (dx1 * dx2 < 0) directionChanges++; // Changed horizontal direction
-        }
-
-        if (directionChanges > 5) {
-          trackEvent('cursor_frustration', undefined, undefined, {
-            path: pathname,
-            x: e.pageX, y: e.pageY
-          });
-          mouseMoveHistoryRef.current = []; // Reset
-        }
-      }
-    };
+    // Movimento do mouse não é mais rastreado: gerava uma requisição a cada 1,5 s sem uso real.
 
     // Error Tracking
     const handleError = (e: ErrorEvent) => {
@@ -164,7 +125,6 @@ function TrackingLogic() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('click', handleClick);
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
@@ -210,7 +170,6 @@ function TrackingLogic() {
       clearTimeout(timeoutId);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('click', handleClick);
-      window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       window.removeEventListener('beforeunload', handleLeave);

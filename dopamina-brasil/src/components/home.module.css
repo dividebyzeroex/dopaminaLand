@@ -14,7 +14,7 @@
 /* Card do exemplo real */
 .example { flex: 1.4 1 460px; min-width: 0; background: #fff; border-radius: 22px; padding: 26px; box-shadow: 0 24px 60px #20211f14; display: flex; flex-direction: column; gap: 16px; }
 .exampleTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.kicker { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #5d625b; }
+.kicker { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #5d625b; }
 .exampleProduct { display: flex; gap: 16px; align-items: center; }
 .exampleThumb { width: 72px; height: 72px; flex-shrink: 0; border-radius: 14px; border: 1px solid #20211f12; overflow: hidden; background: #fff; }
 .exampleThumb > div { min-height: 0; }
