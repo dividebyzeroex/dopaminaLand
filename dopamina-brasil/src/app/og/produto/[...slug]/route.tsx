@@ -8,7 +8,7 @@ import type { VerdictTone } from "@/lib/price-verdict";
 
 /** Imagem de compartilhamento (1200×630) de cada produto: selo, preço e gráfico. */
 const size = { width: 1200, height: 630 };
-const CACHE = { "Cache-Control": "public, s-maxage=10800, stale-while-revalidate=86400" };
+const CACHE = { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" };
 
 const TONES: Record<VerdictTone, { fg: string; bg: string }> = {
   good: { fg: "#1d7a4b", bg: "#e3f1e8" },

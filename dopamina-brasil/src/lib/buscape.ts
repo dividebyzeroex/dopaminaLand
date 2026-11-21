@@ -300,11 +300,16 @@ export const searchProducts = unstable_cache(
   { revalidate: 3600 },
 );
 
-/** Detalhe de produto com cache de 3 horas. */
+/**
+ * Detalhe de produto com cache de 30 minutos. É a ÚNICA fonte de preço do site:
+ * página do produto, termômetro, busca, Minha lista e alertas leem daqui, para
+ * nunca mostrarem preços de consultas diferentes ao mesmo tempo.
+ */
+export const PRODUCT_TTL = 1800;
 export const getProduct = unstable_cache(
   async (path: string) => productUncached(path),
-  ["buscape-product-v3"],
-  { revalidate: 10800 },
+  ["buscape-product-v4"],
+  { revalidate: PRODUCT_TTL },
 );
 
 export function normalizeQuery(input: string): string {
@@ -349,9 +354,5 @@ async function popularUncached(): Promise<PopularProduct[]> {
 
 export const getPopularProducts = unstable_cache(async () => popularUncached(), ["buscape-popular-v1"], { revalidate: 10800 });
 
-/** Detalhe de produto com cache de 1 hora: usado pela checagem horária dos alertas. */
-export const getProductFresh = unstable_cache(
-  async (path: string) => productUncached(path),
-  ["buscape-product-fresh-v2"],
-  { revalidate: 3600 },
-);
+/** Checagem horária dos alertas: mesma consulta do site (o push e a página mostram o mesmo preço). */
+export const getProductFresh = getProduct;

@@ -14,7 +14,7 @@ import { EVENTS, eventBySlug, eventLabel, occurrence, todaySP } from "@/lib/even
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const revalidate = 10800;
+export const revalidate = 1800;
 // Só as datas do calendário existem; qualquer outro endereço é 404.
 export const dynamicParams = false;
 
