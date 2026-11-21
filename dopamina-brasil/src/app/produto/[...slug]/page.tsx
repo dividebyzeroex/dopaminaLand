@@ -13,10 +13,11 @@ import ShareVerdict from "@/components/price/ShareVerdict";
 import TrackOnce from "@/components/price/TrackOnce";
 import AlertButton from "@/components/pwa/AlertButton";
 import InstallBanner from "@/components/pwa/InstallBanner";
+import SaveButton from "@/components/list/SaveButton";
 import ProductVisual from "@/components/ProductVisual";
 import { analyzeProduct } from "@/lib/analysis";
 import { isSafeProductPath } from "@/lib/buscape";
-import { VERDICT_RULES } from "@/lib/price-verdict";
+import { decisionOf, VERDICT_RULES } from "@/lib/price-verdict";
 import { brl, dateTime, shortDate, signedPct } from "@/lib/format";
 import { activeEvent, EVERGREEN } from "@/lib/events";
 
@@ -117,7 +118,7 @@ export default async function ProductPage({ params }: Props) {
           <h1 className={styles.productTitle}>{product.name}</h1>
           <div className={styles.priceRow}>
             <strong>{product.bestPrice ? brl(product.bestPrice) : "—"}</strong>
-            <VerdictBadge tone={verdict.tone} label={verdict.label} />
+            <SaveButton path={product.path} name={product.name} price={product.bestPrice} image={product.image} />
           </div>
           <p className={studio.caption}>
             Menor preço agora{product.bestStore ? ` na ${product.bestStore}` : ""}
@@ -125,12 +126,13 @@ export default async function ProductPage({ params }: Props) {
           </p>
           <div className={`${styles.verdict} ${styles[verdict.tone]}`} style={{ marginTop: 22 }}>
             <span className={styles.verdictMeta}>{activeEvent()?.event.copy.verdictLabel ?? EVERGREEN.verdictLabel}</span>
-            <p className={styles.verdictHeadline}>{verdict.headline}</p>
+            <p className={styles.decision}>{decisionOf(verdict.kind)}</p>
+            <p className={styles.verdictHeadline}><VerdictBadge tone={verdict.tone} label={verdict.label} small /> {verdict.headline}</p>
             <p className={styles.verdictDetail}>{verdict.detail}</p>
             <p className={styles.verdictMeta}>Consulta: {dateTime(product.checkedAt)} · <Link href="/metodologia" style={{ color: "inherit" }}>como julgamos</Link></p>
           </div>
           {/* No celular o alerta fica na barra fixa; aqui só no desktop. */}
-          <div className={styles.desktopOnly} style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} /></div>
+          <div className={styles.desktopOnly} style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} image={product.image} /></div>
           <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
           <InstallBanner />
         </div>
@@ -189,7 +191,7 @@ export default async function ProductPage({ params }: Props) {
     </div>
     {/* Celular: as duas ações que importam sempre ao alcance do polegar. */}
     <div className={styles.actionBar} role="region" aria-label="Ações do produto">
-      <AlertButton path={product.path} name={product.name} price={product.bestPrice} compact />
+      <AlertButton path={product.path} name={product.name} price={product.bestPrice} image={product.image} compact />
       {best
         ? <a className={styles.actionStore} href={best.url} target="_blank" rel="noopener noreferrer nofollow" data-track="offer" data-store={best.store} data-price={best.price} data-product={product.name} data-product-path={product.path} data-position={1} data-placement="barra-fixa">Ir à loja · {brl(best.price)} <ArrowUpRight size={16} aria-hidden="true" /></a>
         : <a className={styles.actionStore} href={product.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">Ver ofertas <ArrowUpRight size={16} aria-hidden="true" /></a>}

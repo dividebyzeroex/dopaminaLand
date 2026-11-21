@@ -7,6 +7,7 @@ import "./globals.css";
 import TrackingProvider from "@/components/TrackingProvider";
 import { CSPostHogProvider } from "@/providers/PostHogProvider";
 import PwaInit from "@/components/pwa/PwaInit";
+import TabBar from "@/components/nav/TabBar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -86,6 +87,7 @@ export default function RootLayout({
           <CSPostHogProvider>
             <main className="flex-1 overflow-x-clip">{children}</main>
             <PwaInit />
+            <TabBar />
           </CSPostHogProvider>
         </TrackingProvider>
         <Analytics />

@@ -19,9 +19,15 @@ type Props = {
   series?: number[];
   /** Veredito ainda sendo calculado (busca em duas etapas). */
   checking?: boolean;
+  /** Ficha curta extraída do título (capacidade, armazenamento...). */
+  specs?: string[];
+  /** Quantas outras versões (cor, voltagem) foram agrupadas neste card. */
+  versions?: number;
+  /** "row": lista de uma coluna com imagem à esquerda (busca). */
+  layout?: "grid" | "row";
 };
 
-export default function ProductCard({ hit, verdict, name, image, price, storeCount, note, series, checking }: Props) {
+export default function ProductCard({ hit, verdict, name, image, price, storeCount, note, series, checking, specs = [], versions = 0, layout = "grid" }: Props) {
   const title = name ?? hit.name;
   const value = price ?? verdict?.current ?? hit.price;
   const stores = storeCount ?? hit.storeCount;
@@ -29,15 +35,24 @@ export default function ProductCard({ hit, verdict, name, image, price, storeCou
     ? <>Oferta avulsa na <b>{hit.store}</b></>
     : stores ? <>{stores} {stores === 1 ? "loja" : "lojas"}</> : null;
 
+  const badge = <>
+    {verdict && <VerdictBadge tone={verdict.tone} label={verdict.label} small />}
+    {checking && <span className={styles.checking} aria-live="polite">Checando histórico…</span>}
+  </>;
+  const cls = layout === "row" ? `${styles.card} ${styles.cardRow}` : styles.card;
   const body = <>
     <div className={styles.cardVisual}>
-      {verdict && <VerdictBadge tone={verdict.tone} label={verdict.label} small />}
-      {checking && <span className={styles.checking} aria-live="polite">Checando histórico…</span>}
+      {layout === "grid" && badge}
       <ProductVisual src={image ?? hit.image} name={title} />
     </div>
     <div className={styles.cardBody}>
+      {layout === "row" && (verdict || checking) && <div className={styles.rowBadge}>{badge}</div>}
       <span className={styles.cardMeta}>{note}{note && where ? " · " : ""}{where}{hit.cashback ? <> · cashback {brl(hit.cashback)}</> : null}</span>
       <h3>{title}</h3>
+      {(specs.length > 0 || versions > 0) && <p className={styles.specs}>
+        {specs.map(spec => <span key={spec}>{spec}</span>)}
+        {versions > 0 && <span className={styles.versions}>+{versions} {versions === 1 ? "versão" : "versões"}</span>}
+      </p>}
       <strong className={styles.cardPrice}>{brl(value)}</strong>
       {verdict && series && series.length > 1 && <div className={styles.cardSpark}><Sparkline prices={series} tone={verdict.tone} /></div>}
       {verdict && verdict.kind !== "insuficiente" && verdict.vsMedian !== null && verdict.median
@@ -47,6 +62,6 @@ export default function ProductCard({ hit, verdict, name, image, price, storeCou
   </>;
 
   return hit.path
-    ? <Link href={`/produto/${hit.path}`} className={styles.card}>{body}</Link>
-    : <a href={hit.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" className={styles.card}>{body}</a>;
+    ? <Link href={`/produto/${hit.path}`} className={cls}>{body}</Link>
+    : <a href={hit.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" className={cls}>{body}</a>;
 }

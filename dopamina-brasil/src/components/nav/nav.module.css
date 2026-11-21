@@ -1,0 +1,21 @@
+/* Abas inferiores: só no celular/tablet (no desktop a navegação fica no cabeçalho). */
+.tabs, .spacer { display: none; }
+
+@media (max-width: 900px) {
+  .spacer { display: block; height: calc(64px + env(safe-area-inset-bottom)); }
+  .tabs {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    position: fixed; z-index: 30; left: 0; right: 0; bottom: 0;
+    padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    background: #f5f5f0f2; border-top: 1px solid #20211f18;
+    backdrop-filter: saturate(1.4) blur(12px); -webkit-backdrop-filter: saturate(1.4) blur(12px);
+    font-family: var(--font-inter), sans-serif;
+  }
+  .tab, .tabOn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    min-height: 52px; border-radius: 12px; text-decoration: none; font-size: 12px; font-weight: 500;
+    color: #5d625b; -webkit-tap-highlight-color: transparent;
+  }
+  .tabOn { color: #2854ec; font-weight: 600; }
+  .tab:focus-visible, .tabOn:focus-visible { outline: 2px solid #2854ec; outline-offset: -2px; }
+}
