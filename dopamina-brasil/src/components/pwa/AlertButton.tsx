@@ -13,6 +13,14 @@ import styles from "./pwa.module.css";
 type Props = { path: string; name: string; price: number | null; image?: string; /** Rótulo curto, para a barra fixa do celular. */ compact?: boolean };
 type Step = "choose" | "install-ios" | "saving" | "done" | "denied" | "error";
 
+/** "4.100,50", "4100,50", "4100.50" e "4100" → número. */
+function parseBrl(text: string): number {
+  const t = text.trim();
+  if (t.includes(",")) return Number(t.replace(/\./g, "").replace(",", "."));
+  if (/\.\d{1,2}$/.test(t)) return Number(t);
+  return Number(t.replace(/\./g, ""));
+}
+
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
 /** "Avisar quando o preço mudar": escolhe o tipo de alerta, pede permissão e salva. */
@@ -25,6 +33,11 @@ export default function AlertButton({ path, name, price, image, compact }: Props
   const [message, setMessage] = useState("");
   const [mode, setMode] = useState<"push" | "background" | "open">("open");
   const [kinds, setKinds] = useState({ drop: true, stable: true, rise: false });
+  // Preço-alvo: sugestão inicial 10% abaixo do preço de agora, arredondada.
+  const [useTarget, setUseTarget] = useState(false);
+  const [targetText, setTargetText] = useState(price ? String(Math.floor((price * 0.9) / 10) * 10) : "");
+  const target = useTarget ? parseBrl(targetText) : null;
+  const targetInvalid = useTarget && (!target || !Number.isFinite(target) || target <= 0 || (price !== null && target >= price));
   // Destaques de queda dos mais buscados (no máximo 1 aviso por dia).
   const [trending, setTrending] = useState(true);
 
@@ -58,7 +71,7 @@ export default function AlertButton({ path, name, price, image, compact }: Props
   }
 
   const toggle = (key: keyof typeof kinds) => setKinds(k => ({ ...k, [key]: !k[key] }));
-  const none = !kinds.drop && !kinds.stable && !kinds.rise;
+  const none = !kinds.drop && !kinds.stable && !kinds.rise && !useTarget;
 
   return <>
     <button type="button" className={`${active ? styles.alertOn : styles.alertBtn}${compact ? ` ${styles.alertCompact}` : ""}`} onClick={open}>
@@ -85,10 +98,16 @@ export default function AlertButton({ path, name, price, image, compact }: Props
             <label className={styles.option}><input type="checkbox" checked={kinds.drop} onChange={() => toggle("drop")} /><span><b>Baixar de preço</b><small>Queda de 3% ou mais</small></span></label>
             <label className={styles.option}><input type="checkbox" checked={kinds.stable} onChange={() => toggle("stable")} /><span><b>Estabilizar</b><small>Uma semana sem variação relevante</small></span></label>
             <label className={styles.option}><input type="checkbox" checked={kinds.rise} onChange={() => toggle("rise")} /><span><b>Subir de preço</b><small>Alta de 3% ou mais</small></span></label>
+            <label className={styles.option}><input type="checkbox" checked={useTarget} onChange={() => setUseTarget(v => !v)} /><span><b>Chegar ao meu preço</b><small>Avisa uma vez quando baixar até o valor que você escolher</small></span></label>
+            {useTarget && <label className={styles.target}>
+              <span>Avisar quando chegar a</span>
+              <span className={styles.targetField}>R$ <input inputMode="decimal" value={targetText} onChange={e => setTargetText(e.target.value.replace(/[^0-9.,]/g, ""))} aria-invalid={targetInvalid} aria-describedby="alvo-ajuda" /></span>
+              <small id="alvo-ajuda">{targetInvalid ? "Escolha um valor menor que o preço de agora." : price && target ? `${Math.round((1 - target / price) * 100)}% abaixo do preço de hoje` : ""}</small>
+            </label>}
           </fieldset>
           <label className={styles.option} style={{ marginTop: 8 }}><input type="checkbox" checked={trending} onChange={() => setTrending(t => !t)} /><span><b>Quedas nos mais buscados</b><small>Desconto real nos produtos que mais gente procura. No máximo 1 aviso por dia.</small></span></label>
           {pwa.canPromptInstall && !pwa.standalone && <button type="button" className={styles.secondary} onClick={() => void promptInstall()}>Instalar o app para receber mais rápido</button>}
-          <button type="button" className={styles.primary} disabled={none || step === "saving"} onClick={() => void save()}>
+          <button type="button" className={styles.primary} disabled={none || targetInvalid || step === "saving"} onClick={() => void save()}>
             {step === "saving" ? "Ativando…" : "Ativar alerta"}
           </button>
           <p className={styles.fine}>Sem cadastro e sem e-mail: o alerta fica neste aparelho e, quando o push está disponível, também no servidor. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>

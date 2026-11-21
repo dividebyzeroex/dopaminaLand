@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { BellRing, Heart, X } from "lucide-react";
+import { BellRing, Gift, Heart, X } from "lucide-react";
 import { listLocalWatches, removeLocalWatch, subscribePwa, watchedPaths, type LocalWatch } from "@/lib/pwa-client";
-import { changeSinceSaved, parseList, type SavedItem } from "@/lib/my-list";
-import { readListRaw, removeFromList } from "@/lib/my-list-client";
+import { changeSinceSaved, giftTotals, nextGiftOccasion, parseList, type SavedItem } from "@/lib/my-list";
+import { readListRaw, removeFromList, saveToList, setGift } from "@/lib/my-list-client";
+import { upcomingEvents } from "@/lib/events";
 import styles from "./list.module.css";
 
 type Live = { price: number; image: string | null; verdict: { kind: string; tone: "good" | "neutral" | "warn" | "bad"; label: string; decision: string } };
@@ -13,6 +14,13 @@ type Live = { price: number; image: string | null; verdict: { kind: string; tone
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const pct = (v: number) => `${Math.abs(v * 100).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}%`;
 const day = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
+
+/** "natal-2026" → "Natal 2026" (listas de datas que já passaram). */
+const GIFT_NAMES: Record<string, string> = { natal: "Natal", maes: "Dia das Mães", namorados: "Dia dos Namorados", pais: "Dia dos Pais", criancas: "Dia das Crianças" };
+function giftLabel(key: string) {
+  const [id, year] = key.split("-");
+  return `${GIFT_NAMES[id] ?? id} ${year ?? ""}`.trim();
+}
 
 /** Junta salvos e alertas (alerta sem item salvo entra com o preço de quando foi criado). */
 function merge(saved: SavedItem[], watches: LocalWatch[]): SavedItem[] {
@@ -46,6 +54,8 @@ export default function MyList({ compact = false }: { compact?: boolean }) {
   const saved = useMemo(() => parseList(raw), [raw]);
   const [watches, setWatches] = useState<LocalWatch[] | null>(null);
   const [live, setLive] = useState<Record<string, Live | null>>({});
+  const [tab, setTab] = useState<string>("tudo");
+  const occasion = useMemo(() => nextGiftOccasion(upcomingEvents()), []);
 
   useEffect(() => {
     let alive = true;
@@ -85,15 +95,45 @@ export default function MyList({ compact = false }: { compact?: boolean }) {
     </div>;
   }
 
-  const enriched = items.map(item => ({ item, now: live[item.path] }));
+  // Listas de presente que existem na lista, mais a da próxima data (mesmo vazia).
+  const giftKeys = [...new Set([...(occasion ? [occasion.key] : []), ...items.map(x => x.gift).filter((g): g is string => Boolean(g))])];
+  const giftName = (key: string) => key === occasion?.key ? occasion.name : giftLabel(key);
+  const visible = !compact && tab !== "tudo" ? items.filter(x => x.gift === tab) : items;
+
+  function toggleGift(item: SavedItem) {
+    if (!occasion) return;
+    // Alerta sem item salvo: salva primeiro para poder marcar.
+    if (!saved.some(x => x.path === item.path)) saveToList(item);
+    setGift(item.path, item.gift === occasion.key ? null : occasion.key);
+  }
+
+  const enriched = visible.map(item => ({ item, now: live[item.path] }));
   const dropped = enriched.filter(({ item, now }) => now && changeSinceSaved(item.price, now.price).kind === "down");
   const shown = compact ? (dropped.length ? dropped : enriched).slice(0, 3) : enriched;
   const alertSet = new Set(alerts.split("|"));
+  const totals = tab !== "tudo" ? giftTotals(enriched.map(({ item, now }) => ({ price: item.price, now: now ? now.price : null }))) : null;
 
   return <section className={compact ? styles.compact : styles.list} aria-labelledby={compact ? "lista-inicio" : undefined}>
     {compact
       ? <div className={styles.compactHead}><h2 id="lista-inicio">{dropped.length ? "Baixou na sua lista" : "Na sua lista"}</h2><Link href="/lista">Ver tudo ({items.length})</Link></div>
-      : <p className={styles.summary} aria-live="polite">{items.length} {items.length === 1 ? "produto" : "produtos"}{dropped.length ? ` · ${dropped.length} ${dropped.length === 1 ? "baixou" : "baixaram"} desde que você salvou` : ""}</p>}
+      : <>
+        {giftKeys.length > 0 && <div className={styles.tabs} role="tablist" aria-label="Listas">
+          <button type="button" role="tab" aria-selected={tab === "tudo"} className={tab === "tudo" ? styles.tabOn : styles.tab} onClick={() => setTab("tudo")}>Tudo ({items.length})</button>
+          {giftKeys.map(key => <button key={key} type="button" role="tab" aria-selected={tab === key} className={tab === key ? styles.tabOn : styles.tab} onClick={() => setTab(key)}>
+            <Gift size={15} aria-hidden="true" /> {giftName(key)} ({items.filter(x => x.gift === key).length})
+          </button>)}
+        </div>}
+        {totals
+          ? <div className={styles.giftSummary} aria-live="polite">
+              {totals.count === 0
+                ? <p>Nenhum presente nesta lista ainda. Toque em <Gift size={14} aria-label="presente" /> num produto para separar para {giftName(tab)}.</p>
+                : <>
+                  <p><b>Total hoje: {brl(totals.now)}</b>{totals.priced < totals.count ? ` (${totals.priced} de ${totals.count} com preço agora)` : ""}</p>
+                  <p>{Math.abs(totals.diff) < 0.5 ? "Mesmo total de quando você salvou." : totals.diff < 0 ? `Você economiza ${brl(-totals.diff)} em relação a quando salvou.` : `Está ${brl(totals.diff)} mais caro do que quando você salvou.`}{tab === occasion?.key ? ` Faltam ${occasion.daysLeft} dias.` : ""}</p>
+                </>}
+            </div>
+          : <p className={styles.summary} aria-live="polite">{items.length} {items.length === 1 ? "produto" : "produtos"}{dropped.length ? ` · ${dropped.length} ${dropped.length === 1 ? "baixou" : "baixaram"} desde que você salvou` : ""}</p>}
+      </>}
     <ul className={styles.rows}>
       {shown.map(({ item, now }) => {
         const change = now ? changeSinceSaved(item.price, now.price) : null;
@@ -113,6 +153,7 @@ export default function MyList({ compact = false }: { compact?: boolean }) {
               {now && <span className={`${styles.decision} ${styles[now.verdict.tone]}`}>{alertSet.has(item.path) && <BellRing size={13} aria-label="Alerta ativo" />}{now.verdict.decision}</span>}
             </span>
           </Link>
+          {!compact && occasion && <button type="button" className={item.gift === occasion.key ? styles.giftOn : styles.remove} onClick={() => toggleGift(item)} aria-pressed={item.gift === occasion.key} aria-label={item.gift === occasion.key ? `Tirar ${item.name} da lista de ${occasion.name}` : `Separar ${item.name} para ${occasion.name}`} title={`Presente de ${occasion.name}`}><Gift size={18} /></button>}
           {!compact && <button type="button" className={styles.remove} onClick={() => void remove(item.path)} aria-label={`Remover ${item.name} da lista`}><X size={18} /></button>}
         </li>;
       })}

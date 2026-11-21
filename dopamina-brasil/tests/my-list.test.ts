@@ -32,3 +32,23 @@ assert.equal(changeSinceSaved(100, 100.4).kind, "same");
 assert.ok(Math.abs(changeSinceSaved(749, 467.1).pct + 0.3764) < 0.001);
 
 console.log("my-list: ok");
+
+// Listas de presente
+{
+  const { nextGiftOccasion, withGift, giftTotals } = await import("../src/lib/my-list.ts");
+  const occ = [
+    { event: { id: "black-friday", name: "Black Friday" }, date: "2026-11-27", daysLeft: 6 },
+    { event: { id: "natal", name: "Natal" }, date: "2026-12-25", daysLeft: 34 },
+    { event: { id: "maes", name: "Dia das Mães" }, date: "2027-05-09", daysLeft: 169 },
+  ];
+  assert.deepEqual(nextGiftOccasion(occ), { key: "natal-2026", name: "Natal 2026", date: "2026-12-25", daysLeft: 34 });
+  assert.equal(nextGiftOccasion([{ event: { id: "natal", name: "Natal" }, date: "2026-12-25", daysLeft: -1 }, ...occ.slice(2)])?.key, "maes-2027");
+  let l = withGift([item("a"), item("b")], "a", "natal-2026");
+  assert.equal(l[0].gift, "natal-2026");
+  assert.equal(withItem(l, item("a", 50)).find(x => x.path === "a")?.gift, "natal-2026", "salvar de novo mantém a lista de presente");
+  l = withGift(l, "a", null);
+  assert.equal(l[0].gift, undefined);
+  const t = giftTotals([{ price: 100, now: 90 }, { price: 200, now: 210 }, { price: 50, now: null }]);
+  assert.deepEqual(t, { count: 3, priced: 2, saved: 300, now: 300, diff: 0 });
+  console.log("gift lists: ok");
+}

@@ -85,7 +85,7 @@ export default function PriceHistoryChart({ points, current, median, min, today 
           </linearGradient>
         </defs>
         {yTicks.map(v => <g key={v}>
-          <line x1={PAD.left} x2={W - PAD.right} y1={y(v)} y2={y(v)} stroke="#20211f" strokeOpacity=".06" />
+          <line x1={PAD.left} x2={W - PAD.right} y1={y(v)} y2={y(v)} stroke="currentColor" strokeOpacity=".06" />
           <text x={PAD.left - 10} y={y(v) + 3} textAnchor="end">{brlShort(v)}</text>
         </g>)}
         {series.map((p, i) => (i % xEvery === 0 || i === lastIndex) && (lastIndex - i >= xEvery / 2 || i === lastIndex)
@@ -93,12 +93,12 @@ export default function PriceHistoryChart({ points, current, median, min, today 
           : null)}
         <path d={area} fill="url(#dopa-area)" />
         {median && <line x1={PAD.left} x2={W - PAD.right} y1={y(median)} y2={y(median)} stroke="#969b94" strokeWidth="1.5" strokeDasharray="5 5" />}
-        <path d={line} fill="none" stroke="#20211f" strokeWidth="2" strokeLinejoin="round" />
-        {min && <circle cx={x(minIndex)} cy={y(lo)} r="5" fill="#1d7a4b" stroke="#fff" strokeWidth="2" />}
-        <circle cx={x(lastIndex)} cy={y(series[lastIndex].price)} r="6" fill="#2854ec" stroke="#fff" strokeWidth="2.5" />
+        <path d={line} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        {min && <circle cx={x(minIndex)} cy={y(lo)} r="5" style={{ fill: "var(--good)", stroke: "var(--surface)" }} strokeWidth="2" />}
+        <circle cx={x(lastIndex)} cy={y(series[lastIndex].price)} r="6" fill="#2854ec" style={{ stroke: "var(--surface)" }} strokeWidth="2.5" />
         {activePoint && active !== null && <g>
-          <line x1={x(active)} x2={x(active)} y1={PAD.top} y2={PAD.top + innerH} stroke="#20211f" strokeOpacity=".25" />
-          <circle cx={x(active)} cy={y(activePoint.price)} r="4.5" fill="#20211f" stroke="#fff" strokeWidth="2" />
+          <line x1={x(active)} x2={x(active)} y1={PAD.top} y2={PAD.top + innerH} stroke="currentColor" strokeOpacity=".25" />
+          <circle cx={x(active)} cy={y(activePoint.price)} r="4.5" fill="currentColor" style={{ stroke: "var(--surface)" }} strokeWidth="2" />
         </g>}
       </svg>
       {activePoint && <div className={styles.tooltip} style={{ left: tooltipLeft }} aria-hidden="true">

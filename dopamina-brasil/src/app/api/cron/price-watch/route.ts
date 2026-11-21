@@ -22,6 +22,7 @@ type WatchRow = {
   id: number; product_path: string; product_name: string | null;
   notify_drop: boolean; notify_rise: boolean; notify_stable: boolean;
   last_price: number | null; last_change_at: string; last_notified_at: string | null;
+  target_price: number | null; target_hit_at: string | null;
   push_subscriptions: StoredSubscription & { disabled_at: string | null };
 };
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
 
   const db = adminDb()!;
   const { data, error } = await db.from("price_watches")
-    .select("id, product_path, product_name, notify_drop, notify_rise, notify_stable, last_price, last_change_at, last_notified_at, push_subscriptions!inner(id, endpoint, p256dh, auth, disabled_at)")
+    .select("id, product_path, product_name, notify_drop, notify_rise, notify_stable, last_price, last_change_at, last_notified_at, target_price, target_hit_at, push_subscriptions!inner(id, endpoint, p256dh, auth, disabled_at)")
     .is("push_subscriptions.disabled_at", null)
     .limit(5000);
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -55,11 +56,12 @@ export async function GET(req: NextRequest) {
     const decision = decideAlert({
       notifyDrop: w.notify_drop, notifyRise: w.notify_rise, notifyStable: w.notify_stable,
       lastPrice: previous, lastChangeAt: w.last_change_at, lastNotifiedAt: w.last_notified_at,
+      targetPrice: w.target_price === null ? null : Number(w.target_price), targetHitAt: w.target_hit_at,
     }, price, now);
 
     if (decision.kind) {
       const stableDays = (now.getTime() - Date.parse(w.last_change_at)) / 86400000;
-      const msg = alertMessage(decision.kind, w.product_name ?? "Produto", price, previous, decision.change, stableDays);
+      const msg = alertMessage(decision.kind, w.product_name ?? "Produto", price, previous, decision.change, stableDays, w.target_price === null ? null : Number(w.target_price));
       const result = await sendPush(w.push_subscriptions, { ...msg, url: `/produto/${w.product_path}?origem=alerta`, tag: `preco-${w.product_path}` });
       if (result === "gone") {
         stats.gone++;
@@ -71,6 +73,7 @@ export async function GET(req: NextRequest) {
     }
     await db.from("price_watches").update({
       last_price: decision.next.lastPrice, last_change_at: decision.next.lastChangeAt, last_notified_at: decision.next.lastNotifiedAt,
+      target_hit_at: decision.next.targetHitAt,
     }).eq("id", w.id);
   });
 

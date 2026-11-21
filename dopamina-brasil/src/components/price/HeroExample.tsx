@@ -53,14 +53,14 @@ export default function HeroExample({ item, eventName }: { item: ThermometerItem
       aria-label={`Histórico de ${points.length} dias. Preço típico ${verdict.median ? brl(verdict.median) : "indisponível"}. Hoje ${brl(verdict.current)}.`}>
       <path d={area} fill={color} fillOpacity="0.07" />
       {verdict.median && <line x1={14} x2={W - 14} y1={y(verdict.median)} y2={y(verdict.median)} stroke="#8b9087" strokeWidth="1.5" strokeDasharray="5 5" />}
-      <path d={path} fill="none" stroke="#20211f" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d={path} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
       {peakIndex >= 0 && verdict.recentPeak && <g>
-        <circle cx={x(peakIndex)} cy={y(verdict.recentPeak)} r="6" fill={color} stroke="#fff" strokeWidth="2.5" />
+        <circle cx={x(peakIndex)} cy={y(verdict.recentPeak)} r="6" style={{ fill: color, stroke: "var(--surface)" }} strokeWidth="2.5" />
         <text x={peakLabelLeft ? x(peakIndex) - 12 : x(peakIndex) + 12} y={Math.max(16, y(verdict.recentPeak) - 10)} textAnchor={peakLabelLeft ? "end" : "start"} className={styles.chartLabelStrong} fill={color}>
           {shortDate(verdict.recentPeakDate!)}: {brl(verdict.recentPeak)}
         </text>
       </g>}
-      <circle cx={x(last)} cy={y(prices[last])} r="7" fill="#2854ec" stroke="#fff" strokeWidth="3" />
+      <circle cx={x(last)} cy={y(prices[last])} r="7" fill="#2854ec" style={{ stroke: "var(--surface)" }} strokeWidth="3" />
       {verdict.median && <text x={18} y={y(verdict.median) - 8} className={styles.chartLabel}>típico {brlShort(verdict.median)}</text>}
       <text x={14} y={H + 14} className={styles.chartLabel}>{shortDate(points[0].date)}</text>
       <text x={W - 14} y={H + 14} textAnchor="end" className={styles.chartLabel}>hoje</text>
