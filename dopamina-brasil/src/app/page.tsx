@@ -6,6 +6,7 @@ import styles from "@/components/home.module.css";
 import SiteHeader from "@/components/price/SiteHeader";
 import SiteFooter from "@/components/price/SiteFooter";
 import SearchBox from "@/components/price/SearchBox";
+import MyList from "@/components/list/MyList";
 import VerdictBadge from "@/components/price/VerdictBadge";
 import HeroExample, { pickExample } from "@/components/price/HeroExample";
 import ThermometerGrid from "@/components/price/ThermometerGrid";
@@ -54,6 +55,9 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
+
+      {/* Quem já salvou algo vê primeiro o que mudou na própria lista. */}
+      <MyList compact />
 
       <div className={`${styles.head} ${styles.headTight}`} id="termometro">
         <div><span className={styles.kicker}>Termômetro · o que está sendo procurado agora</span><h2>{copy.thermometerTitle}</h2></div>

@@ -7,15 +7,16 @@ import { usePwa } from "./usePwa";
 import InstallSteps from "./InstallSteps";
 import { enableBackgroundCheck, ensureNotificationPermission, localNotification, promptInstall, registerServerAlert, saveLocalWatch, subscribePwa, watchedPaths } from "@/lib/pwa-client";
 import { trackEvent } from "@/lib/tracking";
+import { saveToList } from "@/lib/my-list-client";
 import styles from "./pwa.module.css";
 
-type Props = { path: string; name: string; price: number | null; /** Rótulo curto, para a barra fixa do celular. */ compact?: boolean };
+type Props = { path: string; name: string; price: number | null; image?: string; /** Rótulo curto, para a barra fixa do celular. */ compact?: boolean };
 type Step = "choose" | "install-ios" | "saving" | "done" | "denied" | "error";
 
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
 /** "Avisar quando o preço mudar": escolhe o tipo de alerta, pede permissão e salva. */
-export default function AlertButton({ path, name, price, compact }: Props) {
+export default function AlertButton({ path, name, price, image, compact }: Props) {
   const titleId = useId();
   const pwa = usePwa();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -47,6 +48,8 @@ export default function AlertButton({ path, name, price, compact }: Props) {
     const serverPush = await registerServerAlert({ path, kinds, trending });
     const saved = await saveLocalWatch({ path, name, price, kinds, serverPush }).catch(() => false);
     if (!saved) { setMessage("Não foi possível salvar o alerta neste aparelho."); setStep("error"); return; }
+    // Alertar também salva na Minha lista (um gesto só).
+    saveToList({ path, name, price, image });
     const background = serverPush ? false : await enableBackgroundCheck();
     setMode(serverPush ? "push" : background ? "background" : "open");
     await localNotification(serverPush ? "Alerta por push ativado ✓" : "Alerta local ativado ✓", serverPush ? `Vamos avisar quando ${name.slice(0, 60)} mudar de preço.` : "Abra o Dopamina para atualizar o preço. Avisos com o app fechado não estão garantidos.", `/produto/${path}`).catch(() => undefined);

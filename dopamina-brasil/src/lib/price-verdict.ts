@@ -32,6 +32,20 @@ export type Verdict = {
 };
 
 export const MIN_DAYS = 14;
+
+/**
+ * O veredito em linguagem de decisão: a resposta para "compro agora ou espero?".
+ * O selo técnico (label) continua como explicação logo abaixo.
+ */
+export const DECISION: Record<VerdictKind, string> = {
+  menor: "Pode comprar.",
+  abaixo: "Bom momento para comprar.",
+  maquiado: "Espere.",
+  acima: "Espere, se puder.",
+  comum: "Preço normal. Sem pressa.",
+  insuficiente: "Ainda sem resposta.",
+};
+export const decisionOf = (kind: VerdictKind) => DECISION[kind];
 const RECENT_DAYS = 14;
 
 export const VERDICT_RULES: { kind: VerdictKind; label: string; rule: string }[] = [

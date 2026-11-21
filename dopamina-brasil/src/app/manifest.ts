@@ -22,8 +22,10 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
+    // Android: o Dopamina aparece no menu "Compartilhar" dos apps de loja.
+    share_target: { action: "/compartilhar", method: "GET", params: { title: "title", text: "text", url: "url" } },
     shortcuts: [
-      { name: "Meus alertas", url: "/alertas?origem=atalho", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "Minha lista", url: "/lista?origem=atalho", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
       { name: "Datas comerciais", url: "/datas?origem=atalho", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
     ],
   };

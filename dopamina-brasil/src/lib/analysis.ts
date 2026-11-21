@@ -1,6 +1,7 @@
 import { getProduct, searchProducts, type ProductDetail, type SearchHit } from "./buscape";
 import { loadStoredHistory } from "./price-store";
 import { computeVerdict, type Verdict } from "./price-verdict";
+import { groupVersions, sortGroups, type Order } from "./search-view";
 
 export type AnalyzedHit = { hit: SearchHit; product: ProductDetail | null; verdict: Verdict | null };
 
@@ -53,19 +54,23 @@ export async function analyzeHit(hit: SearchHit): Promise<AnalyzedHit | null> {
 /**
  * Busca em duas etapas: a lista sai na hora e o veredito dos primeiros `detailed`
  * resultados chega depois, um a um (a página mostra cada card assim que fica pronto).
+ * Versões do mesmo modelo (cor, voltagem) viram um item só; a ordem vem antes da
+ * escolha de quem recebe veredito, para os primeiros da tela serem os analisados.
  * Concorrência baixa de propósito: a fonte bloqueia rajadas de requisições.
  */
-export async function startSearch(query: string, detailed = 6) {
+export async function startSearch(query: string, options: { detailed?: number; order?: Order } = {}) {
+  const { detailed = 6, order = "relevancia" } = options;
   const hits = (await searchProducts(query.toLowerCase())).slice(0, 16);
-  const toDetail = new Set(hits.filter(hit => hit.path).slice(0, detailed).map(hit => hit.path));
+  const groups = sortGroups(groupVersions(hits), order);
+  const toDetail = new Set(groups.map(g => g.item).filter(hit => hit.path).slice(0, detailed).map(hit => hit.path));
   const run = createLimiter(2);
-  const pending = hits.map(hit => (hit.path && toDetail.has(hit.path) ? run(() => analyzeHit(hit)) : null));
-  return { hits, pending };
+  const pending = groups.map(({ item }) => (item.path && toDetail.has(item.path) ? run(() => analyzeHit(item)) : null));
+  return { hits, groups, pending };
 }
 
 /** Versão completa (espera todos os vereditos), usada por relatórios e APIs. */
 export async function analyzeSearch(query: string, detailed = 6): Promise<AnalyzedHit[]> {
-  const { hits, pending } = await startSearch(query, detailed);
-  const results = await Promise.all(hits.map((hit, i) => pending[i] ?? Promise.resolve<AnalyzedHit>({ hit, product: null, verdict: null })));
+  const { groups, pending } = await startSearch(query, { detailed });
+  const results = await Promise.all(groups.map(({ item }, i) => pending[i] ?? Promise.resolve<AnalyzedHit>({ hit: item, product: null, verdict: null })));
   return results.filter((entry): entry is AnalyzedHit => entry !== null);
 }
