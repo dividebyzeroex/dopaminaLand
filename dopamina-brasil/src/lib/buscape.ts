@@ -306,11 +306,11 @@ export const searchProducts = unstable_cache(
  * nunca mostrarem preços de consultas diferentes ao mesmo tempo.
  */
 export const PRODUCT_TTL = 1800;
-export const getProduct = unstable_cache(
-  async (path: string) => productUncached(path),
-  ["buscape-product-v4"],
-  { revalidate: PRODUCT_TTL },
-);
+export const productTag = (path: string) => `produto:${path}`;
+export function getProduct(path: string): Promise<ProductDetail | null> {
+  // Uma entrada de cache por produto, com tag própria: "Atualizar preço" invalida só ele.
+  return unstable_cache(() => productUncached(path), ["buscape-product-v4", path], { revalidate: PRODUCT_TTL, tags: [productTag(path)] })();
+}
 
 export function normalizeQuery(input: string): string {
   return input.normalize("NFC").replace(/\s+/g, " ").trim().slice(0, 120);

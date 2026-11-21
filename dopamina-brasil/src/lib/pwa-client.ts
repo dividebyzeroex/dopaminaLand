@@ -109,6 +109,8 @@ export type LocalWatch = {
   notifyDrop: boolean; notifyRise: boolean; notifyStable: boolean;
   basePrice: number; lastPrice: number; currentPrice?: number;
   lastChangeAt: string; lastNotifiedAt: string | null; createdAt: string; checkedAt?: string;
+  /** Preço-alvo opcional e quando foi atingido. */
+  targetPrice?: number | null; targetHitAt?: string | null;
 };
 
 const SYNC_TAG = "dopamina-precos";
@@ -153,13 +155,14 @@ export async function enableBackgroundCheck(): Promise<boolean> {
   } catch { return false; }
 }
 
-export async function saveLocalWatch(input: { path: string; name: string; price: number; kinds: AlertKinds; serverPush?: boolean }) {
+export async function saveLocalWatch(input: { path: string; name: string; price: number; kinds: AlertKinds; serverPush?: boolean; target?: number | null }) {
   const now = new Date().toISOString();
   const watch: LocalWatch = {
     path: input.path, name: input.name, serverPush: Boolean(input.serverPush),
     notifyDrop: input.kinds.drop, notifyRise: input.kinds.rise, notifyStable: input.kinds.stable,
     basePrice: input.price, lastPrice: input.price, currentPrice: input.price,
     lastChangeAt: now, lastNotifiedAt: null, createdAt: now, checkedAt: now,
+    targetPrice: input.target ?? null, targetHitAt: null,
   };
   const result = await swCall({ type: "save", watch });
   if (result.ok) rememberWatched(input.path, true);
@@ -198,7 +201,7 @@ async function pushEndpoint(): Promise<string | null> {
  * de hora em hora. Retorna false se o navegador ou o servidor não suportarem:
  * aí o alerta segue só com a checagem local.
  */
-export async function registerServerAlert(input: { path: string; kinds: AlertKinds; trending?: boolean }): Promise<boolean> {
+export async function registerServerAlert(input: { path: string; kinds: AlertKinds; trending?: boolean; target?: number | null }): Promise<boolean> {
   const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   if (!key) return false;
   try {
@@ -209,7 +212,7 @@ export async function registerServerAlert(input: { path: string; kinds: AlertKin
     const response = await fetch("/api/alerts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subscription: subscription.toJSON(), path: input.path, kinds: input.kinds, trending: input.trending }),
+      body: JSON.stringify({ subscription: subscription.toJSON(), path: input.path, kinds: input.kinds, trending: input.trending, target: input.target ?? null }),
     });
     const data = await response.json().catch(() => null);
     return Boolean(response.ok && data?.ok);

@@ -51,7 +51,7 @@ export default function HomePage() {
           <p className={styles.lead}>{copy.lead}</p>
           <div id="busca"><SearchBox placeholder="Ex.: PlayStation 5 Slim ou link da loja" suggestions={event?.suggestions ?? EVERGREEN.suggestions} /></div>
           <ul className={styles.trust}>
-            {["Histórico diário de 40 dias", "Regras abertas", "Nenhum veredito pago"].map(text => <li key={text}><Check size={16} color="#1d7a4b" strokeWidth={2.2} aria-hidden="true" />{text}</li>)}
+            {["Histórico diário de 40 dias", "Regras abertas", "Nenhum veredito pago"].map(text => <li key={text}><Check size={16} color="var(--good)" strokeWidth={2.2} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
       </section>

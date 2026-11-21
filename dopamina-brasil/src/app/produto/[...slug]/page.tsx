@@ -14,10 +14,13 @@ import TrackOnce from "@/components/price/TrackOnce";
 import AlertButton from "@/components/pwa/AlertButton";
 import InstallBanner from "@/components/pwa/InstallBanner";
 import SaveButton from "@/components/list/SaveButton";
+import PriceFreshness from "@/components/price/PriceFreshness";
+import SimilarWithHistory from "@/components/price/SimilarWithHistory";
+import { Suspense } from "react";
 import ProductVisual from "@/components/ProductVisual";
 import { analyzeProduct } from "@/lib/analysis";
 import { isSafeProductPath } from "@/lib/buscape";
-import { decisionOf, VERDICT_RULES } from "@/lib/price-verdict";
+import { decisionOf, MIN_DAYS, VERDICT_RULES } from "@/lib/price-verdict";
 import { brl, dateTime, shortDate, signedPct } from "@/lib/format";
 import { activeEvent, EVERGREEN } from "@/lib/events";
 
@@ -134,6 +137,10 @@ export default async function ProductPage({ params }: Props) {
           </div>
           {/* No celular o alerta fica na barra fixa; aqui só no desktop. */}
           <div className={styles.desktopOnly} style={{ marginTop: 16 }}><AlertButton path={product.path} name={product.name} price={product.bestPrice} image={product.image} /></div>
+          {verdict.kind === "insuficiente" && <div className={styles.nextStep}>
+            <b>O que fazer agora?</b>
+            <p>Salve o produto: na Minha lista você vê o veredito assim que tivermos {MIN_DAYS} dias de preços. Ou compare com os modelos parecidos logo abaixo, que já têm histórico.</p>
+          </div>}
           <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
           <InstallBanner />
         </div>
@@ -146,6 +153,8 @@ export default async function ProductPage({ params }: Props) {
         <div className={styles.stat}><span>Máximo</span><strong>{brl(verdict.max!)}</strong><small>{verdict.days} dias desde {verdict.since ? shortDate(verdict.since) : "—"}</small></div>
       </section>}
 
+      {verdict.kind === "insuficiente" && <Suspense fallback={null}><SimilarWithHistory path={product.path} name={product.name} /></Suspense>}
+
       <div className={styles.two}>
         <section className={styles.chartPanel} aria-label="Histórico de preço">
           <div className={styles.chartHead}><h3>Histórico de preço</h3><span>{history.length} dias · eixo ajustado à variação</span></div>
@@ -153,7 +162,7 @@ export default async function ProductPage({ params }: Props) {
         </section>
         <section aria-label="Ofertas por loja">
           <div className={styles.storeList}>
-            <div className={styles.chartHead} style={{ padding: "18px 0 6px" }}><h3>Onde comprar</h3><span>ordenado por preço</span></div>
+            <div className={styles.chartHead} style={{ padding: "18px 0 6px" }}><h3>Onde comprar</h3><PriceFreshness path={product.path} checkedAt={product.checkedAt} /></div>
             {product.offers.length === 0 && <p className={studio.note}>A fonte não listou ofertas individuais agora.</p>}
             {stores.map(({ offer, more }, index) => <div key={offer.id} className={styles.storeRow}>
               <div className={styles.storeName}>
@@ -178,7 +187,7 @@ export default async function ProductPage({ params }: Props) {
         <section className={styles.rules}>
           {VERDICT_RULES.filter(rule => rule.kind !== "insuficiente").map(rule => {
             const tone = rule.kind === "menor" || rule.kind === "abaixo" ? "good" : rule.kind === "maquiado" ? "bad" : rule.kind === "acima" ? "warn" : "neutral";
-            return <article key={rule.kind} className={styles.rule} style={rule.kind === verdict.kind ? { outline: "2px solid #20211f" } : undefined}><VerdictBadge tone={tone} label={rule.label} small /><p>{rule.rule}</p></article>;
+            return <article key={rule.kind} className={styles.rule} style={rule.kind === verdict.kind ? { outline: "2px solid var(--ink)" } : undefined}><VerdictBadge tone={tone} label={rule.label} small /><p>{rule.rule}</p></article>;
           })}
           <article className={styles.rule}><span className={studio.eyebrow}>Fonte</span><p>Série diária do menor preço entre as lojas, publicada pelo Buscapé, somada ao histórico que gravamos a cada consulta. Frete, cupons e cashback não entram no cálculo.</p></article>
         </section>
@@ -192,6 +201,7 @@ export default async function ProductPage({ params }: Props) {
     </div>
     {/* Celular: as duas ações que importam sempre ao alcance do polegar. */}
     <div className={styles.actionBar} role="region" aria-label="Ações do produto">
+      <PriceFreshness path={product.path} checkedAt={product.checkedAt} compact />
       <AlertButton path={product.path} name={product.name} price={product.bestPrice} image={product.image} compact />
       {best
         ? <a className={styles.actionStore} href={best.url} target="_blank" rel="noopener noreferrer nofollow" data-track="offer" data-store={best.store} data-price={best.price} data-product={product.name} data-product-path={product.path} data-position={1} data-placement="barra-fixa">Ir à loja · {brl(best.price)} <ArrowUpRight size={16} aria-hidden="true" /></a>

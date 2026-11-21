@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Inter, Outfit } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
 import TrackingProvider from "@/components/TrackingProvider";
-import { CSPostHogProvider } from "@/providers/PostHogProvider";
 import PwaInit from "@/components/pwa/PwaInit";
 import TabBar from "@/components/nav/TabBar";
 
@@ -30,7 +28,7 @@ export const viewport: Viewport = {
   // (o iOS usa a theme-color ali); no navegador, a cor do papel.
   themeColor: [
     { media: "(display-mode: standalone)", color: "#20211f" },
-    { media: "(prefers-color-scheme: dark)", color: "#20211f" },
+    { media: "(prefers-color-scheme: dark)", color: "#161715" },
     { color: "#f5f5f0" },
   ],
 };
@@ -84,29 +82,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <TrackingProvider>
-          <CSPostHogProvider>
             <main className="flex-1 overflow-x-clip">{children}</main>
             <PwaInit />
             <TabBar />
-          </CSPostHogProvider>
         </TrackingProvider>
         <Analytics />
         <SpeedInsights />
         
-        {/* Google Analytics (GA4): carrega depois que a página fica pronta, sem disputar com o conteúdo. */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-JG8ZCXR32T"
-          strategy="lazyOnload"
-        />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-JG8ZCXR32T');
-          `}
-        </Script>
-
       </body>
     </html>
   );

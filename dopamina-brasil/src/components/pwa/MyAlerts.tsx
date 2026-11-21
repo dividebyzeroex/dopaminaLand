@@ -70,7 +70,7 @@ export default function MyAlerts() {
     </div>}
 
     {watches.map(w => {
-      const kinds = [w.notifyDrop && "baixar", w.notifyStable && "estabilizar", w.notifyRise && "subir"].filter(Boolean).join(", ");
+      const kinds = [w.targetPrice ? `chegar a ${brl(w.targetPrice)}` : null, w.notifyDrop && "baixar", w.notifyStable && "estabilizar", w.notifyRise && "subir"].filter(Boolean).join(", ");
       const now = w.currentPrice ?? w.lastPrice;
       const change = w.basePrice ? (now - w.basePrice) / w.basePrice : 0;
       return <article key={w.path} className={styles.alertRow}>

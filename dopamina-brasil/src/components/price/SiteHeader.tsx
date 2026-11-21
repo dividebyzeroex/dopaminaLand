@@ -3,11 +3,12 @@ import { Heart, Search } from "lucide-react";
 import studio from "../studio.module.css";
 import styles from "../bf.module.css";
 import { activeEvent } from "@/lib/events";
+import BackButton from "../nav/BackButton";
 
 export default function SiteHeader() {
   const live = activeEvent();
   return <header className={studio.nav}>
-    <Link href="/" className={studio.brand}>dopamina</Link>
+    <div style={{ display: "flex", alignItems: "center", gap: 2 }}><BackButton /><Link href="/" className={studio.brand}>dopamina</Link></div>
     <nav className={styles.navLinks} aria-label="Principal">
       {live
         ? <Link href={`/datas/${live.event.slug}`} className={styles.navHot}><span className={styles.ribbonDot} style={{ background: live.event.accent }} aria-hidden="true" />{live.event.name}</Link>

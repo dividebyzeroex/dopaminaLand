@@ -9,6 +9,8 @@
  *   servidor, que manda o push; aqui eles só atualizam o preço exibido, sem
  *   notificar, para o aviso não chegar em dobro.
  * - Regras: baixou 3%+, subiu 3%+, estável (±1%) por 7 dias, sem repetir antes de 7 dias.
+ * - Preço-alvo (opcional): avisa uma vez quando o preço chega ao valor escolhido;
+ *   volta a valer se o preço subir de novo acima do alvo (+1%).
  */
 (function (root) {
   "use strict";
@@ -18,34 +20,43 @@
   var STABLE_DAYS = 7;
   var DAY = 86400000;
 
-  /** Decide se um alerta dispara. watch: { notifyDrop, notifyRise, notifyStable, lastPrice, lastChangeAt, lastNotifiedAt } */
+  /**
+   * Decide se um alerta dispara.
+   * watch: { notifyDrop, notifyRise, notifyStable, lastPrice, lastChangeAt, lastNotifiedAt, targetPrice?, targetHitAt? }
+   */
   function decideAlert(watch, price, now) {
     now = now || new Date();
     var nowIso = now.toISOString();
     var change = watch.lastPrice > 0 ? (price - watch.lastPrice) / watch.lastPrice : 0;
     var moved = Math.abs(change) > STABLE_BAND;
     var lastChangeAt = moved ? nowIso : watch.lastChangeAt;
+    var target = watch.targetPrice > 0 ? watch.targetPrice : null;
+    var targetHitAt = watch.targetHitAt || null;
+    // Rearma o alvo quando o preço volta a ficar acima dele.
+    if (target && targetHitAt && price > target * 1.01) targetHitAt = null;
 
-    if (change <= -DROP_OR_RISE && watch.notifyDrop) {
-      return { kind: "drop", change: change, next: { lastPrice: price, lastChangeAt: lastChangeAt, lastNotifiedAt: nowIso } };
+    function result(kind, lastPrice, notified, hit) {
+      return { kind: kind, change: change, next: { lastPrice: lastPrice, lastChangeAt: lastChangeAt, lastNotifiedAt: notified, targetHitAt: hit } };
     }
-    if (change >= DROP_OR_RISE && watch.notifyRise) {
-      return { kind: "rise", change: change, next: { lastPrice: price, lastChangeAt: lastChangeAt, lastNotifiedAt: nowIso } };
-    }
+
+    if (target && price <= target && !targetHitAt) return result("target", price, nowIso, nowIso);
+    if (change <= -DROP_OR_RISE && watch.notifyDrop) return result("drop", price, nowIso, targetHitAt);
+    if (change >= DROP_OR_RISE && watch.notifyRise) return result("rise", price, nowIso, targetHitAt);
     var stableFor = (now.getTime() - Date.parse(lastChangeAt)) / DAY;
     var sinceLastPush = watch.lastNotifiedAt ? (now.getTime() - Date.parse(watch.lastNotifiedAt)) / DAY : Infinity;
     if (!moved && watch.notifyStable && stableFor >= STABLE_DAYS && sinceLastPush >= STABLE_DAYS) {
-      return { kind: "stable", change: change, next: { lastPrice: watch.lastPrice, lastChangeAt: lastChangeAt, lastNotifiedAt: nowIso } };
+      return result("stable", watch.lastPrice, nowIso, targetHitAt);
     }
     // Sem aviso: a referência só muda quando o preço realmente mudou.
-    return { kind: null, change: change, next: { lastPrice: moved ? price : watch.lastPrice, lastChangeAt: lastChangeAt, lastNotifiedAt: watch.lastNotifiedAt } };
+    return result(null, moved ? price : watch.lastPrice, watch.lastNotifiedAt, targetHitAt);
   }
 
   function brl(v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); }
   function pct(v) { return Math.abs(v * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "%"; }
 
-  function alertMessage(kind, name, price, previous, change, stableDays) {
+  function alertMessage(kind, name, price, previous, change, stableDays, target) {
     var short = name.length > 60 ? name.slice(0, 58) + "…" : name;
+    if (kind === "target") return { title: "Chegou ao seu preço: " + short, body: "Agora por " + brl(price) + " (seu alvo era " + brl(target || price) + "). Veja se é desconto real antes de comprar." };
     if (kind === "drop") return { title: "Baixou " + pct(change) + ": " + short, body: "De " + brl(previous) + " para " + brl(price) + ". Veja se é desconto real no histórico." };
     if (kind === "rise") return { title: "Subiu " + pct(change) + ": " + short, body: "Foi de " + brl(previous) + " para " + brl(price) + ". Se puder, espere." };
     return { title: "Preço estável: " + short, body: brl(price) + " há " + Math.floor(stableDays) + " dias, sem sinal de queda. Bom momento para decidir." };
@@ -110,7 +121,7 @@
               var shown = Promise.resolve();
               if (decision.kind && !w.serverPush) {
                 var stableDays = (now.getTime() - Date.parse(w.lastChangeAt)) / DAY;
-                var msg = alertMessage(decision.kind, w.name, data.price, previous, decision.change, stableDays);
+                var msg = alertMessage(decision.kind, w.name, data.price, previous, decision.change, stableDays, w.targetPrice);
                 report.notified++;
                 shown = notify(msg.title, {
                   body: msg.body,

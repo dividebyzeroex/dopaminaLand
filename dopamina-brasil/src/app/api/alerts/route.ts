@@ -16,6 +16,8 @@ type Body = {
   endpoint?: string;
   path?: string;
   kinds?: { drop?: boolean; rise?: boolean; stable?: boolean };
+  /** Preço-alvo opcional (avisa quando o preço chegar a este valor). */
+  target?: number | null;
   /** Também receber os destaques de queda dos produtos mais buscados. */
   trending?: boolean;
 };
@@ -39,6 +41,8 @@ export async function POST(req: NextRequest) {
 
   const product = await getProduct(body.path).catch(() => null);
   if (!product?.bestPrice) return bad("Não conseguimos ler o preço deste produto agora.", 502);
+  const target = typeof body.target === "number" && Number.isFinite(body.target) && body.target > 0 ? Math.round(body.target * 100) / 100 : null;
+  if (target !== null && target >= product.bestPrice) return bad("O preço-alvo precisa ser menor que o preço de agora.");
 
   const db = adminDb()!;
   const existing = await subscriptionId(sub.endpoint);
@@ -58,6 +62,7 @@ export async function POST(req: NextRequest) {
     subscription_id: saved.id, product_path: product.path, product_name: product.name,
     notify_drop: kinds.drop, notify_rise: kinds.rise, notify_stable: kinds.stable,
     base_price: product.bestPrice, last_price: product.bestPrice, last_change_at: new Date().toISOString(),
+    target_price: target, target_hit_at: null,
   }, { onConflict: "subscription_id,product_path" });
   if (watchError) return bad("Não foi possível salvar o alerta.", 500);
 

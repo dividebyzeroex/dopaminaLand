@@ -23,4 +23,22 @@ check("estável já avisado há 2 dias não repete", decideAlert({ ...base, last
 check("estável avisado há 8 dias repete", decideAlert({ ...base, lastChangeAt: daysAgo(20), lastNotifiedAt: daysAgo(8) }, 1000, now).kind, "stable");
 check("mudança de 1,5% reinicia a contagem de estabilidade", decideAlert({ ...base, lastChangeAt: daysAgo(10) }, 1015, now).next.lastChangeAt, now.toISOString());
 check("texto de queda", alertMessage("drop", "JBL Flip 6", 600, 640, -0.0625, 0).title, "Baixou 6,3%: JBL Flip 6");
+// Preço-alvo
+{
+  const t = { notifyDrop: false, notifyRise: false, notifyStable: false, lastPrice: 1000, lastChangeAt: "2026-11-01T00:00:00Z", lastNotifiedAt: null, targetPrice: 900 };
+  const now2 = new Date("2026-11-21T12:00:00Z");
+  const hit = decideAlert(t, 890, now2);
+  check("alvo atingido avisa", hit.kind, "target");
+  check("alvo registra quando foi atingido", Boolean(hit.next.targetHitAt), true);
+  check("alvo não repete enquanto segue abaixo", decideAlert({ ...t, ...hit.next }, 880, now2).kind, null);
+  const back = decideAlert({ ...t, ...hit.next }, 950, now2);
+  check("preço acima do alvo rearma", back.next.targetHitAt, null);
+  check("rearmado, avisa de novo", decideAlert({ ...t, ...back.next }, 899, now2).kind, "target");
+  check("acima do alvo não avisa", decideAlert(t, 905, now2).kind, null);
+  check("sem alvo, segue as regras antigas", decideAlert({ ...t, targetPrice: null, notifyDrop: true }, 890, now2).kind, "drop");
+  check("alvo tem prioridade sobre queda", decideAlert({ ...t, notifyDrop: true }, 890, now2).kind, "target");
+  const msg = alertMessage("target", "PS5", 3890, 4100, -0.05, 0, 3900);
+  check("mensagem do alvo cita o alvo", /R\$\s?3\.900,00/.test(msg.body), true);
+}
+
 process.exit(fail);

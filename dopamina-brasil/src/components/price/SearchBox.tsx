@@ -2,12 +2,14 @@
 
 import { useState, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ClipboardPaste, Loader2, Search } from "lucide-react";
+import { ArrowRight, ClipboardPaste, Loader2, ScanBarcode, Search } from "lucide-react";
+import Link from "next/link";
 import studio from "../studio.module.css";
 import { blockedMessage, checkSearch } from "@/lib/search-policy";
 import { trackEvent } from "@/lib/tracking";
 import { addRecent } from "@/lib/recent-searches";
 import { extractLink } from "@/lib/shared-link";
+import { FEATURES } from "@/lib/features";
 
 const noop = () => () => {};
 
@@ -58,7 +60,10 @@ export default function SearchBox({ defaultValue = "", suggestions = [], id = "p
     </form>
     {pending && <p role="status" className={studio.status}>Consultando preços e histórico…</p>}
     {error && <p role="alert" className={studio.error}>{error}</p>}
-    {canPaste && <button type="button" className={studio.pasteButton} onClick={() => void paste()} disabled={pending}><ClipboardPaste size={16} aria-hidden="true" /> Colar link da loja</button>}
+    <div className={studio.quickActions}>
+      {canPaste && <button type="button" className={studio.pasteButton} onClick={() => void paste()} disabled={pending}><ClipboardPaste size={16} aria-hidden="true" /> Colar link da loja</button>}
+      {FEATURES.scanner && <Link href="/escanear" className={studio.pasteButton}><ScanBarcode size={16} aria-hidden="true" /> Escanear código</Link>}
+    </div>
     {suggestions.length > 0 && <div className={studio.suggestions}><span>Experimente</span>{suggestions.map(item => <button type="button" key={item} disabled={pending} onClick={() => go(item)}>{item}</button>)}</div>}
   </div>;
 }
