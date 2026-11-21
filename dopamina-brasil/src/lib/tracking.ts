@@ -69,7 +69,9 @@ export async function initSession(forceUpdate: boolean = false) {
 }
 
 export async function trackEvent(
-  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals' | 'tracking_update' | 'digital_dna_scan' | 'narrator_interaction' | 'neuro_xray_toggle' | 'resistance_training_start' | 'resistance_training_fail' | 'resistance_training_complete' | 'wrapped_generated' | 'wrapped_shared' | 'bookmarklet_installed' | 'dark_pattern_audit' | 'super_search',
+  eventType: 'view_item' | 'add_to_cart' | 'dwell_time_exceeded' | 'fake_checkout' | 'scroll_depth' | 'page_leave' | 'rage_click' | 'share_product' | 'search' | 'cart_abandoned' | 'checkout_basket' | 'dead_click' | 'cursor_frustration' | 'js_error' | 'element_visible' | 'heatmap_click' | 'heatmap_move' | 'web_vitals' | 'tracking_update' | 'digital_dna_scan' | 'narrator_interaction' | 'neuro_xray_toggle' | 'resistance_training_start' | 'resistance_training_fail' | 'resistance_training_complete' | 'wrapped_generated' | 'wrapped_shared' | 'bookmarklet_installed' | 'dark_pattern_audit' | 'super_search'
+    // Funil de pesquisa de preços (lido pelo dopamina-insights)
+    | 'page_view' | 'search_results' | 'search_blocked' | 'product_view' | 'offer_click' | 'outbound_click',
   productName?: string,
   priceDisplayed?: number,
   metadata?: Record<string, unknown>
@@ -87,7 +89,8 @@ export async function trackEvent(
         event_type: eventType,
         product_id: productName,
         price_displayed: priceDisplayed,
-        metadata: metadata
+        // O caminho atual acompanha todo evento para o painel saber onde ele aconteceu.
+        metadata: { path: window.location.pathname, ...(metadata || {}) }
       }),
       keepalive: true
     });

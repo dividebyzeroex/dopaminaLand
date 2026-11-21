@@ -10,6 +10,7 @@ import SearchBox from "@/components/price/SearchBox";
 import VerdictBadge from "@/components/price/VerdictBadge";
 import PriceHistoryChart from "@/components/price/PriceHistoryChart";
 import ShareVerdict from "@/components/price/ShareVerdict";
+import TrackOnce from "@/components/price/TrackOnce";
 import AlertButton from "@/components/pwa/AlertButton";
 import InstallBanner from "@/components/pwa/InstallBanner";
 import ProductVisual from "@/components/ProductVisual";
@@ -98,6 +99,15 @@ export default async function ProductPage({ params }: Props) {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <div className={studio.wrap}>
       <SiteHeader />
+      <TrackOnce event="product_view" product={product.name} price={product.bestPrice} metadata={{
+        product_path: product.path,
+        brand: product.brand ?? null,
+        category: product.category ?? null,
+        best_store: product.bestStore ?? null,
+        store_count: product.storeCount ?? null,
+        verdict: verdict.kind,
+        vs_median: verdict.vsMedian ?? null,
+      }} />
       <nav className={styles.crumbs} aria-label="Navegação"><Link href="/">Início</Link><span>/</span>{product.category && <><span>{product.category}</span><span>/</span></>}<span aria-current="page">{product.name}</span></nav>
 
       <section className={styles.productHero}>
@@ -142,14 +152,14 @@ export default async function ProductPage({ params }: Props) {
           <div className={styles.storeList}>
             <div className={styles.chartHead} style={{ padding: "18px 0 6px" }}><h3>Onde comprar</h3><span>ordenado por preço</span></div>
             {product.offers.length === 0 && <p className={studio.note}>A fonte não listou ofertas individuais agora.</p>}
-            {stores.map(({ offer, more }) => <div key={offer.id} className={styles.storeRow}>
+            {stores.map(({ offer, more }, index) => <div key={offer.id} className={styles.storeRow}>
               <div className={styles.storeName}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {offer.logo ? <img src={offer.logo} alt="" loading="lazy" /> : null}
                 <div>{offer.store}<small>{offer.marketplace ? "Marketplace (vendedor parceiro)" : "Loja oficial / venda direta"}{more ? ` · +${more} ${more === 1 ? "oferta" : "ofertas"} nesta loja` : ""}</small></div>
               </div>
               <div className={styles.storePrice}>{brl(offer.price)}{offer.installments && offer.installmentValue ? <small>ou {offer.installments}x {brl(offer.installmentValue)}</small> : null}</div>
-              <a className={styles.storeLink} href={offer.url} target="_blank" rel="noopener noreferrer nofollow">Ir à loja <ArrowUpRight size={13} /></a>
+              <a className={styles.storeLink} href={offer.url} target="_blank" rel="noopener noreferrer nofollow" data-track="offer" data-store={offer.store} data-price={offer.price} data-product={product.name} data-product-path={product.path} data-position={index + 1}>Ir à loja <ArrowUpRight size={13} /></a>
             </div>)}
             <p className={studio.note} style={{ marginTop: 6, marginBottom: 14 }}>
               {product.offerCount && product.offerCount > product.offers.length ? <>Mostrando {product.offers.length} de {product.offerCount} ofertas. <a href={product.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>Ver todas na fonte</a>. </> : null}
@@ -181,7 +191,7 @@ export default async function ProductPage({ params }: Props) {
     <div className={styles.actionBar} role="region" aria-label="Ações do produto">
       <AlertButton path={product.path} name={product.name} price={product.bestPrice} compact />
       {best
-        ? <a className={styles.actionStore} href={best.url} target="_blank" rel="noopener noreferrer nofollow">Ir à loja · {brl(best.price)} <ArrowUpRight size={16} aria-hidden="true" /></a>
+        ? <a className={styles.actionStore} href={best.url} target="_blank" rel="noopener noreferrer nofollow" data-track="offer" data-store={best.store} data-price={best.price} data-product={product.name} data-product-path={product.path} data-position={1} data-placement="barra-fixa">Ir à loja · {brl(best.price)} <ArrowUpRight size={16} aria-hidden="true" /></a>
         : <a className={styles.actionStore} href={product.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">Ver ofertas <ArrowUpRight size={16} aria-hidden="true" /></a>}
     </div>
   </main>;

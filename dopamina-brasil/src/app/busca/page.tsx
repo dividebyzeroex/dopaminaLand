@@ -8,6 +8,7 @@ import ProductCard from "@/components/price/ProductCard";
 import { Suspense } from "react";
 import { startSearch, type AnalyzedHit } from "@/lib/analysis";
 import type { SearchHit } from "@/lib/buscape";
+import TrackOnce from "@/components/price/TrackOnce";
 import { ACCESSORY, foldText, normalizeQuery, queryFromUrl } from "@/lib/buscape";
 import { redirect } from "next/navigation";
 import { blockedMessage, checkSearch } from "@/lib/search-policy";
@@ -52,6 +53,10 @@ export default async function SearchPage({ searchParams }: Props) {
   return <main className={studio.shell}>
     <div className={studio.wrap}>
       <SiteHeader />
+      {/* Com resultados, o evento sai do resumo (depois que os vereditos chegam). */}
+      {query && !(search && hits.length > 0) && <TrackOnce event="search_results" metadata={{
+        query, results: 0, analyzed: 0, real_discounts: 0, fake_discounts: 0, failed, blocked, only_accessories: false, top: [],
+      }} />}
       <section style={{ padding: "44px 0 10px", maxWidth: 640 }}>
         <span className={studio.eyebrow}>Sua busca</span>
         <h1 className={studio.resultTitle}>{blocked ? "Busca não permitida" : query || "O que você quer comprar?"}</h1>
@@ -67,7 +72,7 @@ export default async function SearchPage({ searchParams }: Props) {
         <div className={studio.sectionHead}>
           <div><span className={studio.eyebrow}>{hits.length} produtos · ordem de relevância da fonte</span><h2>Escolha o modelo exato.</h2></div>
           <Suspense fallback={<p>Checando o histórico de preço dos primeiros resultados. Os vereditos aparecem nos cards em segundos.</p>}>
-            <Summary pending={search.pending} />
+            <Summary query={query} hits={hits} pending={search.pending} onlyAccessories={onlyAccessories} />
           </Suspense>
         </div>
         <section className={styles.grid} aria-label="Resultados" style={{ marginBottom: 56 }}>
@@ -94,11 +99,26 @@ async function AnalyzedCard({ hit, pending }: { hit: SearchHit; pending: Promise
     series={product ? displaySeries(product.history, product.bestPrice, product.checkedAt.slice(0, 10)).slice(-40).map(p => p.price) : undefined} />;
 }
 
-async function Summary({ pending }: { pending: (Promise<AnalyzedHit | null> | null)[] }) {
-  const done = await Promise.all(pending.filter((p): p is Promise<AnalyzedHit | null> => p !== null));
-  const analyzed = done.filter((r): r is AnalyzedHit => Boolean(r?.verdict));
-  if (!analyzed.length) return <p>Abra um produto para ver o histórico de preço e as ofertas por loja.</p>;
+async function Summary({ query, hits, pending, onlyAccessories }: { query: string; hits: SearchHit[]; pending: (Promise<AnalyzedHit | null> | null)[]; onlyAccessories: boolean }) {
+  const settled = await Promise.all(hits.map((hit, i) => pending[i] ?? Promise.resolve<AnalyzedHit>({ hit, product: null, verdict: null })));
+  const results = settled.filter((r): r is AnalyzedHit => r !== null);
+  const analyzed = results.filter(r => r.verdict);
   const real = analyzed.filter(r => r.verdict!.kind === "menor" || r.verdict!.kind === "abaixo").length;
   const fake = analyzed.filter(r => r.verdict!.kind === "maquiado").length;
-  return <p>Analisamos o histórico dos {analyzed.length} primeiros: {real} com preço abaixo do normal{fake ? `, ${fake} com desconto maquiado` : ""}. Abra um produto para ver o gráfico e as lojas.</p>;
+  return <>
+    <TrackOnce event="search_results" metadata={{
+      query,
+      results: results.length,
+      analyzed: analyzed.length,
+      real_discounts: real,
+      fake_discounts: fake,
+      failed: false,
+      blocked: false,
+      only_accessories: onlyAccessories,
+      top: results.slice(0, 5).map(({ hit, product, verdict }) => ({ name: product?.name ?? hit.name, path: hit.path ?? null, price: product?.bestPrice ?? hit.price ?? null, verdict: verdict?.kind ?? null })),
+    }} />
+    {analyzed.length
+      ? <p>Analisamos o histórico dos {analyzed.length} primeiros: {real} com preço abaixo do normal{fake ? `, ${fake} com desconto maquiado` : ""}. Abra um produto para ver o gráfico e as lojas.</p>
+      : <p>Abra um produto para ver o histórico de preço e as ofertas por loja.</p>}
+  </>;
 }
