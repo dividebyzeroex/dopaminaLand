@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
+import { parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
 
 const body = '{"a":1}';
 const sig = createHmac("sha256", "s3").update(body).digest("hex");
@@ -29,4 +29,11 @@ assert.match(reply, /Espere\./);
 assert.match(reply, /dopaminado\.com\.br\/produto\/air-fryer\/p\/1/);
 assert.match(reply, /consultado em 24\/11/);
 assert.ok(reply.includes(SIGNATURE) && reply.includes(DISCLAIMER));
+const cm = (c = {}, over = {}) => ({ id: "ev2", event: "comment.received", comment: { id: "cm1", postId: "zp1", platformPostId: "ig1", platform: "instagram", text: "raiox airfryer 5l", isReply: false, author: { id: "u9", isOwnAccount: false }, ...c }, account: { accountId: "a1" }, ...over });
+assert.deepEqual(parseComment(cm()), { eventId: "ev2", postId: "ig1", commentId: "cm1", accountId: "a1", authorId: "u9", text: "raiox airfryer 5l" });
+assert.equal(parseComment(cm({ text: "Amei! 😍" })), null);
+assert.equal(parseComment(cm({ isReply: true })), null);
+assert.equal(parseComment(cm({ author: { id: "u9", isOwnAccount: true } })), null);
+assert.equal(parseComment(cm({ platform: "youtube" })), null);
+assert.equal(parseComment(cm({}, { event: "message.received" })), null);
 console.log("raiox-reply: ok");
