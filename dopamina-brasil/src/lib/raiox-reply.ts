@@ -47,6 +47,27 @@ export function parseIncoming(payload: unknown): Incoming | null {
   return { eventId: p.id, conversationId: m.conversationId, accountId, senderId: m.sender?.id || m.conversationId, text };
 }
 
+export type IncomingComment = { eventId: string; postId: string; commentId: string; accountId: string; authorId: string; text: string };
+
+/** Comentário novo de outra pessoa (Instagram/Facebook) que pede o Raio-X pela palavra-chave. */
+export function parseComment(payload: unknown): IncomingComment | null {
+  const p = payload as {
+    id?: string; event?: string;
+    comment?: { id?: string; postId?: string; platformPostId?: string; platform?: string; text?: string | null; isReply?: boolean; author?: { id?: string; isOwnAccount?: boolean } };
+    account?: { accountId?: string; id?: string };
+  } | null;
+  if (!p || p.event !== "comment.received" || !p.id || !p.comment) return null;
+  const c = p.comment;
+  if (c.platform !== "instagram" && c.platform !== "facebook") return null;
+  if (c.isReply || c.author?.isOwnAccount) return null;
+  const text = typeof c.text === "string" ? c.text.trim() : "";
+  if (!/\braio[\s-]?x\b/i.test(text)) return null;
+  const postId = c.platformPostId || c.postId;
+  const accountId = p.account?.accountId || p.account?.id;
+  if (!c.id || !postId || !accountId) return null;
+  return { eventId: p.id, postId, commentId: c.id, accountId, authorId: c.author?.id || c.id, text };
+}
+
 export type RaioxRequest = { kind: "link"; url: string } | { kind: "query"; query: string } | { kind: "empty" };
 
 /** Tira a palavra-chave ("raiox", "raio-x", "raio x") e entende link ou nome do produto. */

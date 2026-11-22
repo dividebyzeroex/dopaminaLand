@@ -5,7 +5,7 @@ import { blockedMessage, checkSearch } from "@/lib/search-policy";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   askMessage, blockedReply, buildFoundReply, errorMessage, limitMessage, notFoundMessage,
-  parseIncoming, parseRequest, verifySignature,
+  parseComment, parseIncoming, parseRequest, verifySignature,
 } from "@/lib/raiox-reply";
 
 /**
@@ -63,6 +63,19 @@ async function send(conversationId: string, accountId: string, message: string, 
   if (!res.ok) console.error("zernio: envio falhou", res.status, (await res.text().catch(() => "")).slice(0, 200));
 }
 
+async function sendPrivateReply(c: { postId: string; commentId: string; accountId: string }, message: string, eventId: string) {
+  const key = process.env.ZERNIO_API_KEY;
+  if (!key) { console.error("zernio: ZERNIO_API_KEY ausente"); return; }
+  const url = `https://zernio.com/api/v1/inbox/comments/${encodeURIComponent(c.postId)}/${encodeURIComponent(c.commentId)}/private-reply`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "Idempotency-Key": eventId },
+    body: JSON.stringify({ accountId: c.accountId, message }),
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!res.ok) console.error("zernio: resposta privada falhou", res.status, (await res.text().catch(() => "")).slice(0, 200));
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.ZERNIO_WEBHOOK_SECRET;
   if (!secret) return NextResponse.json({ error: "not configured" }, { status: 503 });
@@ -72,6 +85,18 @@ export async function POST(req: NextRequest) {
   }
   let payload: unknown;
   try { payload = JSON.parse(raw); } catch { return NextResponse.json({ error: "invalid json" }, { status: 400 }); }
+
+  const comment = parseComment(payload);
+  if (comment) {
+    if (!firstTime(comment.eventId)) return NextResponse.json({ ok: true, ignored: true });
+    after(async () => {
+      let reply: string;
+      try { reply = await buildReply(comment.text, comment.authorId); }
+      catch (error) { console.error("zernio: consulta falhou", error); reply = errorMessage(); }
+      await sendPrivateReply(comment, reply, comment.eventId).catch(e => console.error("zernio: resposta privada", e));
+    });
+    return NextResponse.json({ ok: true });
+  }
 
   const incoming = parseIncoming(payload);
   if (!incoming || !firstTime(incoming.eventId)) return NextResponse.json({ ok: true, ignored: true });
