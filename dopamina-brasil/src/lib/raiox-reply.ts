@@ -75,7 +75,7 @@ export function parseRequest(text: string): RaioxRequest {
   const link = extractLink(text);
   if (link) return { kind: "link", url: link };
   const query = text.replace(/^\s*(?:@\w+\s*)?raio[\s-]?x\b[\s:,.\-–—]*/i, "").replace(/\s+/g, " ").trim().slice(0, 120);
-  return query.length >= 2 ? { kind: "query", query } : { kind: "empty" };
+  return query.length >= 2 && !isGreeting(query) ? { kind: "query", query } : { kind: "empty" };
 }
 
 export type RaioxFound = {
@@ -83,7 +83,15 @@ export type RaioxFound = {
   decision: string; headline: string; detail: string; days: number;
   /** Linhas logo abaixo do título (ex.: aviso de meta atingida). */
   lead?: string[];
+  /** Convite para pedir aviso de preço (desligado na própria mensagem de alerta). Padrão: ligado. */
+  hint?: boolean;
 };
+
+/** Convite curto para o alerta; mais direto quando o veredito é esperar. */
+export const alertHint = (decision: string) =>
+  decision.startsWith("Espere")
+    ? "Vale esperar. Responda avisar e eu te chamo quando o preço cair."
+    : "Quer aviso quando o preço baixar? Responda: avisar";
 
 export function buildFoundReply(r: RaioxFound): string {
   const lines = [
@@ -98,12 +106,27 @@ export function buildFoundReply(r: RaioxFound): string {
   ];
   if (r.detail) lines.push(r.detail);
   if (r.productPath) lines.push("", `Gráfico e histórico: ${SITE}/produto/${r.productPath}`);
+  if (r.productPath && r.hint !== false) lines.push("", alertHint(r.decision));
   lines.push("", SIGNATURE, `Dados de ${r.days} dias, consultado em ${dayMonth(r.now ?? new Date())}. ${DISCLAIMER}`);
   return lines.join("\n");
 }
 
+/** Boas-vindas e pedido sem produto: explica o que o bot faz, com os dois comandos. */
 export const askMessage = () =>
-  ["Raio-X Dopamina", "", "Me manda o link do produto (ou o nome) e eu devolvo o histórico de preço e o veredito.", "Exemplo: raiox iPhone 15 128GB", "", SIGNATURE].join("\n");
+  [
+    "Raio-X Dopamina", "",
+    "Eu mostro o histórico de preço de um produto e digo se o desconto é real.", "",
+    "1. Mande raiox + o link da loja ou o nome. Exemplo: raiox airfryer 5l",
+    "2. Depois responda avisar, e eu te chamo quando o preço cair.", "",
+    "Grátis, sem cadastro e nenhum veredito pago.", "",
+    SIGNATURE,
+  ].join("\n");
+
+/** Cumprimentos e pedidos de ajuda: não são produto, recebem as boas-vindas. */
+export function isGreeting(text: string): boolean {
+  const t = text.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+  return t.length <= 30 && /^(oi+|ola+|opa|eai|e ai|hey|hello|bom dia|boa tarde|boa noite|ajuda|ajudar|help|menu|comecar|iniciar|start|como funciona|como usar|o que voce faz|quem e voce)( tudo bem| tudo bom| td bem)?$/.test(t);
+}
 
 export const notFoundMessage = () =>
   ["Raio-X Dopamina", "", "Não achei esse produto com preço verificável. Tente o nome completo, com modelo e capacidade.", `Ou pesquise em ${SITE}`, "", SIGNATURE].join("\n");
@@ -157,5 +180,5 @@ export const watchStopMessage = (count: number) =>
 export const publicCommentReply = () => "Te mandei o Raio-X no Direct. Se não aparecer, olhe as Solicitações de mensagem. Antes da dopamina, o histórico.";
 
 export function buildTargetReply(r: RaioxFound & { target: number }): string {
-  return buildFoundReply({ ...r, lead: [`Alerta de preço: chegou na sua meta de ${brl(r.target)}.`] });
+  return buildFoundReply({ ...r, hint: false, lead: [`Alerta de preço: chegou na sua meta de ${brl(r.target)}.`] });
 }
