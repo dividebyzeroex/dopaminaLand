@@ -9,6 +9,7 @@ import SearchBox from "@/components/price/SearchBox";
 import MyList from "@/components/list/MyList";
 import VerdictBadge from "@/components/price/VerdictBadge";
 import HeroExample, { pickExample } from "@/components/price/HeroExample";
+import HeroArt from "@/components/price/HeroArt";
 import ThermometerGrid from "@/components/price/ThermometerGrid";
 import { ThermometerSkeleton } from "@/components/price/Thermometer";
 import { getThermometer, sortMaquiadoFirst, thermometerSourceNote } from "@/lib/featured";
@@ -54,6 +55,7 @@ export default function HomePage() {
             {["Histórico diário de 40 dias", "Regras abertas", "Nenhum veredito pago"].map(text => <li key={text}><Check size={16} color="var(--good)" strokeWidth={2.2} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
+        <HeroArt />
       </section>
 
       {/* Quem já salvou algo vê primeiro o que mudou na própria lista. */}
