@@ -81,12 +81,15 @@ export function parseRequest(text: string): RaioxRequest {
 export type RaioxFound = {
   name: string; price: number; productPath: string | null; now?: Date;
   decision: string; headline: string; detail: string; days: number;
+  /** Linhas logo abaixo do título (ex.: aviso de meta atingida). */
+  lead?: string[];
 };
 
 export function buildFoundReply(r: RaioxFound): string {
   const lines = [
     "Raio-X Dopamina",
     "",
+    ...(r.lead?.length ? [...r.lead, ""] : []),
     r.name,
     `${brl(r.price)}, menor preço entre as lojas`,
     "",
@@ -112,3 +115,47 @@ export const limitMessage = () =>
   ["Raio-X Dopamina", "", "Muitas consultas seguidas. Espere um minuto e mande de novo.", "", SIGNATURE].join("\n");
 
 export const blockedReply = (message: string) => ["Raio-X Dopamina", "", message].join("\n");
+
+/** Número em reais como a pessoa escreve: "1500", "1.500", "1.500,90", "R$ 1500". */
+export function parseBrl(text: string): number | null {
+  const m = text.match(/(?:r\$\s*)?(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:,\d{1,2})?|\d+\.\d{1,2})(?!\d)/i);
+  if (!m) return null;
+  const raw = m[1];
+  const normalized = /^\d{1,3}(?:\.\d{3})+/.test(raw) ? raw.replace(/\./g, "").replace(",", ".") : raw.replace(",", ".");
+  const value = Number(normalized);
+  return Number.isFinite(value) && value >= 1 && value <= 1_000_000 ? Math.round(value * 100) / 100 : null;
+}
+
+export type Command = { kind: "watch"; target: number | null } | { kind: "stop" };
+
+/** "avisar", "avisar 1500", "meta 1.500", "parar". Qualquer outro texto é um pedido de Raio-X. */
+export function parseCommand(text: string): Command | null {
+  const t = text.trim().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  if (/^(parar|cancelar|sair|desativar)\b/.test(t) && t.length <= 40) return { kind: "stop" };
+  const m = t.match(/^(?:me\s+)?(avisar|avisa|aviso|alerta|alertar|meta)\b(.*)$/);
+  if (!m || m[2].length > 40) return null;
+  return { kind: "watch", target: parseBrl(m[2]) };
+}
+
+/** Sem valor, o alerta é para 5% abaixo do preço de hoje, arredondado para baixo. */
+export const defaultTarget = (price: number) => Math.floor(price * 0.95);
+
+const head = (...lines: string[]) => ["Raio-X Dopamina", "", ...lines, "", SIGNATURE].join("\n");
+export const watchSetMessage = (name: string, target: number, price: number, auto: boolean) =>
+  head(
+    `Combinado. Aviso você por aqui quando ${name} chegar a ${brl(target)}${auto ? " (5% abaixo de hoje)" : ""}. Hoje: ${brl(price)}.`,
+    "Para outro valor, responda: meta 1500. Para parar: parar.",
+    "Se o Instagram bloquear o envio, o aviso chega na sua próxima mensagem para cá.",
+  );
+export const watchAlreadyMessage = (name: string, target: number, price: number) =>
+  head(`${name} já está em ${brl(price)}, abaixo da meta de ${brl(target)}.`, "Confira o histórico antes de decidir: responda raiox + o nome para ver o veredito.");
+export const watchNoContextMessage = () =>
+  head("Para avisar, preciso saber o produto. Mande primeiro: raiox + o link ou o nome.", "Depois responda: avisar.");
+export const watchStopMessage = (count: number) =>
+  head(count > 0 ? `Pronto. Parei ${count === 1 ? "o aviso" : `os ${count} avisos`}.` : "Você não tem avisos ativos.");
+
+export const publicCommentReply = () => "Te mandei o Raio-X no Direct. Se não aparecer, olhe as Solicitações de mensagem. Antes da dopamina, o histórico.";
+
+export function buildTargetReply(r: RaioxFound & { target: number }): string {
+  return buildFoundReply({ ...r, lead: [`Alerta de preço: chegou na sua meta de ${brl(r.target)}.`] });
+}

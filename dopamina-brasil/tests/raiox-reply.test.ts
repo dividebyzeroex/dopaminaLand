@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
+import { parseBrl, parseCommand, defaultTarget, buildTargetReply, parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
 
 const body = '{"a":1}';
 const sig = createHmac("sha256", "s3").update(body).digest("hex");
@@ -36,4 +36,19 @@ assert.equal(parseComment(cm({ isReply: true })), null);
 assert.equal(parseComment(cm({ author: { id: "u9", isOwnAccount: true } })), null);
 assert.equal(parseComment(cm({ platform: "youtube" })), null);
 assert.equal(parseComment(cm({}, { event: "message.received" })), null);
+assert.equal(parseBrl("1500"), 1500);
+assert.equal(parseBrl("1.500"), 1500);
+assert.equal(parseBrl("R$ 1.500,90"), 1500.9);
+assert.equal(parseBrl("299,90"), 299.9);
+assert.equal(parseBrl("sem número"), null);
+assert.deepEqual(parseCommand("avisar"), { kind: "watch", target: null });
+assert.deepEqual(parseCommand("Me avisa 1.500"), { kind: "watch", target: 1500 });
+assert.deepEqual(parseCommand("meta R$ 299,90"), { kind: "watch", target: 299.9 });
+assert.deepEqual(parseCommand("parar"), { kind: "stop" });
+assert.equal(parseCommand("raiox avisar geladeira"), null);
+assert.equal(parseCommand("avisar quando o preço da geladeira inverse de 500 litros cair bastante"), null);
+assert.equal(defaultTarget(399.9), 379);
+const t = buildTargetReply({ name: "Air Fryer", price: 349, target: 350, productPath: "p/1", decision: "Pode comprar.", headline: "h", detail: "", days: 30, now: new Date("2026-11-24T15:00:00Z") });
+assert.match(t, /Alerta de preço: chegou na sua meta de R\$\s350,00/);
+assert.ok(t.includes(SIGNATURE) && t.includes(DISCLAIMER));
 console.log("raiox-reply: ok");
