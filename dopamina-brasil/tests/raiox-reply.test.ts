@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { isStoryReply, isExplicit, isGreeting, askMessage, alertHint, parseBrl, parseCommand, defaultTarget, buildTargetReply, parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
+import { describeEvent, isStoryReply, isExplicit, isGreeting, askMessage, alertHint, parseBrl, parseCommand, defaultTarget, buildTargetReply, parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
 
 const body = '{"a":1}';
 const sig = createHmac("sha256", "s3").update(body).digest("hex");
@@ -79,4 +79,13 @@ assert.equal(isStoryReply({ message: { text: "story do dia", metadata: {} } }), 
 assert.equal(isStoryReply({}), false);
 assert.equal(parseIncoming(ev({ message: { conversationId: "c1", direction: "incoming", text: "airfryer 5l", sender: { id: "u1" }, metadata: { story: true } } }))?.storyReply, true);
 assert.equal(parseIncoming(ev())?.storyReply, false);
+const base = { event: "message.received", message: { platform: "instagram", direction: "incoming", text: "oi", attachments: [] }, metadata: {} };
+assert.equal(describeEvent(base).reason, "ok");
+assert.equal(describeEvent({ ...base, message: { ...base.message, text: null, attachments: [{ type: "share", originalType: "story_mention" }] } }).reason, "sem_texto");
+assert.deepEqual(describeEvent({ ...base, message: { ...base.message, text: null, attachments: [{ type: "share", originalType: "story_mention" }] } }).detail.attachments, ["share/story_mention"]);
+assert.equal(describeEvent({ ...base, metadata: { standby: true } }).reason, "standby");
+assert.equal(describeEvent({ ...base, message: { ...base.message, direction: "outgoing" } }).reason, "mensagem_de_saida");
+assert.equal(describeEvent({ event: "comment.received", comment: { platform: "instagram", text: "amei", author: {} } }).reason, "comentario_sem_palavra_chave");
+assert.equal(describeEvent({ event: "mention.received" }).reason, "evento_nao_tratado");
+assert.ok(!JSON.stringify(describeEvent({ ...base, message: { ...base.message, text: "segredo" } })).includes("segredo"), "o diário não guarda o texto");
 console.log("raiox-reply: ok");

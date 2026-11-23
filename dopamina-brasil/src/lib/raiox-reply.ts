@@ -197,3 +197,37 @@ export const publicCommentReply = () => "Te mandei o Raio-X no Direct. Se não a
 export function buildTargetReply(r: RaioxFound & { target: number }): string {
   return buildFoundReply({ ...r, hint: false, lead: [`Alerta de preço: chegou na sua meta de ${brl(r.target)}.`] });
 }
+
+/**
+ * Por que um evento não virou resposta, sem guardar texto nem identificadores: só o motivo,
+ * os tipos de anexo e os nomes dos campos de metadados (para descobrir como o Zernio entrega
+ * respostas de story, menções e reações).
+ */
+export function describeEvent(payload: unknown): { event: string; platform: string | null; reason: string; hasText: boolean; story: boolean; detail: Record<string, unknown> } {
+  const p = payload as {
+    event?: string;
+    message?: { platform?: string; direction?: string; text?: string | null; attachments?: { type?: string; originalType?: string }[]; metadata?: Record<string, unknown> };
+    comment?: { platform?: string; text?: string | null; isReply?: boolean; author?: { isOwnAccount?: boolean } };
+    metadata?: Record<string, unknown>;
+  } | null;
+  const event = typeof p?.event === "string" ? p.event : "desconhecido";
+  const m = p?.message;
+  const c = p?.comment;
+  const hasText = Boolean((m?.text ?? c?.text ?? "").toString().trim());
+  const detail: Record<string, unknown> = {
+    attachments: (m?.attachments ?? []).map(a => `${a.type ?? "?"}${a.originalType ? `/${a.originalType}` : ""}`),
+    messageKeys: m ? Object.keys(m) : undefined,
+    metadataKeys: [...Object.keys(p?.metadata ?? {}), ...Object.keys(m?.metadata ?? {})],
+  };
+  let reason = "ok";
+  if (event === "message.received") {
+    if (m?.direction !== "incoming") reason = "mensagem_de_saida";
+    else if (p?.metadata?.standby === true) reason = "standby";
+    else if (!hasText) reason = "sem_texto";
+  } else if (event === "comment.received") {
+    if (c?.isReply || c?.author?.isOwnAccount) reason = "comentario_proprio_ou_resposta";
+    else if (c?.platform !== "instagram" && c?.platform !== "facebook") reason = "plataforma";
+    else if (!/\braio[\s-]?x\b/i.test((c?.text ?? "").toString())) reason = "comentario_sem_palavra_chave";
+  } else reason = "evento_nao_tratado";
+  return { event, platform: m?.platform ?? c?.platform ?? null, reason, hasText, story: isStoryReply(payload), detail };
+}

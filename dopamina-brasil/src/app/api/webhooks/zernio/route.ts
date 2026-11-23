@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/push";
 import { lookup, type Outcome } from "@/lib/raiox-engine";
 import { flushConversation } from "@/lib/raiox-watch";
 import {
-  defaultTarget, errorMessage, isExplicit, parseComment, parseCommand, parseIncoming, publicCommentReply,
+  defaultTarget, describeEvent, errorMessage, isExplicit, parseComment, parseCommand, parseIncoming, publicCommentReply,
   verifySignature, watchAlreadyMessage, watchNoContextMessage, watchSetMessage, watchStopMessage,
 } from "@/lib/raiox-reply";
 import { convoHash, sendDirect, sendPrivateReply, sendPublicReply } from "@/lib/zernio";
@@ -23,6 +23,18 @@ function firstTime(id: string): boolean {
   if (seen.has(id)) return false;
   seen.set(id, now);
   return true;
+}
+
+/** Diário de cada evento recebido: o que chegou, o que o bot decidiu e o status do envio (sem texto). */
+async function journal(payload: unknown, decision: string, sendStatus?: number | null) {
+  const db = adminDb();
+  if (!db) return;
+  const d = describeEvent(payload);
+  const { error } = await db.from("raiox_events").insert({
+    event: d.event, platform: d.platform, decision, story: d.story, has_text: d.hasText,
+    send_status: sendStatus ?? null, detail: { reason: d.reason, ...d.detail },
+  });
+  if (error) console.error("raiox: diário não gravado", error.message);
 }
 
 async function record(channel: string, source: "dm" | "comment", conversationId: string, o: Outcome | { outcome: "error" }) {
@@ -89,6 +101,7 @@ export async function POST(req: NextRequest) {
       catch (error) { console.error("raiox: consulta falhou", error); out = { outcome: "error", text: errorMessage() }; }
       const dm = await sendPrivateReply(comment.postId, comment.commentId, comment.accountId, out.text, comment.eventId);
       await record(platform, "comment", comment.commentId, out).catch(() => {});
+      await journal(payload, dm.ok ? "respondido_comentario" : "falha_envio_comentario", dm.status).catch(() => {});
       // Só avisa publicamente que mandou o Direct se o envio privado deu certo.
       if (dm.ok) await sendPublicReply(comment.postId, comment.commentId, comment.accountId, publicCommentReply(), `${comment.eventId}:pub`);
     });
@@ -96,7 +109,10 @@ export async function POST(req: NextRequest) {
   }
 
   const incoming = parseIncoming(payload);
-  if (!incoming || !firstTime(incoming.eventId)) return NextResponse.json({ ok: true, ignored: true });
+  if (!incoming || !firstTime(incoming.eventId)) {
+    after(() => journal(payload, incoming ? "duplicado" : "ignorado").catch(() => {}));
+    return NextResponse.json({ ok: true, ignored: true });
+  }
 
   after(async () => {
     const cmd = parseCommand(incoming.text);
@@ -110,14 +126,15 @@ export async function POST(req: NextRequest) {
       if (cmd) text = await handleCommand(cmd, incoming.conversationId, incoming.accountId);
       else {
         const r = await lookup(incoming.text, incoming.senderId);
-        if (!explicit && (r.outcome === "not_found" || r.outcome === "limit")) return;
+        if (!explicit && (r.outcome === "not_found" || r.outcome === "limit")) { await journal(payload, "silencio_sem_pedido_explicito").catch(() => {}); return; }
         text = r.text; out = r;
       }
     } catch (error) {
       console.error("raiox: consulta falhou", error);
       text = errorMessage(); out = { outcome: "error" };
     }
-    await sendDirect(incoming.conversationId, incoming.accountId, text, incoming.eventId);
+    const sent = await sendDirect(incoming.conversationId, incoming.accountId, text, incoming.eventId);
+    await journal(payload, sent.ok ? (cmd ? "respondido_comando" : explicit ? "respondido" : "respondido_sem_palavra_chave") : "falha_envio", sent.status).catch(() => {});
     if (out) await record(platform, "dm", incoming.conversationId, out).catch(() => {});
     // A pessoa escreveu: a janela de mensagens está aberta, entrega alertas que ficaram pendentes.
     const db = adminDb();
