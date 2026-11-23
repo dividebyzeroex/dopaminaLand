@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Check, Link2, Share2 } from "lucide-react";
+import { Check, ImageDown, Link2, Share2 } from "lucide-react";
 import { trackEvent } from "@/lib/tracking";
 import styles from "../bf.module.css";
 
-type Props = { url: string; text: string; productName: string };
+type Props = { url: string; text: string; productName: string; /** Cartão em imagem (/og/cartao/...) para story e feed. */ cardUrl?: string };
 
 const noop = () => () => {};
 
@@ -14,8 +14,9 @@ function WhatsAppIcon() {
 }
 
 /** Compartilhar o veredito: WhatsApp primeiro (onde as ofertas circulam), depois o menu do sistema ou copiar link. */
-export default function ShareVerdict({ url, text, productName }: Props) {
+export default function ShareVerdict({ url, text, productName, cardUrl }: Props) {
   const [copied, setCopied] = useState(false);
+  const [busy, setBusy] = useState(false);
   const message = `${text}\n${url}`;
   // Só no navegador: no servidor é sempre false, evitando divergência na hidratação.
   const canShare = useSyncExternalStore(noop, () => typeof navigator.share === "function", () => false);
@@ -27,6 +28,29 @@ export default function ShareVerdict({ url, text, productName }: Props) {
   async function shareNative() {
     track("native");
     try { await navigator.share({ title: productName, text, url }); } catch { /* cancelado */ }
+  }
+
+  /** Imagem pronta para story: abre o menu de compartilhar com o arquivo; sem suporte, baixa o PNG. */
+  async function shareImage() {
+    if (!cardUrl || busy) return;
+    track("image");
+    setBusy(true);
+    try {
+      const res = await fetch(cardUrl);
+      if (!res.ok) throw new Error("cartão indisponível");
+      const blob = await res.blob();
+      const file = new File([blob], "raio-x-dopamina.png", { type: blob.type || "image/png" });
+      if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: productName, text });
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = file.name;
+        link.click();
+        window.setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+      }
+    } catch { /* cancelado ou sem rede: nada a fazer */ }
+    finally { setBusy(false); }
   }
 
   async function copy() {
@@ -42,6 +66,9 @@ export default function ShareVerdict({ url, text, productName }: Props) {
     <a className={styles.shareWhats} href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" onClick={() => track("whatsapp")}>
       <WhatsAppIcon /> Enviar no WhatsApp
     </a>
+    {cardUrl && <button type="button" className={styles.shareGhost} onClick={() => void shareImage()} disabled={busy} aria-live="polite">
+      <ImageDown size={16} aria-hidden="true" /> {busy ? "Gerando…" : "Imagem para story"}
+    </button>}
     {canShare
       ? <button type="button" className={styles.shareGhost} onClick={() => void shareNative()}><Share2 size={16} aria-hidden="true" /> Compartilhar</button>
       : <button type="button" className={styles.shareGhost} onClick={() => void copy()} aria-live="polite">{copied ? <><Check size={16} aria-hidden="true" /> Link copiado</> : <><Link2 size={16} aria-hidden="true" /> Copiar link</>}</button>}

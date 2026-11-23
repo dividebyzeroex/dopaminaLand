@@ -16,6 +16,8 @@ const legacyRoutes = [
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  // O cartão de Raio-X lê a fonte da marca do disco; sem isto ela pode ficar fora do pacote da função.
+  outputFileTracingIncludes: { "/og/cartao/[...slug]": ["./src/lib/og-fonts/**/*"] },
   images: {
     // Somente os CDNs de imagem da fonte de preços. Um curinga "**" transformaria
     // o otimizador de imagens em proxy aberto para qualquer site.

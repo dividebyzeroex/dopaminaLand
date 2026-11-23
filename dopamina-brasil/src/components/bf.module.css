@@ -342,3 +342,6 @@
 .nextStep p { font-size: 15px; line-height: 1.6; color: var(--text-2); margin: 0; }
 .similar { margin: 28px 0 8px; }
 .similar h2 { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+
+.verdictNudge { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--surface) 70%, transparent); border: 1px dashed color-mix(in srgb, currentColor 35%, transparent); font-size: 14px; line-height: 1.5; }
+.verdictNudge b { font-weight: 650; }

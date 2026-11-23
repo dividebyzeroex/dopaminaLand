@@ -94,14 +94,28 @@ export default async function ProductPage({ params }: Props) {
     offers: product.bestPrice ? {
       "@type": "AggregateOffer",
       priceCurrency: "BRL",
+      availability: "https://schema.org/InStock",
       lowPrice: product.bestPrice,
       highPrice: product.offers.at(-1)?.price ?? product.bestPrice,
       offerCount: product.offerCount ?? product.offers.length,
     } : undefined,
   };
 
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Início", item: SITE },
+      ...(product.category ? [{ "@type": "ListItem", position: 2, name: product.category }] : []),
+      { "@type": "ListItem", position: product.category ? 3 : 2, name: product.name, item: `${SITE}/produto/${product.path}` },
+    ],
+  };
+  // Veredito "espere": o convite ao alerta aparece junto da resposta, quando a pessoa decide.
+  const shouldWait = decisionOf(verdict.kind).startsWith("Espere");
+
   return <main className={`${studio.shell} ${styles.withBar}`}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs).replace(/</g, "\\u003c") }} />
     <div className={studio.wrap}>
       <SiteHeader />
       <TrackOnce event="product_view" product={product.name} price={product.bestPrice} metadata={{
@@ -133,6 +147,7 @@ export default async function ProductPage({ params }: Props) {
             <p className={styles.decision}>{decisionOf(verdict.kind)}</p>
             <p className={styles.verdictHeadline}><VerdictBadge tone={verdict.tone} label={verdict.label} small /> {verdict.headline}</p>
             <p className={styles.verdictDetail}>{verdict.detail}</p>
+            {shouldWait && <p className={styles.verdictNudge}>Vale esperar? <b>Avise-me quando o preço cair</b>: toque em “Avisar se baixar” e escolha o preço que você quer pagar.</p>}
             <p className={styles.verdictMeta}>Consulta: {dateTime(product.checkedAt)} · <Link href="/metodologia" style={{ color: "inherit" }}>como julgamos</Link></p>
           </div>
           {/* No celular o alerta fica na barra fixa; aqui só no desktop. */}
@@ -141,7 +156,7 @@ export default async function ProductPage({ params }: Props) {
             <b>O que fazer agora?</b>
             <p>Salve o produto: na Minha lista você vê o veredito assim que tivermos {MIN_DAYS} dias de preços. Ou compare com os modelos parecidos logo abaixo, que já têm histórico.</p>
           </div>}
-          <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} />
+          <ShareVerdict url={`${SITE}/produto/${product.path}`} productName={product.name} text={shareText} cardUrl={`/og/cartao/${product.path}`} />
           <InstallBanner />
         </div>
       </section>

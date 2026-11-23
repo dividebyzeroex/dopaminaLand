@@ -5,6 +5,7 @@ import { isSafeProductPath } from "@/lib/buscape";
 import { brl, signedPct } from "@/lib/format";
 import { displaySeries, stepGeometry } from "@/lib/series";
 import type { VerdictTone } from "@/lib/price-verdict";
+import { photo } from "@/lib/og-photo";
 
 /** Imagem de compartilhamento (1200×630) de cada produto: selo, preço e gráfico. */
 const size = { width: 1200, height: 630 };
@@ -16,17 +17,6 @@ const TONES: Record<VerdictTone, { fg: string; bg: string }> = {
   warn: { fg: "#8a5200", bg: "#f8ecd6" },
   neutral: { fg: "#4c5049", bg: "#e9ebe5" },
 };
-
-/** Baixa a foto antes; se falhar, a imagem sai sem foto em vez de quebrar. */
-async function photo(url?: string): Promise<string | null> {
-  if (!url) return null;
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
-    const type = res.headers.get("content-type") ?? "";
-    if (!res.ok || !type.startsWith("image/")) return null;
-    return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
-  } catch { return null; }
-}
 
 function Fallback() {
   return new ImageResponse(
