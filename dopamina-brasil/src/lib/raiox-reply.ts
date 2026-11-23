@@ -27,7 +27,7 @@ export function verifySignature(rawBody: string, signature: string | null, secre
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-export type Incoming = { eventId: string; conversationId: string; accountId: string; senderId: string; text: string };
+export type Incoming = { eventId: string; conversationId: string; accountId: string; senderId: string; text: string; storyReply: boolean };
 
 /** Só mensagens de entrada de pessoas, fora do modo "standby" (humano atendendo). */
 export function parseIncoming(payload: unknown): Incoming | null {
@@ -44,8 +44,23 @@ export function parseIncoming(payload: unknown): Incoming | null {
   const text = typeof m.text === "string" ? m.text.trim() : "";
   const accountId = p.account?.accountId || p.account?.id;
   if (!text || !accountId) return null;
-  return { eventId: p.id, conversationId: m.conversationId, accountId, senderId: m.sender?.id || m.conversationId, text };
+  return { eventId: p.id, conversationId: m.conversationId, accountId, senderId: m.sender?.id || m.conversationId, text, storyReply: isStoryReply(payload) };
 }
+
+/**
+ * Resposta a story (inclusive à caixa de pergunta): o Instagram entrega como mensagem comum e o
+ * contexto do story vem em campos que a documentação do Zernio não detalha. Por isso a checagem é
+ * tolerante: olha só metadados e tipos de anexo (nunca o texto da pessoa) atrás de "story".
+ */
+export function isStoryReply(payload: unknown): boolean {
+  const p = payload as { message?: { metadata?: unknown; replyTo?: unknown; reply_to?: unknown; attachments?: { originalType?: string }[] }; metadata?: unknown } | null;
+  const m = p?.message;
+  const hay = JSON.stringify({ a: p?.metadata, b: m?.metadata, c: m?.replyTo, d: m?.reply_to, e: m?.attachments?.map(x => x.originalType) }) ?? "";
+  return /story|reply_to|replyTo/i.test(hay);
+}
+
+/** O pedido é explícito: tem a palavra-chave ou um link. Sem isso e fora de story, vira conversa comum. */
+export const isExplicit = (text: string) => /\braio[\s-]?x\b/i.test(text) || extractLink(text) !== null;
 
 export type IncomingComment = { eventId: string; postId: string; commentId: string; accountId: string; authorId: string; text: string };
 
