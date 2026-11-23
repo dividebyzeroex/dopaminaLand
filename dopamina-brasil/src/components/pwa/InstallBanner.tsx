@@ -45,8 +45,8 @@ export default function InstallBanner() {
       <button type="button" className={styles.bannerClose} onClick={dismiss} aria-label="Agora não"><X size={18} /></button>
     </aside>
     <dialog ref={dialog} className={styles.sheet} aria-labelledby="install-title" onClick={e => { if (e.target === dialog.current) dialog.current?.close(); }}>
+      <button type="button" className={styles.close} onClick={() => dialog.current?.close()} aria-label="Fechar"><X size={18} /></button>
       <div className={styles.sheetInner}>
-        <button type="button" className={styles.close} onClick={() => dialog.current?.close()} aria-label="Fechar"><X size={18} /></button>
         <span className={styles.kicker}>App Dopamina</span>
         <h2 id="install-title" className={styles.sheetTitle}>Instale em poucos toques</h2>
         <p className={styles.sheetText}>Com o app na tela inicial, você recebe notificação quando um preço que acompanha cair, subir ou estabilizar.</p>
