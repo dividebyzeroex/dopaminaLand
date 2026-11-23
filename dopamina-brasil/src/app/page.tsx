@@ -29,7 +29,7 @@ async function Thermometer({ eventId, href }: { eventId: EventId | null; href: s
   return <>
     <ThermometerGrid items={sortMaquiadoFirst(items)} limit={8} />
     <p className={styles.footnote}>
-      {thermometerSourceNote(items)} A linha mostra o menor preço do dia entre as lojas.{" "}
+      {thermometerSourceNote(items)}{" · "}
       <Link href={href} style={{ color: "inherit" }}>Ver todos os {items.length} produtos</Link>
     </p>
   </>;
@@ -63,7 +63,6 @@ export default function HomePage() {
 
       <div className={`${styles.head} ${styles.headTight}`} id="termometro">
         <div><span className={styles.kicker}>Termômetro · o que está sendo procurado agora</span><h2>{copy.thermometerTitle}</h2></div>
-        <p>Descontos maquiados primeiro. Toque num produto para ver o gráfico completo e as lojas.</p>
       </div>
       <Suspense fallback={<ThermometerSkeleton count={8} />}><Thermometer eventId={event?.id ?? null} href={eventHref} /></Suspense>
 
@@ -72,23 +71,17 @@ export default function HomePage() {
       </div>
       <div className={styles.practice}>
         <Suspense fallback={<div className={styles.example} aria-hidden="true" style={{ minHeight: 420 }} />}><Example eventId={event?.id ?? null} eventName={event?.name} /></Suspense>
-      <section className={styles.questions} aria-label="O que respondemos">
-        {[
-          ["01", "Está barato hoje?", "Comparamos com o preço típico do próprio produto, não com o “de” riscado da loja."],
-          ["02", "Já esteve mais barato?", "Mostramos o menor preço do período e quanto falta para chegar nele."],
-          ["03", "Subiu antes de cair?", "Se o preço foi inflado nas semanas anteriores, o selo avisa: desconto maquiado."],
-        ].map(([n, title, text]) => <div key={n} className={styles.question}><span>{n}</span><h2>{title}</h2><p>{text}</p></div>)}
-      </section>
+        <div className={styles.practiceSide} id="regras">
+          <h3 className={styles.sideTitle}>Como julgamos, sem letra miúda.</h3>
+          <section className={styles.rules}>
+            <div className={styles.rule}><VerdictBadge tone="good" label="Desconto real" /><p>No menor preço do período e pelo menos 3% abaixo do preço típico (mediana).</p></div>
+            <div className={styles.rule}><VerdictBadge tone="bad" label="Desconto maquiado" /><p>Subiu 8% ou mais nas duas semanas anteriores e hoje só voltou ao patamar normal.</p></div>
+            <div className={styles.rule}><VerdictBadge tone="warn" label="Acima do normal" /><p>Pelo menos 5% acima do preço típico. Vale esperar ou procurar outra loja.</p></div>
+          </section>
+          <Link href="/metodologia" className={styles.more}>Ver as 6 regras e a fonte dos dados →</Link>
+        </div>
       </div>
 
-
-      <div className={styles.head} id="regras"><h2>Como julgamos, sem letra miúda.</h2></div>
-      <section className={styles.rules}>
-        <div className={styles.rule}><VerdictBadge tone="good" label="Desconto real" /><p>No menor preço do período e pelo menos 3% abaixo do preço típico (mediana).</p></div>
-        <div className={styles.rule}><VerdictBadge tone="bad" label="Desconto maquiado" /><p>Subiu 8% ou mais nas duas semanas anteriores e hoje só voltou ao patamar normal.</p></div>
-        <div className={styles.rule}><VerdictBadge tone="warn" label="Acima do normal" /><p>Pelo menos 5% acima do preço típico. Vale esperar ou procurar outra loja.</p></div>
-      </section>
-      <Link href="/metodologia" className={styles.more}>Ver as 6 regras e a fonte dos dados →</Link>
 
       <section className={styles.cta}>
         <div>

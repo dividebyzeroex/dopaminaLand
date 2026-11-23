@@ -62,15 +62,18 @@ export default function ShareVerdict({ url, text, productName, cardUrl }: Props)
     } catch { /* sem permissão: o link continua visível na barra do navegador */ }
   }
 
-  return <div className={styles.share}>
-    <a className={styles.shareWhats} href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" onClick={() => track("whatsapp")}>
-      <WhatsAppIcon /> Enviar no WhatsApp
-    </a>
-    {cardUrl && <button type="button" className={styles.shareGhost} onClick={() => void shareImage()} disabled={busy} aria-live="polite">
-      <ImageDown size={16} aria-hidden="true" /> {busy ? "Gerando…" : "Imagem para story"}
-    </button>}
-    {canShare
-      ? <button type="button" className={styles.shareGhost} onClick={() => void shareNative()}><Share2 size={16} aria-hidden="true" /> Compartilhar</button>
-      : <button type="button" className={styles.shareGhost} onClick={() => void copy()} aria-live="polite">{copied ? <><Check size={16} aria-hidden="true" /> Link copiado</> : <><Link2 size={16} aria-hidden="true" /> Copiar link</>}</button>}
-  </div>;
+  return <details className={styles.shareMenu}>
+    <summary className={styles.shareGhost}><Share2 size={16} aria-hidden="true" /> Compartilhar</summary>
+    <div className={styles.share}>
+      <a className={styles.shareWhats} href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" onClick={() => track("whatsapp")}>
+        <WhatsAppIcon /> Enviar no WhatsApp
+      </a>
+      {cardUrl && <button type="button" className={styles.shareGhost} onClick={() => void shareImage()} disabled={busy} aria-live="polite">
+        <ImageDown size={16} aria-hidden="true" /> {busy ? "Gerando…" : "Imagem para story"}
+      </button>}
+      {canShare
+        ? <button type="button" className={styles.shareGhost} onClick={() => void shareNative()}><Share2 size={16} aria-hidden="true" /> Outros apps</button>
+        : <button type="button" className={styles.shareGhost} onClick={() => void copy()} aria-live="polite">{copied ? <><Check size={16} aria-hidden="true" /> Link copiado</> : <><Link2 size={16} aria-hidden="true" /> Copiar link</>}</button>}
+    </div>
+  </details>;
 }

@@ -110,8 +110,6 @@ export default async function ProductPage({ params }: Props) {
       { "@type": "ListItem", position: product.category ? 3 : 2, name: product.name, item: `${SITE}/produto/${product.path}` },
     ],
   };
-  // Veredito "espere": o convite ao alerta aparece junto da resposta, quando a pessoa decide.
-  const shouldWait = decisionOf(verdict.kind).startsWith("Espere");
 
   return <main className={`${studio.shell} ${styles.withBar}`}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
@@ -147,7 +145,6 @@ export default async function ProductPage({ params }: Props) {
             <p className={styles.decision}>{decisionOf(verdict.kind)}</p>
             <p className={styles.verdictHeadline}><VerdictBadge tone={verdict.tone} label={verdict.label} small /> {verdict.headline}</p>
             <p className={styles.verdictDetail}>{verdict.detail}</p>
-            {shouldWait && <p className={styles.verdictNudge}>Vale esperar? <b>Avise-me quando o preço cair</b>: toque em “Avisar se baixar” e escolha o preço que você quer pagar.</p>}
             <p className={styles.verdictMeta}>Consulta: {dateTime(product.checkedAt)} · <Link href="/metodologia" style={{ color: "inherit" }}>como julgamos</Link></p>
           </div>
           {/* No celular o alerta fica na barra fixa; aqui só no desktop. */}
@@ -177,7 +174,7 @@ export default async function ProductPage({ params }: Props) {
         </section>
         <section aria-label="Ofertas por loja">
           <div className={styles.storeList}>
-            <div className={styles.chartHead} style={{ padding: "18px 0 6px" }}><h3>Onde comprar</h3><PriceFreshness path={product.path} checkedAt={product.checkedAt} /></div>
+            <div className={styles.chartHead} style={{ padding: "18px 0 6px" }}><h3>Onde comprar</h3><span className={styles.desktopOnly}><PriceFreshness path={product.path} checkedAt={product.checkedAt} /></span></div>
             {product.offers.length === 0 && <p className={studio.note}>A fonte não listou ofertas individuais agora.</p>}
             {stores.map(({ offer, more }, index) => <div key={offer.id} className={styles.storeRow}>
               <div className={styles.storeName}>

@@ -32,13 +32,6 @@
 .exampleLink { align-self: flex-start; font-size: 14px; font-weight: 600; color: var(--link); text-decoration: none; }
 .exampleLink:hover { text-decoration: underline; }
 
-/* Três perguntas */
-.questions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; min-width: 0; }
-.question { background: var(--neutral); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
-.question span { font-size: 13px; font-weight: 600; color: var(--muted); }
-.question h2 { margin: 0; font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
-.question p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--text-2); }
-
 /* Cabeçalhos de seção */
 .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; margin: 72px 0 22px; }
 .head h2 { margin: 10px 0 0; font-size: clamp(30px, 4vw, 48px); letter-spacing: -.05em; line-height: 1.05; font-weight: 600; }
@@ -48,7 +41,11 @@
 
 /* Exemplo real + três perguntas, lado a lado no desktop */
 .practice { display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch; }
-.practice .questions { flex: 1 1 320px; grid-template-columns: 1fr; }
+.practice .example { flex: 1.4 1 460px; }
+.practiceSide { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.practiceSide .rules { grid-template-columns: 1fr; }
+.practiceSide .more { margin-top: 0; }
+.sideTitle { margin: 4px 0 2px; font-size: 22px; letter-spacing: -.03em; font-weight: 600; }
 .footnote { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
 
 /* Regras */
@@ -71,7 +68,6 @@
   .example { padding: 20px; border-radius: 18px; }
   .examplePrice { font-size: 26px; }
   .head { margin-top: 52px; }
-  .question { padding: 20px; }
   /* O SVG encolhe ~45% no celular: compensa o tamanho do texto. */
   .chartLabel { font-size: 22px; }
   .chartLabelStrong { font-size: 23px; }
