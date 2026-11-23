@@ -7,13 +7,32 @@
 .alertBtn:focus-visible, .alertOn:focus-visible { outline: 2px solid #2854ec; outline-offset: 3px; }
 
 /* Janela inferior (bottom sheet) */
-.sheet { border: 0; padding: 0; margin: auto auto 0; width: min(520px, 100%); max-height: calc(100dvh - 24px); border-radius: 24px 24px 0 0; background: var(--surface); color: var(--ink); box-shadow: 0 -20px 60px #0003; }
+.sheet { border: 0; padding: 0; margin: auto auto 0; width: min(520px, 100%); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow: hidden; border-radius: 24px 24px 0 0; background: var(--surface); color: var(--ink); box-shadow: 0 -20px 60px #0003; }
 .sheet::backdrop { background: color-mix(in srgb, var(--ink) 40%, transparent); backdrop-filter: blur(2px); }
-.sheet[open] { animation: rise .28s cubic-bezier(.2,.7,.3,1); }
+.sheet[open] { display: flex; flex-direction: column; animation: rise .28s cubic-bezier(.2,.7,.3,1); }
 @keyframes rise { from { transform: translateY(40px); opacity: 0; } }
 @media (min-width: 700px) { .sheet { margin: auto; border-radius: 24px; } }
-.sheetInner { position: relative; padding: 28px 24px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px; font-family: var(--font-inter), sans-serif; }
-.close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--neutral); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.sheetInner { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 28px 24px 0; display: flex; flex-direction: column; gap: 14px; font-family: var(--font-inter), sans-serif; }
+/* Sombra nas bordas quando há mais conteúdo para rolar (técnica "scroll shadows"). */
+.sheetInner { background-color: var(--surface); background-repeat: no-repeat; background-size: 100% 36px, 100% 36px, 100% 12px, 100% 12px; background-position: center top, center bottom, center top, center bottom; background-attachment: local, local, scroll, scroll;
+  background-image: linear-gradient(var(--surface) 30%, transparent), linear-gradient(transparent, var(--surface) 70%), radial-gradient(farthest-side at 50% 0, color-mix(in srgb, var(--ink) 20%, transparent), transparent), radial-gradient(farthest-side at 50% 100%, color-mix(in srgb, var(--ink) 20%, transparent), transparent); }
+/* Respiro no fim do conteúdo; some quando há barra de ação fixa (ela já cuida do espaço). */
+.sheetInner::after { content: ""; flex: 0 0 calc(20px + env(safe-area-inset-bottom)); }
+.sheetInner:has(.actionBar)::after { display: none; }
+/* Botão principal sempre à vista, mesmo com a lista de opções rolando por trás. */
+.actionBar { position: sticky; bottom: 0; margin: 4px -24px 0; padding: 12px 24px calc(14px + env(safe-area-inset-bottom)); display: grid; gap: 10px; background: var(--surface); border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+/* Telas baixas (iPhone SE, modo paisagem): mais compacto. */
+@media (max-height: 740px) {
+  .sheetInner { gap: 10px; padding-top: 22px; }
+  .sheetTitle { font-size: 21px; }
+  .options { gap: 8px; }
+  .option { padding: 10px 14px; }
+  .option small { font-size: 12px; }
+  .sheetText { font-size: 14px; line-height: 1.5; }
+  .steps { gap: 8px; }
+  .steps li { padding: 9px 12px; font-size: 14px; }
+}
+.close { position: absolute; z-index: 2; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--neutral); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .kicker { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .sheetTitle { margin: 0; font-size: 24px; letter-spacing: -.035em; line-height: 1.2; font-weight: 600; padding-right: 40px; }
 .sheetText { margin: 0; font-size: 15px; line-height: 1.6; color: var(--text-2); }

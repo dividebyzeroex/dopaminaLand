@@ -79,8 +79,9 @@ export default function AlertButton({ path, name, price, image, compact }: Props
     </button>
 
     <dialog ref={dialog} className={styles.sheet} aria-labelledby={titleId} onClick={e => { if (e.target === dialog.current) dialog.current?.close(); }}>
+      {/* Fora da área que rola: o X nunca sai da tela. */}
+      <button type="button" className={styles.close} onClick={() => dialog.current?.close()} aria-label="Fechar"><X size={18} /></button>
       <div className={styles.sheetInner}>
-        <button type="button" className={styles.close} onClick={() => dialog.current?.close()} aria-label="Fechar"><X size={18} /></button>
 
         {step === "install-ios" && <>
           <span className={styles.kicker}>Primeiro passo</span>
@@ -107,10 +108,12 @@ export default function AlertButton({ path, name, price, image, compact }: Props
           </fieldset>
           <label className={styles.option} style={{ marginTop: 8 }}><input type="checkbox" checked={trending} onChange={() => setTrending(t => !t)} /><span><b>Quedas nos mais buscados</b><small>Desconto real nos produtos que mais gente procura. No máximo 1 aviso por dia.</small></span></label>
           {pwa.canPromptInstall && !pwa.standalone && <button type="button" className={styles.secondary} onClick={() => void promptInstall()}>Instalar o app para receber mais rápido</button>}
-          <button type="button" className={styles.primary} disabled={none || targetInvalid || step === "saving"} onClick={() => void save()}>
-            {step === "saving" ? "Ativando…" : "Ativar alerta"}
-          </button>
           <p className={styles.fine}>Sem cadastro e sem e-mail: o alerta fica neste aparelho e, quando o push está disponível, também no servidor. Você desativa quando quiser em <Link href="/alertas">Meus alertas</Link>.</p>
+          <div className={styles.actionBar}>
+            <button type="button" className={styles.primary} disabled={none || targetInvalid || step === "saving"} onClick={() => void save()}>
+              {step === "saving" ? "Ativando…" : "Ativar alerta"}
+            </button>
+          </div>
         </>}
 
         {step === "done" && <>
