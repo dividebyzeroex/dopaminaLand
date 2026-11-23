@@ -79,25 +79,21 @@
 
 @media (prefers-reduced-motion: reduce) { .pillDot { animation: none; } }
 
-/* Arte da home (só em telas largas). Cartões flutuando sobre círculos, como os cartões do site. */
+/* Arte da home (só em telas largas): foto com dois cartões do site por cima. */
 .visual { display: none; }
 @media (min-width: 1100px) {
   .visual { position: relative; display: block; min-width: 0; aspect-ratio: 1 / 1; max-height: 640px; width: 100%; justify-self: end; background: var(--neutral); border-radius: 26px; overflow: hidden; isolation: isolate; }
 }
-.visualRing { position: absolute; width: 88%; aspect-ratio: 1; left: 6%; top: 6%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); box-shadow: 0 0 0 clamp(24px, 3.2vw, 56px) color-mix(in srgb, var(--surface) 38%, transparent), 0 0 0 clamp(48px, 6.4vw, 112px) color-mix(in srgb, var(--surface) 24%, transparent); z-index: -1; }
-.visualRing2 { width: 52%; left: 24%; top: 24%; box-shadow: none; }
-.visualMain, .visualAlert, .visualVerdicts { position: absolute; background: var(--surface); box-shadow: 0 24px 60px color-mix(in srgb, var(--ink) 10%, transparent); }
-.visualMain { left: 7%; right: 7%; top: 8%; border-radius: 22px; padding: clamp(18px, 2.2vw, 28px); display: flex; flex-direction: column; gap: 14px; animation: visualFloat 7s ease-in-out infinite; }
-.visualTop { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.visualPhoto { object-fit: cover; object-position: 50% 70%; }
+.visualShade { position: absolute; inset: 0; background: linear-gradient(to bottom, color-mix(in srgb, #000 22%, transparent) 0%, transparent 38%, transparent 62%, color-mix(in srgb, #000 40%, transparent) 100%); }
+.visualMain, .visualAlert { position: absolute; background: var(--surface); box-shadow: 0 24px 60px color-mix(in srgb, #000 22%, transparent); }
+.visualMain { right: 5%; top: 4%; width: 56%; border-radius: 20px; padding: clamp(14px, 1.6vw, 22px); display: flex; flex-direction: column; gap: 10px; animation: visualFloat 7s ease-in-out infinite; }
+.visualTop { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .visualChart { width: 100%; height: auto; display: block; overflow: visible; color: var(--ink); }
-.visualStory { margin: 0; font-size: clamp(13px, 1.05vw, 15px); line-height: 1.6; color: var(--text-2); }
-.visualAlert { right: 5%; bottom: 22%; display: flex; align-items: center; gap: 12px; padding: 14px 18px 14px 14px; border-radius: 18px; animation: visualFloat 7s ease-in-out -2.4s infinite; }
+.visualAlert { left: 5%; bottom: 7%; display: flex; align-items: center; gap: 12px; padding: 14px 18px 14px 14px; border-radius: 18px; animation: visualFloat 7s ease-in-out -3s infinite; }
 .visualAlert strong { display: block; font-size: clamp(13px, 1.05vw, 15px); font-weight: 600; letter-spacing: -.01em; }
 .visualAlert span:not(.visualBell) { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .visualBell { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #2854ec; color: #fff; flex-shrink: 0; }
-.visualVerdicts { left: 5%; bottom: 5%; border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; animation: visualFloat 7s ease-in-out -4.8s infinite; }
-.visualBadges { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-.visualFine { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
-.visualCaption { position: absolute; right: 22px; bottom: 16px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-@keyframes visualFloat { 50% { transform: translateY(-8px); } }
-@media (prefers-reduced-motion: reduce) { .visualMain, .visualAlert, .visualVerdicts { animation: none; } }
+.visualCaption { position: absolute; right: 14px; bottom: 12px; padding: 4px 9px; border-radius: 999px; background: color-mix(in srgb, #000 45%, transparent); color: #fff; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+@keyframes visualFloat { 50% { transform: translateY(-7px); } }
+@media (prefers-reduced-motion: reduce) { .visualMain, .visualAlert { animation: none; } }

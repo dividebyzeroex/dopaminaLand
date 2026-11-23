@@ -1,41 +1,41 @@
-import { BellRing, Check } from "lucide-react";
+import Image from "next/image";
+import { BellRing } from "lucide-react";
 import VerdictBadge from "./VerdictBadge";
 import styles from "../home.module.css";
 
 /**
  * Arte da home para telas largas (monitor e TV), onde o texto sozinho deixa a direita vazia.
- * Ilustração do veredito: mesma linguagem do site (cartões, selos, linha em degraus), sem preços
- * nem produto de verdade. O que ela mostra é a ideia: o preço sobe antes de "cair".
+ * Foto de um casal acompanhando uma queda de preço no celular (imagem gerada por IA, sem
+ * marcas nem textos) com dois cartões do site por cima: o histórico em degraus e o aviso de meta.
+ * Sem produto nem preços reais; a legenda diz que a imagem é gerada por IA.
  * Decorativa: o texto ao lado já diz tudo, por isso fica escondida de leitores de tela.
  */
 const W = 520;
 const H = 150;
-// Degraus do preço: estável, pico antes da data, "queda" que só volta ao normal.
-const STEPS: [number, number][] = [[0, 112], [70, 106], [118, 114], [170, 62], [232, 62], [262, 32], [330, 32], [356, 118], [440, 118], [W, 112]];
+// Degraus do preço: estável, pequenas oscilações e uma queda real até o menor preço.
+const STEPS: [number, number][] = [[0, 50], [60, 46], [110, 54], [170, 40], [230, 44], [290, 58], [340, 52], [372, 104], [W, 104]];
 const path = STEPS.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `H${x} V${y}`)).join(" ");
-const TYPICAL = 112;
+const TYPICAL = 62;
 
 export default function HeroArt() {
   return <div className={styles.visual} aria-hidden="true">
-    <span className={styles.visualRing} />
-    <span className={`${styles.visualRing} ${styles.visualRing2}`} />
+    <Image src="/hero-casal.webp" alt="" fill sizes="(min-width: 1100px) 45vw, 0px" className={styles.visualPhoto} />
+    <span className={styles.visualShade} />
 
     <article className={styles.visualMain}>
       <div className={styles.visualTop}>
         <span className={styles.kicker}>Histórico · 40 dias</span>
-        <VerdictBadge tone="bad" label="Desconto maquiado" />
+        <VerdictBadge tone="good" label="Desconto real" />
       </div>
       <svg viewBox={`0 0 ${W} ${H + 22}`} className={styles.visualChart}>
-        <path d={`${path} V${H} H0 Z`} style={{ fill: "var(--bad)" }} fillOpacity="0.07" />
+        <path d={`${path} V${H} H0 Z`} style={{ fill: "var(--good)" }} fillOpacity="0.08" />
         <line x1="0" x2={W} y1={TYPICAL} y2={TYPICAL} stroke="#8b9087" strokeWidth="1.5" strokeDasharray="5 5" />
-        <text x="6" y={TYPICAL + 22} className={styles.chartLabel}>preço típico</text>
+        <text x="6" y={TYPICAL + 20} className={styles.chartLabel}>preço típico</text>
         <path d={path} fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
-        <circle cx="294" cy="32" r="7" style={{ fill: "var(--bad)", stroke: "var(--surface)" }} strokeWidth="3" />
-        <text x="276" y="20" textAnchor="end" className={styles.chartLabelStrong} style={{ fill: "var(--bad)" }}>subiu antes</text>
-        <circle cx={W - 14} cy={TYPICAL} r="8" fill="#2854ec" style={{ stroke: "var(--surface)" }} strokeWidth="3" />
+        <circle cx={W - 14} cy="104" r="8" style={{ fill: "var(--good)", stroke: "var(--surface)" }} strokeWidth="3" />
+        <text x={W - 14} y="86" textAnchor="end" className={styles.chartLabelStrong} style={{ fill: "var(--good)" }}>menor preço</text>
         <text x={W - 14} y={H + 18} textAnchor="end" className={styles.chartLabel}>hoje</text>
       </svg>
-      <p className={styles.visualStory}>O preço <strong>subiu nas semanas anteriores</strong> e agora “caiu” para o valor normal. <strong>Não é promoção.</strong></p>
     </article>
 
     <article className={styles.visualAlert}>
@@ -46,16 +46,6 @@ export default function HeroArt() {
       </div>
     </article>
 
-    <article className={styles.visualVerdicts}>
-      <span className={styles.kicker}>Veredito honesto</span>
-      <div className={styles.visualBadges}>
-        <VerdictBadge tone="good" label="Desconto real" />
-        <VerdictBadge tone="neutral" label="Preço comum" />
-        <VerdictBadge tone="warn" label="Acima do normal" />
-      </div>
-      <span className={styles.visualFine}><Check size={14} color="var(--good)" strokeWidth={2.4} />Nenhum veredito pago</span>
-    </article>
-
-    <span className={styles.visualCaption}>Ilustração do veredito</span>
+    <span className={styles.visualCaption}>Imagem ilustrativa gerada por IA</span>
   </div>;
 }
