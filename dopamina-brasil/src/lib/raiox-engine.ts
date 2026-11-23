@@ -13,7 +13,8 @@ export type Outcome = {
 
 export async function lookup(text: string, senderKey: string): Promise<Outcome> {
   const request = parseRequest(text);
-  if (request.kind === "empty") return { text: askMessage(), outcome: "ask" };
+  // "none" não chega aqui (o webhook filtra antes), mas se chegar: boas-vindas, nunca uma busca.
+  if (request.kind === "empty" || request.kind === "none") return { text: askMessage(), outcome: "ask" };
   if (!rateLimit(`zernio:${senderKey}`, 6, 60_000).ok) return { text: limitMessage(), outcome: "limit" };
 
   const raw = request.kind === "link" ? queryFromUrl(request.url) : request.query;

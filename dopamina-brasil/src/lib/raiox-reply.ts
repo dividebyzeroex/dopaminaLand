@@ -59,8 +59,14 @@ export function isStoryReply(payload: unknown): boolean {
   return /story|reply_to|replyTo/i.test(hay);
 }
 
-/** O pedido é explícito: tem a palavra-chave ou um link. Sem isso e fora de story, vira conversa comum. */
-export const isExplicit = (text: string) => /\braio[\s-]?x\b/i.test(text) || extractLink(text) !== null;
+/**
+ * Só uma frase que COMEÇA por "raiox" ou "análise" pede uma busca. O @ da menção antes é aceito
+ * ("@perfil raiox airfryer"). Link solto, nome de produto solto, reação e conversa não disparam nada.
+ */
+const KEYWORD = String.raw`^\s*(?:@[\w.]+\s*[:,]?\s*)?(?:raio[\s-]?x|an[aá]lis[ae]r?)(?![\p{L}\p{N}])`;
+const KEYWORD_RE = new RegExp(KEYWORD, "iu");
+const KEYWORD_AND_SEPARATORS_RE = new RegExp(`${KEYWORD}[\\s:,.\\-–—]*`, "iu");
+export const startsWithKeyword = (text: string) => KEYWORD_RE.test(text);
 
 export type IncomingComment = { eventId: string; postId: string; commentId: string; accountId: string; authorId: string; text: string };
 
@@ -76,21 +82,24 @@ export function parseComment(payload: unknown): IncomingComment | null {
   if (c.platform !== "instagram" && c.platform !== "facebook") return null;
   if (c.isReply || c.author?.isOwnAccount) return null;
   const text = typeof c.text === "string" ? c.text.trim() : "";
-  if (!/\braio[\s-]?x\b/i.test(text)) return null;
+  if (!startsWithKeyword(text)) return null;
   const postId = c.platformPostId || c.postId;
   const accountId = p.account?.accountId || p.account?.id;
   if (!c.id || !postId || !accountId) return null;
   return { eventId: p.id, postId, commentId: c.id, accountId, authorId: c.author?.id || c.id, text };
 }
 
-export type RaioxRequest = { kind: "link"; url: string } | { kind: "query"; query: string } | { kind: "empty" };
+export type RaioxRequest = { kind: "link"; url: string } | { kind: "query"; query: string } | { kind: "empty" } | { kind: "none" };
 
-/** Tira a palavra-chave ("raiox", "raio-x", "raio x") e entende link ou nome do produto. */
+/** Lê o pedido: palavra-chave no início e, depois dela, um link ou o nome do produto. */
 export function parseRequest(text: string): RaioxRequest {
-  const link = extractLink(text);
+  const m = text.match(KEYWORD_AND_SEPARATORS_RE);
+  if (!m) return isHelp(text) ? { kind: "empty" } : { kind: "none" };
+  const rest = text.slice(m[0].length).replace(/\s+/g, " ").trim();
+  const link = extractLink(rest);
   if (link) return { kind: "link", url: link };
-  const query = text.replace(/^\s*(?:@\w+\s*)?raio[\s-]?x\b[\s:,.\-–—]*/i, "").replace(/\s+/g, " ").trim().slice(0, 120);
-  return query.length >= 2 && !isGreeting(query) ? { kind: "query", query } : { kind: "empty" };
+  const query = rest.slice(0, 120);
+  return query.length >= 2 && !isHelp(query) ? { kind: "query", query } : { kind: "empty" };
 }
 
 export type RaioxFound = {
@@ -137,10 +146,10 @@ export const askMessage = () =>
     SIGNATURE,
   ].join("\n");
 
-/** Cumprimentos e pedidos de ajuda: não são produto, recebem as boas-vindas. */
-export function isGreeting(text: string): boolean {
+/** Pedidos de ajuda ("ajuda", "como funciona"): recebem as boas-vindas. Cumprimentos soltos ("oi") não. */
+export function isHelp(text: string): boolean {
   const t = text.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
-  return t.length <= 30 && /^(oi+|ola+|opa|eai|e ai|hey|hello|bom dia|boa tarde|boa noite|ajuda|ajudar|help|menu|comecar|iniciar|start|como funciona|como usar|o que voce faz|quem e voce)( tudo bem| tudo bom| td bem)?$/.test(t);
+  return /^(ajuda|ajudar|help|menu|como funciona|como usar|o que voce faz|quem e voce)$/.test(t);
 }
 
 export const notFoundMessage = () =>
@@ -227,7 +236,7 @@ export function describeEvent(payload: unknown): { event: string; platform: stri
   } else if (event === "comment.received") {
     if (c?.isReply || c?.author?.isOwnAccount) reason = "comentario_proprio_ou_resposta";
     else if (c?.platform !== "instagram" && c?.platform !== "facebook") reason = "plataforma";
-    else if (!/\braio[\s-]?x\b/i.test((c?.text ?? "").toString())) reason = "comentario_sem_palavra_chave";
+    else if (!startsWithKeyword((c?.text ?? "").toString())) reason = "comentario_sem_palavra_chave";
   } else reason = "evento_nao_tratado";
   return { event, platform: m?.platform ?? c?.platform ?? null, reason, hasText, story: isStoryReply(payload), detail };
 }
