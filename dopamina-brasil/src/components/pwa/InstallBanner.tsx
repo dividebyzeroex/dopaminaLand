@@ -39,8 +39,8 @@ export default function InstallBanner() {
 
   return <>
     <aside className={styles.banner} aria-label="Instalar o app">
-      <span className={styles.bannerIcon} aria-hidden="true"><BellRing size={20} /></span>
-      <p><b>Saiba quando este preço cair.</b> Com o Dopamina na tela inicial, o aviso chega como notificação.</p>
+      <span className={styles.bannerIcon} aria-hidden="true"><BellRing size={16} /></span>
+      <p><b>Saiba quando este preço cair.</b> Instale o app e receba o aviso.</p>
       <button type="button" className={styles.bannerCta} onClick={() => void install()}>Instalar</button>
       <button type="button" className={styles.bannerClose} onClick={dismiss} aria-label="Agora não"><X size={18} /></button>
     </aside>

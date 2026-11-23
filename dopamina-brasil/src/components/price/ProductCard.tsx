@@ -43,11 +43,11 @@ export default function ProductCard({ hit, verdict, name, image, price, storeCou
   const body = <>
     <div className={styles.cardVisual}>
       {layout === "grid" && badge}
-      <ProductVisual src={image ?? hit.image} name={title} />
+      <ProductVisual src={image ?? hit.image} name={title} halo={false} />
     </div>
     <div className={styles.cardBody}>
       {layout === "row" && (verdict || checking) && <div className={styles.rowBadge}>{badge}</div>}
-      <span className={styles.cardMeta}>{note}{note && where ? " · " : ""}{where}{hit.cashback ? <> · cashback {brl(hit.cashback)}</> : null}</span>
+      <span className={styles.cardMeta}>{note}{note && where ? " · " : ""}{where}</span>
       <h3>{title}</h3>
       {(specs.length > 0 || versions > 0) && <p className={styles.specs}>
         {specs.map(spec => <span key={spec}>{spec}</span>)}

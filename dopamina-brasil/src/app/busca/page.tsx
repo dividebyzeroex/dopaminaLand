@@ -162,7 +162,7 @@ async function Summary({ query, groups, pending, onlyAccessories }: { query: str
       top: results.slice(0, 5).map(({ hit, product, verdict }) => ({ name: product?.name ?? hit.name, path: hit.path ?? null, price: product?.bestPrice ?? hit.price ?? null, verdict: verdict?.kind ?? null })),
     }} />
     {analyzed.length
-      ? <p>Analisamos o histórico dos {analyzed.length} primeiros: {real} com preço abaixo do normal{fake ? `, ${fake} com desconto maquiado` : ""}. Abra um produto para ver o gráfico e as lojas.</p>
+      ? <p>Nos {analyzed.length} primeiros: {real} abaixo do normal{fake ? `, ${fake} com desconto maquiado` : ""}.</p>
       : <p>Abra um produto para ver o histórico de preço e as ofertas por loja.</p>}
   </>;
 }

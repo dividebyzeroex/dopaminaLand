@@ -43,7 +43,7 @@ export default function HeroExample({ item, eventName }: { item: ThermometerItem
       <VerdictBadge tone={verdict.tone} label={verdict.label} />
     </div>
     <div className={styles.exampleProduct}>
-      <div className={styles.exampleThumb}><ProductVisual src={item.image} name={item.name} /></div>
+      <div className={styles.exampleThumb}><ProductVisual src={item.image} name={item.name} halo={false} /></div>
       <div style={{ minWidth: 0 }}>
         <div className={styles.exampleName}>{item.name}</div>
         <div className={styles.examplePrice}>{brl(verdict.current)}</div>

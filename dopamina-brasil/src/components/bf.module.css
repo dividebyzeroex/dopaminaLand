@@ -220,7 +220,10 @@
 .darkSearch input::placeholder { color: #8a8e86; }
 
 /* ── Compartilhar veredito ── */
-.share { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.shareMenu { margin-top: 14px; }
+.shareMenu > summary { list-style: none; cursor: pointer; width: fit-content; }
+.shareMenu > summary::-webkit-details-marker { display: none; }
+.share { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 .shareWhats, .shareGhost { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 18px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
 .shareWhats { background: #1d7a4b; color: #fff; border: 0; }
 .shareWhats:hover { background: #156139; }
@@ -343,5 +346,3 @@
 .similar { margin: 28px 0 8px; }
 .similar h2 { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
 
-.verdictNudge { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--surface) 70%, transparent); border: 1px dashed color-mix(in srgb, currentColor 35%, transparent); font-size: 14px; line-height: 1.5; }
-.verdictNudge b { font-weight: 650; }
