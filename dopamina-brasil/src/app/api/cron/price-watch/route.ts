@@ -4,6 +4,7 @@ import { getProductFresh } from "@/lib/buscape";
 import { mapLimit } from "@/lib/analysis";
 import { alertMessage, decideAlert } from "@/lib/alert-rules";
 import { runTrendingDigest } from "@/lib/trending-digest";
+import { runDirectWatches } from "@/lib/raiox-watch";
 
 /**
  * Checagem horária dos alertas: consulta o preço de cada produto acompanhado
@@ -81,5 +82,8 @@ export async function GET(req: NextRequest) {
   const force = req.nextUrl.searchParams.get("destaques") === "agora";
   const digest = await runTrendingDigest(db, now, { force }).catch(e => ({ ran: false, reason: e instanceof Error ? e.message : "erro" }));
 
-  return NextResponse.json({ ok: true, ...stats, digest });
+  // Alertas pedidos pelo Direct (bot Raio-X). Também isolados: falha aqui não derruba o resto.
+  const direct = await runDirectWatches(db, now).catch(e => ({ ran: false, reason: e instanceof Error ? e.message : "erro" }));
+
+  return NextResponse.json({ ok: true, ...stats, digest, direct });
 }

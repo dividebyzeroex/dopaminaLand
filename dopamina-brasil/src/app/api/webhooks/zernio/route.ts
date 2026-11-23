@@ -1,16 +1,18 @@
 import { after, NextRequest, NextResponse } from "next/server";
-import { getProduct, normalizeQuery, queryFromUrl, searchProducts } from "@/lib/buscape";
-import { computeVerdict, decisionOf } from "@/lib/price-verdict";
-import { blockedMessage, checkSearch } from "@/lib/search-policy";
-import { rateLimit } from "@/lib/rate-limit";
+import { getProduct } from "@/lib/buscape";
+import { adminDb } from "@/lib/push";
+import { lookup, type Outcome } from "@/lib/raiox-engine";
+import { flushConversation } from "@/lib/raiox-watch";
 import {
-  askMessage, blockedReply, buildFoundReply, errorMessage, limitMessage, notFoundMessage,
-  parseComment, parseIncoming, parseRequest, verifySignature,
+  defaultTarget, errorMessage, parseComment, parseCommand, parseIncoming, publicCommentReply,
+  verifySignature, watchAlreadyMessage, watchNoContextMessage, watchSetMessage, watchStopMessage,
 } from "@/lib/raiox-reply";
+import { convoHash, sendDirect, sendPrivateReply, sendPublicReply } from "@/lib/zernio";
 
 /**
- * Webhook do Zernio (`message.received`): lê o pedido "raiox ...", busca o
- * histórico e responde na mesma conversa. Responde 2xx na hora e processa depois.
+ * Webhook do Zernio: `message.received` (Direct) e `comment.received` (comentário "raiox").
+ * Responde 2xx na hora e processa depois. Pedidos viram métricas (raiox_requests);
+ * "avisar"/"meta X" criam alertas (raiox_watches) entregues pela checagem horária.
  */
 export const maxDuration = 60;
 
@@ -23,57 +25,47 @@ function firstTime(id: string): boolean {
   return true;
 }
 
-async function buildReply(text: string, senderId: string): Promise<string> {
-  const request = parseRequest(text);
-  if (request.kind === "empty") return askMessage();
-  if (!rateLimit(`zernio:${senderId}`, 6, 60_000).ok) return limitMessage();
-
-  const raw = request.kind === "link" ? queryFromUrl(request.url) : request.query;
-  const query = raw ? normalizeQuery(raw) : "";
-  if (query.length < 2) return notFoundMessage();
-  const policy = checkSearch(query);
-  if (policy.blocked) return blockedReply(blockedMessage(policy.reason));
-
-  const [first] = await searchProducts(query.toLowerCase());
-  if (!first) return notFoundMessage();
-  const detail = first.path ? await getProduct(first.path).catch(() => null) : null;
-  const price = detail?.bestPrice ?? first.price;
-  if (!(price > 0)) return notFoundMessage();
-  const verdict = detail ? computeVerdict(detail.history, price) : null;
-  return buildFoundReply({
-    name: detail?.name ?? first.name,
-    price,
-    productPath: first.path ?? null,
-    decision: decisionOf(verdict?.kind ?? "insuficiente"),
-    headline: verdict?.headline ?? "Ainda não há histórico suficiente para um veredito.",
-    detail: verdict?.detail ?? "",
-    days: verdict?.days ?? 0,
+async function record(channel: string, source: "dm" | "comment", conversationId: string, o: Outcome | { outcome: "error" }) {
+  const db = adminDb();
+  if (!db) return;
+  const full = o as Outcome;
+  const { error } = await db.from("raiox_requests").insert({
+    channel, source, outcome: o.outcome, convo: convoHash(conversationId),
+    query: full.query ?? null, product_path: full.path ?? null, product_name: full.name?.slice(0, 200) ?? null,
+    price: full.price ?? null, verdict: full.verdict ?? null,
   });
+  if (error) console.error("raiox: métrica não gravada", error.message);
 }
 
-async function send(conversationId: string, accountId: string, message: string, eventId: string) {
-  const key = process.env.ZERNIO_API_KEY;
-  if (!key) { console.error("zernio: ZERNIO_API_KEY ausente"); return; }
-  const res = await fetch(`https://zernio.com/api/v1/inbox/conversations/${encodeURIComponent(conversationId)}/messages`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "Idempotency-Key": eventId },
-    body: JSON.stringify({ accountId, message }),
-    signal: AbortSignal.timeout(15_000),
-  });
-  if (!res.ok) console.error("zernio: envio falhou", res.status, (await res.text().catch(() => "")).slice(0, 200));
-}
+/** "avisar", "meta 1500" e "parar" no Direct. Devolve o texto da resposta. */
+async function handleCommand(cmd: NonNullable<ReturnType<typeof parseCommand>>, conversationId: string, accountId: string): Promise<string> {
+  const db = adminDb();
+  if (!db) return errorMessage();
+  if (cmd.kind === "stop") {
+    const { data } = await db.from("raiox_watches").update({ stopped_at: new Date().toISOString() })
+      .eq("conversation_id", conversationId).is("stopped_at", null).is("delivered_at", null).select("id");
+    return watchStopMessage(data?.length ?? 0);
+  }
+  const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const { data: last } = await db.from("raiox_requests").select("product_path, product_name")
+    .eq("convo", convoHash(conversationId)).eq("outcome", "found").not("product_path", "is", null)
+    .gt("created_at", since).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (!last?.product_path) return watchNoContextMessage();
 
-async function sendPrivateReply(c: { postId: string; commentId: string; accountId: string }, message: string, eventId: string) {
-  const key = process.env.ZERNIO_API_KEY;
-  if (!key) { console.error("zernio: ZERNIO_API_KEY ausente"); return; }
-  const url = `https://zernio.com/api/v1/inbox/comments/${encodeURIComponent(c.postId)}/${encodeURIComponent(c.commentId)}/private-reply`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "Idempotency-Key": eventId },
-    body: JSON.stringify({ accountId: c.accountId, message }),
-    signal: AbortSignal.timeout(15_000),
-  });
-  if (!res.ok) console.error("zernio: resposta privada falhou", res.status, (await res.text().catch(() => "")).slice(0, 200));
+  const detail = await getProduct(last.product_path).catch(() => null);
+  const price = detail?.bestPrice;
+  if (!price) return errorMessage();
+  const name = detail?.name ?? last.product_name ?? "o produto";
+  const target = cmd.target ?? defaultTarget(price);
+  if (target >= price) return watchAlreadyMessage(name, target, price);
+
+  const { error } = await db.from("raiox_watches").upsert({
+    account_id: accountId, conversation_id: conversationId, product_path: last.product_path, product_name: name.slice(0, 200),
+    target_price: target, price_at_request: price, hit_at: null, hit_price: null, delivered_at: null, stopped_at: null,
+    attempts: 0, last_error: null, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+  }, { onConflict: "conversation_id,product_path" });
+  if (error) { console.error("raiox: alerta não gravado", error.message); return errorMessage(); }
+  return watchSetMessage(name, target, price, cmd.target === null);
 }
 
 export async function POST(req: NextRequest) {
@@ -85,15 +77,20 @@ export async function POST(req: NextRequest) {
   }
   let payload: unknown;
   try { payload = JSON.parse(raw); } catch { return NextResponse.json({ error: "invalid json" }, { status: 400 }); }
+  const platform = (payload as { message?: { platform?: string }; comment?: { platform?: string } })?.message?.platform
+    ?? (payload as { comment?: { platform?: string } })?.comment?.platform ?? "instagram";
 
   const comment = parseComment(payload);
   if (comment) {
     if (!firstTime(comment.eventId)) return NextResponse.json({ ok: true, ignored: true });
     after(async () => {
-      let reply: string;
-      try { reply = await buildReply(comment.text, comment.authorId); }
-      catch (error) { console.error("zernio: consulta falhou", error); reply = errorMessage(); }
-      await sendPrivateReply(comment, reply, comment.eventId).catch(e => console.error("zernio: resposta privada", e));
+      let out: Outcome | { outcome: "error"; text: string };
+      try { out = await lookup(comment.text, comment.authorId); }
+      catch (error) { console.error("raiox: consulta falhou", error); out = { outcome: "error", text: errorMessage() }; }
+      const dm = await sendPrivateReply(comment.postId, comment.commentId, comment.accountId, out.text, comment.eventId);
+      await record(platform, "comment", comment.commentId, out).catch(() => {});
+      // Só avisa publicamente que mandou o Direct se o envio privado deu certo.
+      if (dm.ok) await sendPublicReply(comment.postId, comment.commentId, comment.accountId, publicCommentReply(), `${comment.eventId}:pub`);
     });
     return NextResponse.json({ ok: true });
   }
@@ -102,10 +99,21 @@ export async function POST(req: NextRequest) {
   if (!incoming || !firstTime(incoming.eventId)) return NextResponse.json({ ok: true, ignored: true });
 
   after(async () => {
-    let reply: string;
-    try { reply = await buildReply(incoming.text, incoming.senderId); }
-    catch (error) { console.error("zernio: consulta falhou", error); reply = errorMessage(); }
-    await send(incoming.conversationId, incoming.accountId, reply, incoming.eventId).catch(e => console.error("zernio: envio", e));
+    const cmd = parseCommand(incoming.text);
+    let text: string;
+    let out: Outcome | { outcome: "error" } | null = null;
+    try {
+      if (cmd) text = await handleCommand(cmd, incoming.conversationId, incoming.accountId);
+      else { const r = await lookup(incoming.text, incoming.senderId); text = r.text; out = r; }
+    } catch (error) {
+      console.error("raiox: consulta falhou", error);
+      text = errorMessage(); out = { outcome: "error" };
+    }
+    await sendDirect(incoming.conversationId, incoming.accountId, text, incoming.eventId);
+    if (out) await record(platform, "dm", incoming.conversationId, out).catch(() => {});
+    // A pessoa escreveu: a janela de mensagens está aberta, entrega alertas que ficaram pendentes.
+    const db = adminDb();
+    if (db) await flushConversation(db, incoming.conversationId).catch(e => console.error("raiox: flush", e));
   });
   return NextResponse.json({ ok: true });
 }
