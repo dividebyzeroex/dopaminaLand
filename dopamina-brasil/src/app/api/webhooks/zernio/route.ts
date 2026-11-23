@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/push";
 import { lookup, type Outcome } from "@/lib/raiox-engine";
 import { flushConversation } from "@/lib/raiox-watch";
 import {
-  defaultTarget, errorMessage, parseComment, parseCommand, parseIncoming, publicCommentReply,
+  defaultTarget, errorMessage, isExplicit, parseComment, parseCommand, parseIncoming, publicCommentReply,
   verifySignature, watchAlreadyMessage, watchNoContextMessage, watchSetMessage, watchStopMessage,
 } from "@/lib/raiox-reply";
 import { convoHash, sendDirect, sendPrivateReply, sendPublicReply } from "@/lib/zernio";
@@ -100,11 +100,19 @@ export async function POST(req: NextRequest) {
 
   after(async () => {
     const cmd = parseCommand(incoming.text);
+    // Pedido de verdade: comando, palavra-chave, link ou resposta a story (caixa de pergunta).
+    // Conversa comum que não acha produto fica sem resposta, para o bot não responder "não achei" a todo DM.
+    const explicit = Boolean(cmd) || incoming.storyReply || isExplicit(incoming.text);
+    if (!explicit) console.log("raiox: DM sem palavra-chave", { story: incoming.storyReply, keys: Object.keys(((payload as { message?: object })?.message) ?? {}) });
     let text: string;
     let out: Outcome | { outcome: "error" } | null = null;
     try {
       if (cmd) text = await handleCommand(cmd, incoming.conversationId, incoming.accountId);
-      else { const r = await lookup(incoming.text, incoming.senderId); text = r.text; out = r; }
+      else {
+        const r = await lookup(incoming.text, incoming.senderId);
+        if (!explicit && (r.outcome === "not_found" || r.outcome === "limit")) return;
+        text = r.text; out = r;
+      }
     } catch (error) {
       console.error("raiox: consulta falhou", error);
       text = errorMessage(); out = { outcome: "error" };

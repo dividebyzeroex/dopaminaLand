@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { isGreeting, askMessage, alertHint, parseBrl, parseCommand, defaultTarget, buildTargetReply, parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
+import { isStoryReply, isExplicit, isGreeting, askMessage, alertHint, parseBrl, parseCommand, defaultTarget, buildTargetReply, parseComment, buildFoundReply, parseIncoming, parseRequest, verifySignature, SIGNATURE, DISCLAIMER } from "../src/lib/raiox-reply.ts";
 
 const body = '{"a":1}';
 const sig = createHmac("sha256", "s3").update(body).digest("hex");
@@ -10,7 +10,7 @@ assert.equal(verifySignature(body + " ", sig, "s3"), false);
 assert.equal(verifySignature(body, null, "s3"), false);
 
 const ev = (over = {}) => ({ id: "e1", event: "message.received", message: { conversationId: "c1", direction: "incoming", text: " raiox iPhone 15 ", sender: { id: "u1" } }, account: { accountId: "a1" }, metadata: {}, ...over });
-assert.deepEqual(parseIncoming(ev()), { eventId: "e1", conversationId: "c1", accountId: "a1", senderId: "u1", text: "raiox iPhone 15" });
+assert.deepEqual(parseIncoming(ev()), { eventId: "e1", conversationId: "c1", accountId: "a1", senderId: "u1", text: "raiox iPhone 15", storyReply: false });
 assert.equal(parseIncoming(ev({ event: "message.sent" })), null);
 assert.equal(parseIncoming(ev({ metadata: { standby: true } })), null);
 assert.equal(parseIncoming(ev({ message: { conversationId: "c1", direction: "outgoing", text: "oi" } })), null);
@@ -70,4 +70,13 @@ assert.ok(esp.indexOf("Responda avisar") < esp.indexOf(SIGNATURE));
 const sem = buildFoundReply({ name: "X", price: 10, productPath: null, decision: "Pode comprar.", headline: "h", detail: "", days: 30 });
 assert.doesNotMatch(sem, /avisar/);
 assert.doesNotMatch(t, /avisar/);
+assert.equal(isExplicit("raiox airfryer"), true);
+assert.equal(isExplicit("olha https://loja.com.br/p/1"), true);
+assert.equal(isExplicit("kkk muito bom"), false);
+assert.equal(isStoryReply({ message: { metadata: { replyTo: { story: { id: "1" } } } } }), true);
+assert.equal(isStoryReply({ message: { attachments: [{ originalType: "ig_story" }] } }), true);
+assert.equal(isStoryReply({ message: { text: "story do dia", metadata: {} } }), false);
+assert.equal(isStoryReply({}), false);
+assert.equal(parseIncoming(ev({ message: { conversationId: "c1", direction: "incoming", text: "airfryer 5l", sender: { id: "u1" }, metadata: { story: true } } }))?.storyReply, true);
+assert.equal(parseIncoming(ev())?.storyReply, false);
 console.log("raiox-reply: ok");
