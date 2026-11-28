@@ -1,5 +1,13 @@
 'use client';
 
+import { isAutomatedUserAgent } from './automated-traffic';
+
+// Navegador controlado por automação (Playwright, Puppeteer) não é uma pessoa.
+function isAutomatedBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  return navigator.webdriver === true || isAutomatedUserAgent(navigator.userAgent);
+}
+
 // Function to generate a random UUID v4
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -20,6 +28,7 @@ export function getSessionId() {
 
 export async function initSession(forceUpdate: boolean = false) {
   if (typeof window === 'undefined') return;
+  if (isAutomatedBrowser()) return;
   const sessionId = getSessionId();
   const initialized = sessionStorage.getItem('dopamina_session_initialized');
   
@@ -77,6 +86,7 @@ export async function trackEvent(
   metadata?: Record<string, unknown>
 ) {
   if (typeof window === 'undefined') return;
+  if (isAutomatedBrowser()) return;
   const sessionId = getSessionId();
   if (!sessionId) return;
 

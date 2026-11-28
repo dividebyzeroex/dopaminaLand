@@ -2,9 +2,12 @@ import { readJsonObject } from "@/lib/request-body";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { sanitizeQueryForStorage } from "@/lib/search-policy";
 import { NextRequest, NextResponse } from 'next/server';
+import { isAutomatedRequest } from '@/lib/automated-traffic';
 import { getServiceSupabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
+  // Navegador sem tela, scripts e robôs não contam como visita.
+  if (isAutomatedRequest(req.headers)) return NextResponse.json({ success: true, ignored: true });
   if (!rateLimit(`telemetry:${clientIp(req.headers)}`, 120, 60_000).ok) {
     return NextResponse.json({ error: "Muitas solicitações." }, { status: 429 });
   }

@@ -1,6 +1,7 @@
 import { readJsonObject } from "@/lib/request-body";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { NextResponse } from 'next/server';
+import { isAutomatedRequest } from '@/lib/automated-traffic';
 import { getServiceSupabase } from '@/lib/supabase';
 import { UAParser } from 'ua-parser-js';
 import crypto from 'crypto';
@@ -27,6 +28,8 @@ export async function OPTIONS() {
 }
 
 export async function POST(request: Request) {
+  // Navegador sem tela, scripts e robôs não contam como visita.
+  if (isAutomatedRequest(request.headers)) return NextResponse.json({ success: true, ignored: true }, { headers: corsHeaders });
   if (!rateLimit(`telemetry:${clientIp(request.headers)}`, 120, 60_000).ok) {
     return NextResponse.json({ error: "Muitas solicitações." }, { status: 429 });
   }
